@@ -1,15 +1,14 @@
 "use client"
 
-import { useGLTF, Html } from "@react-three/drei"
+import { useRef, useState, useEffect, useCallback } from "react"
 import { useThree } from "@react-three/fiber"
-import { useRef, useState, useEffect } from "react"
-import type { Group } from "three"
+import type { Group, Mesh } from "three"
 import * as THREE from "three"
 
-interface Model3DProps {
-  url: string
+interface Primitive3DProps {
+  type: 'cube' | 'flat-cube' | 'globe'
   position: [number, number, number]
-  size?: [number, number, number]
+  size: [number, number, number]
   isSelected?: boolean
   onClick?: () => void
   onPositionChange?: (newPosition: [number, number, number]) => void
@@ -17,59 +16,25 @@ interface Model3DProps {
   keyboardMove?: { direction: string; amount: number } | null
 }
 
-export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove }: Model3DProps) {
+export function Primitive3D({ 
+  type, 
+  position, 
+  size, 
+  isSelected, 
+  onClick, 
+  onPositionChange, 
+  onSizeChange,
+  keyboardMove 
+}: Primitive3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
-  const [error, setError] = useState(false)
   const [isDragging, setIsDragging] = useState<string | null>(null)
   const [currentPosition, setCurrentPosition] = useState<[number, number, number]>(position)
   const [currentSize, setCurrentSize] = useState<[number, number, number]>(size)
   const [gizmoHovered, setGizmoHovered] = useState<string | null>(null)
-  const [baseScale, setBaseScale] = useState<number>(1)
-  const [modelCenter, setModelCenter] = useState<[number, number, number]>([0, 0, 0])
   const { gl } = useThree()
 
-  // Load the 3D model
-  const { scene } = useGLTF(url, undefined, undefined, (error) => {
-    console.error("Error loading 3D model:", error)
-    setError(true)
-  })
-
-  // Calculate initial base scale and center when model loads
-  useEffect(() => {
-    if (scene) {
-      // Get the bounding box of the model
-      const box = new THREE.Box3().setFromObject(scene)
-      const size = box.getSize(new THREE.Vector3())
-
-      // Calculate scale to fit within a 2x2x2 cube (much larger than before)
-      const maxDimension = Math.max(size.x, size.y, size.z)
-      const calculatedBaseScale = (2 / maxDimension) * 5 // 10x bigger than original
-
-      setBaseScale(calculatedBaseScale)
-
-      // Center the model
-      const center = box.getCenter(new THREE.Vector3())
-      setModelCenter([center.x, center.y, center.z])
-
-      // Apply initial scaling
-      scene.scale.set(calculatedBaseScale, calculatedBaseScale, calculatedBaseScale)
-      scene.position.set(-center.x * calculatedBaseScale, -center.y * calculatedBaseScale, -center.z * calculatedBaseScale)
-    }
-  }, [scene])
-
-  // Apply size changes to the model
-  useEffect(() => {
-    if (scene && baseScale > 0) {
-      scene.scale.set(
-        baseScale * currentSize[0],
-        baseScale * currentSize[1], 
-        baseScale * currentSize[2]
-      )
-    }
-  }, [scene, baseScale, currentSize])
-
-  // Update position and size when props change
+  // Update local state when props change
   useEffect(() => {
     setCurrentPosition(position)
   }, [position])
@@ -80,38 +45,38 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
 
   // Handle keyboard movement
   useEffect(() => {
-    if (isSelected && keyboardMove) {
+    if (keyboardMove) {
       const { direction, amount } = keyboardMove
       const [x, y, z] = currentPosition
       let newPosition: [number, number, number] = [x, y, z]
 
       switch (direction) {
         case "ArrowUp":
-          newPosition = [x, y + amount, z] // Move up (positive Y)
+          newPosition = [x, y + amount, z] // Up
           break
         case "ArrowDown":
-          newPosition = [x, y - amount, z] // Move down (negative Y)
+          newPosition = [x, y - amount, z] // Down
           break
         case "ArrowLeft":
-          newPosition = [x - amount, y, z] // Move left (negative X)
+          newPosition = [x - amount, y, z] // Left
           break
         case "ArrowRight":
-          newPosition = [x + amount, y, z] // Move right (positive X)
+          newPosition = [x + amount, y, z] // Right
           break
         case "w":
         case "W":
-          newPosition = [x, y, z - amount] // Move forward (negative Z)
+          newPosition = [x, y, z - amount] // Forward
           break
         case "s":
         case "S":
-          newPosition = [x, y, z + amount] // Move backward (positive Z)
+          newPosition = [x, y, z + amount] // Backward
           break
       }
 
       setCurrentPosition(newPosition)
       onPositionChange?.(newPosition)
     }
-  }, [keyboardMove, isSelected, onPositionChange]) // Removed currentPosition from dependencies
+  }, [keyboardMove]) // Removed all dependencies except keyboardMove to prevent infinite re-renders
 
   // Handle transform gizmo interactions
   const handleGizmoPointerDown = (axis: string) => (e: any) => {
@@ -155,7 +120,7 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
       case "scale":
         const scaleChange = e.movementX * scaleSensitivity
         newSize = [sx + scaleChange, sy + scaleChange, sz + scaleChange]
-        // Ensure minimum size to prevent models from disappearing
+        // Ensure minimum size
         newSize = newSize.map(s => Math.max(0.1, s)) as [number, number, number]
         break
     }
@@ -175,18 +140,44 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
     onClick?.()
   }
 
-  if (error) {
-    return (
-      <group position={currentPosition}>
-        <mesh>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshBasicMaterial color="#ef4444" transparent opacity={0.7} />
-        </mesh>
-        <Html position={[0, 2.5, 0]} center>
-          <div className="bg-red-500/80 text-white text-xs px-2 py-1 rounded">Error Loading Model</div>
-        </Html>
-      </group>
-    )
+  const renderPrimitive = () => {
+    switch (type) {
+      case 'cube':
+        return (
+          <mesh>
+            <boxGeometry args={currentSize} />
+            <meshStandardMaterial 
+              color={isSelected ? "#3b82f6" : hovered ? "#6b7280" : "#8b5cf6"} 
+              transparent 
+              opacity={0.8}
+            />
+          </mesh>
+        )
+      case 'flat-cube':
+        return (
+          <mesh>
+            <boxGeometry args={currentSize} />
+            <meshStandardMaterial 
+              color={isSelected ? "#3b82f6" : hovered ? "#6b7280" : "#10b981"} 
+              transparent 
+              opacity={0.9}
+            />
+          </mesh>
+        )
+      case 'globe':
+        return (
+          <mesh>
+            <sphereGeometry args={[currentSize[0] / 2, 32, 32]} />
+            <meshStandardMaterial 
+              color={isSelected ? "#3b82f6" : hovered ? "#6b7280" : "#f59e0b"} 
+              transparent 
+              opacity={0.8}
+            />
+          </mesh>
+        )
+      default:
+        return null
+    }
   }
 
   return (
@@ -197,12 +188,12 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
-        <primitive object={scene.clone()} />
+        {renderPrimitive()}
 
         {/* Selection highlight */}
         {isSelected && (
           <mesh>
-            <sphereGeometry args={[3, 32, 32]} />
+            <sphereGeometry args={[Math.max(...currentSize) * 0.8, 32, 32]} />
             <meshBasicMaterial color="#3b82f6" transparent opacity={0.1} wireframe />
           </mesh>
         )}
@@ -210,7 +201,7 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
         {/* Hover effect */}
         {hovered && !isSelected && (
           <mesh>
-            <sphereGeometry args={[2.8, 32, 32]} />
+            <sphereGeometry args={[Math.max(...currentSize) * 0.7, 32, 32]} />
             <meshBasicMaterial color="#6b7280" transparent opacity={0.05} wireframe />
           </mesh>
         )}
@@ -222,15 +213,15 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
           {/* X Axis - Red */}
           <group>
             <mesh
-              position={[1.5, 0, 0]}
+              position={[currentSize[0] * 0.8, 0, 0]}
               onPointerDown={handleGizmoPointerDown("x")}
               onPointerOver={() => setGizmoHovered("x")}
               onPointerOut={() => setGizmoHovered(null)}
             >
-              <cylinderGeometry args={[0.05, 0.05, 3, 8]} />
+              <cylinderGeometry args={[0.05, 0.05, currentSize[0] * 1.6, 8]} />
               <meshBasicMaterial color={gizmoHovered === "x" ? "#ff6b6b" : "#ff4444"} transparent opacity={0.8} />
             </mesh>
-            <mesh position={[3, 0, 0]} onPointerDown={handleGizmoPointerDown("x")}>
+            <mesh position={[currentSize[0] * 1.6, 0, 0]} onPointerDown={handleGizmoPointerDown("x")}>
               <coneGeometry args={[0.15, 0.4, 8]} />
               <meshBasicMaterial color={gizmoHovered === "x" ? "#ff6b6b" : "#ff4444"} transparent opacity={0.8} />
             </mesh>
@@ -239,15 +230,15 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
           {/* Y Axis - Green */}
           <group>
             <mesh
-              position={[0, 1.5, 0]}
+              position={[0, currentSize[1] * 0.8, 0]}
               onPointerDown={handleGizmoPointerDown("y")}
               onPointerOver={() => setGizmoHovered("y")}
               onPointerOut={() => setGizmoHovered(null)}
             >
-              <cylinderGeometry args={[0.05, 0.05, 3, 8]} />
+              <cylinderGeometry args={[0.05, 0.05, currentSize[1] * 1.6, 8]} />
               <meshBasicMaterial color={gizmoHovered === "y" ? "#6bff6b" : "#44ff44"} transparent opacity={0.8} />
             </mesh>
-            <mesh position={[0, 3, 0]} onPointerDown={handleGizmoPointerDown("y")}>
+            <mesh position={[0, currentSize[1] * 1.6, 0]} onPointerDown={handleGizmoPointerDown("y")}>
               <coneGeometry args={[0.15, 0.4, 8]} />
               <meshBasicMaterial color={gizmoHovered === "y" ? "#6bff6b" : "#44ff44"} transparent opacity={0.8} />
             </mesh>
@@ -256,16 +247,16 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
           {/* Z Axis - Blue */}
           <group>
             <mesh
-              position={[0, 0, 1.5]}
+              position={[0, 0, currentSize[2] * 0.8]}
               rotation={[Math.PI / 2, 0, 0]}
               onPointerDown={handleGizmoPointerDown("z")}
               onPointerOver={() => setGizmoHovered("z")}
               onPointerOut={() => setGizmoHovered(null)}
             >
-              <cylinderGeometry args={[0.05, 0.05, 3, 8]} />
+              <cylinderGeometry args={[0.05, 0.05, currentSize[2] * 1.6, 8]} />
               <meshBasicMaterial color={gizmoHovered === "z" ? "#6b6bff" : "#4444ff"} transparent opacity={0.8} />
             </mesh>
-            <mesh position={[0, 0, 3]} rotation={[Math.PI / 2, 0, 0]} onPointerDown={handleGizmoPointerDown("z")}>
+            <mesh position={[0, 0, currentSize[2] * 1.6]} rotation={[Math.PI / 2, 0, 0]} onPointerDown={handleGizmoPointerDown("z")}>
               <coneGeometry args={[0.15, 0.4, 8]} />
               <meshBasicMaterial color={gizmoHovered === "z" ? "#6b6bff" : "#4444ff"} transparent opacity={0.8} />
             </mesh>
@@ -279,7 +270,7 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
 
           {/* Resize handles - Corner cubes */}
           <mesh 
-            position={[3, 3, 3]}
+            position={[currentSize[0] * 0.5, currentSize[1] * 0.5, currentSize[2] * 0.5]}
             onPointerDown={handleGizmoPointerDown("scale")}
             onPointerOver={() => setGizmoHovered("scale")}
             onPointerOut={() => setGizmoHovered(null)}
@@ -289,19 +280,20 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
           </mesh>
 
           {/* Axis labels */}
-          <Html position={[3.5, 0, 0]} center>
-            <div className="text-red-400 text-xs font-bold bg-black/50 px-1 rounded">X</div>
-          </Html>
-          <Html position={[0, 3.5, 0]} center>
-            <div className="text-green-400 text-xs font-bold bg-black/50 px-1 rounded">Y</div>
-          </Html>
-          <Html position={[0, 0, 3.5]} center>
-            <div className="text-blue-400 text-xs font-bold bg-black/50 px-1 rounded">Z</div>
-          </Html>
+          <mesh position={[currentSize[0] * 1.8, 0, 0]}>
+            <boxGeometry args={[0.3, 0.3, 0.1]} />
+            <meshBasicMaterial color="#ff4444" />
+          </mesh>
+          <mesh position={[0, currentSize[1] * 1.8, 0]}>
+            <boxGeometry args={[0.3, 0.3, 0.1]} />
+            <meshBasicMaterial color="#44ff44" />
+          </mesh>
+          <mesh position={[0, 0, currentSize[2] * 1.8]}>
+            <boxGeometry args={[0.3, 0.3, 0.1]} />
+            <meshBasicMaterial color="#4444ff" />
+          </mesh>
         </group>
       )}
-
-
     </group>
   )
 }
