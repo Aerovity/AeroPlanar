@@ -10,10 +10,13 @@ import { GenerationPanel, type GenerationOptions } from "@/components/generation
 import { ArchitecturePanel } from "@/components/architecture-panel"
 import { ResizeToolbar } from "@/components/resize-toolbar"
 import { ModelStats } from "@/components/model-stats"
+import { ScenePerformanceMonitor } from "@/components/scene-performance-monitor"
+import { PerformanceLimitDialog } from "@/components/performance-limit-dialog"
 import { SpotlightButton } from "@/components/ui/spotlight-button"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/hooks/use-toast"
+import { useScenePerformance, estimateModelImpact } from "@/hooks/use-scene-performance"
 import {
   Sparkles,
   Eye,
@@ -45,11 +48,22 @@ export default function Home() {
   const [keyboardMove, setKeyboardMove] = useState<{ direction: string; amount: number } | null>(null)
   const [currentView, setCurrentView] = useState<'generation' | 'architecture'>('generation')
   const [clipboard, setClipboard] = useState<any>(null)
+  const [showPerformanceDialog, setShowPerformanceDialog] = useState(false)
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
+  const [performanceDialogData, setPerformanceDialogData] = useState<{
+    warningLevel: 'none' | 'low' | 'medium' | 'high' | 'critical'
+    warnings: string[]
+    suggestions: string[]
+    isBlocking: boolean
+  }>({ warningLevel: 'none', warnings: [], suggestions: [], isBlocking: false })
 
   const selectedModel = useMemo(() => 
     models.find((m) => m.id === selectedModelId), 
     [models, selectedModelId]
   )
+
+  // Performance monitoring
+  const scenePerformance = useScenePerformance(models)
 
   // Add keyboard event listeners
   useEffect(() => {
@@ -147,8 +161,12 @@ export default function Home() {
   const handleUpload3DModel = useCallback(async (file: File) => {
     try {
       const modelUrl = URL.createObjectURL(file)
+      
+      // Estimate model complexity based on file size (rough approximation)
+      const fileSizeMB = file.size / (1024 * 1024)
+      const estimatedFaces = Math.min(200000, Math.max(5000, Math.floor(fileSizeMB * 10000)))
 
-      // Add model to the scene with better spacing
+      // Create model data
       const newModel = {
         id: `uploaded-${Date.now()}`,
         name: file.name.replace(/\.[^/.]+$/, ""),
@@ -157,17 +175,20 @@ export default function Home() {
         size: [2, 2, 2] as [number, number, number],
         originalSize: [2, 2, 2] as [number, number, number],
         status: "ready",
-        faces: Math.floor(Math.random() * 50000) + 10000,
-        vertices: Math.floor(Math.random() * 25000) + 5000,
+        faces: estimatedFaces,
+        vertices: Math.floor(estimatedFaces * 0.6),
         topology: "Triangle",
       }
 
-      setModels((prev) => [...prev, newModel])
-      setSelectedModelId(newModel.id)
+      // Check performance impact before adding
+      checkPerformanceBeforeAdding(estimatedFaces, () => {
+        setModels((prev) => [...prev, newModel])
+        setSelectedModelId(newModel.id)
 
-      toast({
-        title: "3D Model Uploaded!",
-        description: "Your model has been added to the scene. Use arrow keys or transform gizmo to reposition it.",
+        toast({
+          title: "3D Model Uploaded!",
+          description: "Your model has been added to the scene. Use arrow keys or transform gizmo to reposition it.",
+        })
       })
     } catch (error) {
       console.error("Error uploading 3D model:", error)
@@ -177,7 +198,7 @@ export default function Home() {
         variant: "destructive",
       })
     }
-  }, [])
+  }, [scenePerformance])
 
   const handleGenerate = useCallback(async (file: File, options: GenerationOptions) => {
     setIsGenerating(true)
@@ -404,7 +425,8 @@ export default function Home() {
             const blob = await downloadResponse.blob()
             const modelUrl = URL.createObjectURL(blob)
 
-            // Add model to the scene with better spacing
+            // Generate model data with estimated complexity
+            const estimatedFaces = Math.floor(Math.random() * 50000) + 10000
             const newModel = {
               id: taskId,
               name: modelName,
@@ -413,18 +435,21 @@ export default function Home() {
               size: [2, 2, 2] as [number, number, number],
               originalSize: [2, 2, 2] as [number, number, number],
               status: "ready",
-              faces: Math.floor(Math.random() * 50000) + 10000,
-              vertices: Math.floor(Math.random() * 25000) + 5000,
+              faces: estimatedFaces,
+              vertices: Math.floor(estimatedFaces * 0.5),
               topology: "Triangle",
             }
 
-            setModels((prev) => [...prev, newModel])
-            setSelectedModelId(taskId)
+            // Check performance impact before adding generated model
+            checkPerformanceBeforeAdding(estimatedFaces, () => {
+              setModels((prev) => [...prev, newModel])
+              setSelectedModelId(taskId)
 
-            toast({
-              title: "3D Model Generated!",
-              description:
-                "Your model has been added to the scene. Use arrow keys or transform gizmo to reposition it.",
+              toast({
+                title: "3D Model Generated!",
+                description:
+                  "Your model has been added to the scene. Use arrow keys or transform gizmo to reposition it.",
+              })
             })
           }
 
@@ -478,16 +503,104 @@ export default function Home() {
       position: [Math.random() * 20 - 10, 0, Math.random() * 20 - 10] as [number, number, number],
       size: primitive.size,
       originalSize: primitive.size, // Store original size for reset functionality
-      status: 'ready'
+      status: 'ready',
+      faces: primitive.faces || 1000,
+      vertices: primitive.vertices || 500
+    }
+
+    // Check performance impact before adding
+    checkPerformanceBeforeAdding(newModel.faces || 1000, () => {
+      setModels(prev => [...prev, newModel])
+      setSelectedModelId(newModel.id)
+      
+      toast({
+        title: `${primitive.name} Added`,
+        description: "Primitive object added to the scene.",
+      })
+    })
+  }
+
+  // Performance checking and scene management functions
+  const checkPerformanceBeforeAdding = (estimatedFaces: number, proceedCallback: () => void) => {
+    const impact = estimateModelImpact(scenePerformance, estimatedFaces)
+    
+    if (impact.wouldExceedLimits || impact.projectedWarningLevel === 'critical') {
+      setPerformanceDialogData({
+        warningLevel: impact.projectedWarningLevel,
+        warnings: impact.warnings,
+        suggestions: ['Remove some models to free up performance', 'Try using simpler models'],
+        isBlocking: impact.wouldExceedLimits
+      })
+      setPendingAction(() => proceedCallback)
+      setShowPerformanceDialog(true)
+    } else if (impact.warnings.length > 0) {
+      setPerformanceDialogData({
+        warningLevel: impact.projectedWarningLevel,
+        warnings: impact.warnings,
+        suggestions: ['Monitor performance after adding this model'],
+        isBlocking: false
+      })
+      setPendingAction(() => proceedCallback)
+      setShowPerformanceDialog(true)
+    } else {
+      proceedCallback()
+    }
+  }
+
+  const handleClearScene = () => {
+    setModels([])
+    setSelectedModelId(null)
+    toast({
+      title: "Scene Cleared",
+      description: "All models have been removed from the scene.",
+    })
+  }
+
+  const handleOptimizeScene = () => {
+    // Remove models with more than 50k faces or keep only the 20 smallest models
+    const sortedModels = models
+      .filter(model => (model.faces || 0) < 50000)
+      .sort((a, b) => (a.faces || 0) - (b.faces || 0))
+      .slice(0, Math.min(20, models.length))
+    
+    const removedCount = models.length - sortedModels.length
+    setModels(sortedModels)
+    
+    if (selectedModelId && !sortedModels.find(m => m.id === selectedModelId)) {
+      setSelectedModelId(null)
     }
     
-    setModels(prev => [...prev, newModel])
-    setSelectedModelId(newModel.id)
-    
     toast({
-      title: `${primitive.name} Added`,
-      description: "Primitive object added to the scene.",
+      title: "Scene Optimized",
+      description: `Removed ${removedCount} high-complexity models to improve performance.`,
     })
+  }
+
+  const handleRemoveLargestModel = () => {
+    if (models.length === 0) return
+    
+    const largestModel = models.reduce((largest, current) => 
+      (current.faces || 0) > (largest.faces || 0) ? current : largest
+    )
+    
+    handleDeleteModel(largestModel.id)
+    toast({
+      title: "Largest Model Removed",
+      description: `Removed ${largestModel.name} (${(largestModel.faces || 0).toLocaleString()} faces) to improve performance.`,
+    })
+  }
+
+  const handlePerformanceDialogProceed = () => {
+    if (pendingAction) {
+      pendingAction()
+      setPendingAction(null)
+    }
+    setShowPerformanceDialog(false)
+  }
+
+  const handlePerformanceDialogClose = () => {
+    setPendingAction(null)
+    setShowPerformanceDialog(false)
   }
 
   return (
@@ -762,6 +875,16 @@ export default function Home() {
               <>
                 <ModelStats selectedModel={selectedModel} />
 
+                {/* Scene Performance Monitor */}
+                <div className="mt-4">
+                  <ScenePerformanceMonitor 
+                    performance={scenePerformance}
+                    onClearScene={handleClearScene}
+                    onOptimizeScene={handleOptimizeScene}
+                    onRemoveLargestModel={handleRemoveLargestModel}
+                  />
+                </div>
+
                 {/* Transform Controls Info */}
                 {selectedModel && (
                   <div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
@@ -810,6 +933,16 @@ export default function Home() {
             ) : (
               <>
                 <ModelStats selectedModel={selectedModel} />
+
+                {/* Scene Performance Monitor */}
+                <div className="mt-4">
+                  <ScenePerformanceMonitor 
+                    performance={scenePerformance}
+                    onClearScene={handleClearScene}
+                    onOptimizeScene={handleOptimizeScene}
+                    onRemoveLargestModel={handleRemoveLargestModel}
+                  />
+                </div>
 
                 {/* Architecture Modeling Controls */}
                 {selectedModel && (
@@ -913,6 +1046,24 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Performance Limit Dialog */}
+      <PerformanceLimitDialog
+        isOpen={showPerformanceDialog}
+        onClose={handlePerformanceDialogClose}
+        onProceed={handlePerformanceDialogProceed}
+        onClearScene={handleClearScene}
+        onRemoveLargestModel={handleRemoveLargestModel}
+        warningLevel={performanceDialogData.warningLevel}
+        warnings={performanceDialogData.warnings}
+        suggestions={performanceDialogData.suggestions}
+        isBlocking={performanceDialogData.isBlocking}
+        currentPerformance={{
+          totalFaces: scenePerformance.totalFaces,
+          totalModels: scenePerformance.totalModels,
+          performanceScore: scenePerformance.performanceScore
+        }}
+      />
     </div>
   )
 }
