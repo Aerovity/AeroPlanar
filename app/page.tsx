@@ -978,10 +978,15 @@ export default function Home() {
                     <Sparkles className="w-4 h-4 mr-2" />
                     Generation
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:bg-gray-800/50 rounded-full">
-                    <Palette className="w-4 h-4 mr-2" />
-                    Texture
-                  </Button>
+                  <div className="relative">
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:bg-gray-800/50 rounded-full">
+                      <Palette className="w-4 h-4 mr-2" />
+                      Texture
+                    </Button>
+                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
+                      Soon Available
+                    </div>
+                  </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -995,15 +1000,20 @@ export default function Home() {
                     <Layers className="w-4 h-4 mr-2" />
                     Mockups
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`${currentView === '3d-editing' ? 'text-white' : 'text-gray-400'} hover:bg-gray-800/50 rounded-full`}
-                    onClick={() => setCurrentView('3d-editing')}
-                  >
-                    <Grid3x3 className="w-4 h-4 mr-2" />
-                    3D Editing
-                  </Button>
+                  <div className="relative">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={`${currentView === '3d-editing' ? 'text-white' : 'text-gray-400'} hover:bg-gray-800/50 rounded-full`}
+                      onClick={() => setCurrentView('3d-editing')}
+                    >
+                      <Grid3x3 className="w-4 h-4 mr-2" />
+                      3D Editing
+                    </Button>
+                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-blue-400 whitespace-nowrap">
+                      Beta
+                    </div>
+                  </div>
                 </nav>
 
                 <div className="flex items-center gap-2">
