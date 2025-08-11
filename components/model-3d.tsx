@@ -15,9 +15,12 @@ interface Model3DProps {
   onPositionChange?: (newPosition: [number, number, number]) => void
   onSizeChange?: (newSize: [number, number, number]) => void
   keyboardMove?: { direction: string; amount: number } | null
+  activeTool?: string | null
+  toolSettings?: any
+  onToolApply?: (toolType: string, point: any) => void
 }
 
-function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove }: Model3DProps) {
+function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove, activeTool, toolSettings, onToolApply }: Model3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
   const [error, setError] = useState(false)
@@ -27,6 +30,7 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
   const [gizmoHovered, setGizmoHovered] = useState<string | null>(null)
   const [baseScale, setBaseScale] = useState<number>(1)
   const [modelCenter, setModelCenter] = useState<[number, number, number]>([0, 0, 0])
+  const [appliedMaterials, setAppliedMaterials] = useState<Map<string, any>>(new Map())
   const { gl } = useThree()
 
   // Load the 3D model
@@ -172,10 +176,96 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
     }
   }
 
+  // Create material based on brush texture
+  const createBrushMaterial = (textureType: string) => {
+    const materials = {
+      rough: new THREE.MeshStandardMaterial({ 
+        color: 0x8B4513, 
+        roughness: 0.9, 
+        metalness: 0.1,
+        name: 'rough-material'
+      }),
+      smooth: new THREE.MeshStandardMaterial({ 
+        color: 0xC0C0C0, 
+        roughness: 0.1, 
+        metalness: 0.8,
+        name: 'smooth-material'
+      }),
+      metallic: new THREE.MeshStandardMaterial({ 
+        color: 0x4A4A4A, 
+        roughness: 0.2, 
+        metalness: 1.0,
+        name: 'metallic-material'
+      }),
+      wood: new THREE.MeshStandardMaterial({ 
+        color: 0xDEB887, 
+        roughness: 0.8, 
+        metalness: 0.0,
+        name: 'wood-material'
+      }),
+      stone: new THREE.MeshStandardMaterial({ 
+        color: 0x696969, 
+        roughness: 0.9, 
+        metalness: 0.1,
+        name: 'stone-material'
+      })
+    }
+    return materials[textureType as keyof typeof materials] || materials.rough
+  }
+
+  // Handle tool interactions
+  const handleToolInteraction = (e: any) => {
+    if (!activeTool || !isSelected) return
+
+    e.stopPropagation()
+
+    switch (activeTool) {
+      case 'brush':
+        if (toolSettings?.brush) {
+          // Apply brush texture to the entire model
+          const newMaterial = createBrushMaterial(toolSettings.brush.texture)
+          
+          scene.traverse((child: any) => {
+            if (child.isMesh) {
+              child.material = newMaterial
+            }
+          })
+
+          setAppliedMaterials(prev => new Map(prev.set('brush', newMaterial)))
+          onToolApply?.('brush', { position: currentPosition, material: toolSettings.brush.texture })
+        }
+        break
+      
+      case 'scissors':
+        // For scissors, we'll create a simple split effect by duplicating and offsetting
+        onToolApply?.('scissors', { position: currentPosition, point: e.point })
+        break
+
+      case 'smudge':
+        // Smudge effect - we'll simulate this with a slight scale variation
+        if (scene) {
+          const randomScaleVariation = 1 + (Math.random() - 0.5) * 0.1 * (toolSettings?.smudge?.intensity || 0.7)
+          scene.scale.multiplyScalar(randomScaleVariation)
+          onToolApply?.('smudge', { position: currentPosition, intensity: toolSettings?.smudge?.intensity })
+        }
+        break
+
+      case 'deform':
+        // Start deform mode - this will be handled by click and drag
+        onToolApply?.('deform-start', { position: currentPosition, point: e.point })
+        break
+    }
+  }
+
   // Handle model click
   const handleClick = (e: any) => {
     e.stopPropagation()
-    onClick?.()
+    
+    if (activeTool && isSelected) {
+      handleToolInteraction(e)
+    } else {
+      onClick?.()
+    }
   }
 
   if (error) {
@@ -202,10 +292,10 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
       >
         <primitive object={scene} />
 
-        {/* Selection highlight */}
+        {/* Selection highlight - Much larger to encompass the actual model */}
         {isSelected && (
           <mesh>
-            <sphereGeometry args={[3, 32, 32]} />
+            <sphereGeometry args={[Math.max(8, Math.max(...currentSize) * baseScale * 1.5), 32, 32]} />
             <meshBasicMaterial color="#3b82f6" transparent opacity={0.1} wireframe />
           </mesh>
         )}
@@ -213,7 +303,7 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
         {/* Hover effect */}
         {hovered && !isSelected && (
           <mesh>
-            <sphereGeometry args={[2.8, 32, 32]} />
+            <sphereGeometry args={[Math.max(7, Math.max(...currentSize) * baseScale * 1.3), 32, 32]} />
             <meshBasicMaterial color="#6b7280" transparent opacity={0.05} wireframe />
           </mesh>
         )}

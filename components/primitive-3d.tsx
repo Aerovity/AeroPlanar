@@ -14,6 +14,9 @@ interface Primitive3DProps {
   onPositionChange?: (newPosition: [number, number, number]) => void
   onSizeChange?: (newSize: [number, number, number]) => void
   keyboardMove?: { direction: string; amount: number } | null
+  activeTool?: string | null
+  toolSettings?: any
+  onToolApply?: (toolType: string, point: any) => void
 }
 
 function Primitive3DComponent({ 
@@ -24,7 +27,10 @@ function Primitive3DComponent({
   onClick, 
   onPositionChange, 
   onSizeChange,
-  keyboardMove 
+  keyboardMove,
+  activeTool,
+  toolSettings,
+  onToolApply
 }: Primitive3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
@@ -32,6 +38,7 @@ function Primitive3DComponent({
   const [currentPosition, setCurrentPosition] = useState<[number, number, number]>(position)
   const [currentSize, setCurrentSize] = useState<[number, number, number]>(size)
   const [gizmoHovered, setGizmoHovered] = useState<string | null>(null)
+  const [appliedMaterial, setAppliedMaterial] = useState<any>(null)
   const { gl } = useThree()
 
   // Update local state when props change
@@ -81,14 +88,18 @@ function Primitive3DComponent({
   // Handle transform gizmo interactions
   const handleGizmoPointerDown = (axis: string) => (e: any) => {
     e.stopPropagation?.()
-    e.preventDefault?.()
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
     setIsDragging(axis)
     gl.domElement.style.cursor = "grabbing"
   }
 
   const handleGizmoPointerUp = (e: any) => {
     e.stopPropagation?.()
-    e.preventDefault?.()
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
     setIsDragging(null)
     gl.domElement.style.cursor = "default"
   }
@@ -97,7 +108,9 @@ function Primitive3DComponent({
     if (!isDragging) return
 
     e.stopPropagation?.()
-    e.preventDefault?.()
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
 
     const sensitivity = 0.02
     const scaleSensitivity = 0.01
@@ -134,45 +147,145 @@ function Primitive3DComponent({
     }
   }
 
+  // Create material based on brush texture
+  const createBrushMaterial = (textureType: string) => {
+    const materials = {
+      rough: new THREE.MeshStandardMaterial({ 
+        color: 0x8B4513, 
+        roughness: 0.9, 
+        metalness: 0.1,
+      }),
+      smooth: new THREE.MeshStandardMaterial({ 
+        color: 0xC0C0C0, 
+        roughness: 0.1, 
+        metalness: 0.8,
+      }),
+      metallic: new THREE.MeshStandardMaterial({ 
+        color: 0x4A4A4A, 
+        roughness: 0.2, 
+        metalness: 1.0,
+      }),
+      wood: new THREE.MeshStandardMaterial({ 
+        color: 0xDEB887, 
+        roughness: 0.8, 
+        metalness: 0.0,
+      }),
+      stone: new THREE.MeshStandardMaterial({ 
+        color: 0x696969, 
+        roughness: 0.9, 
+        metalness: 0.1,
+      })
+    }
+    return materials[textureType as keyof typeof materials] || materials.rough
+  }
+
+  // Handle tool interactions
+  const handleToolInteraction = (e: any) => {
+    if (!activeTool || !isSelected) return
+
+    e.stopPropagation()
+
+    switch (activeTool) {
+      case 'brush':
+        if (toolSettings?.brush) {
+          const newMaterial = createBrushMaterial(toolSettings.brush.texture)
+          setAppliedMaterial(newMaterial)
+          onToolApply?.('brush', { position: currentPosition, material: toolSettings.brush.texture })
+        }
+        break
+      
+      case 'scissors':
+        onToolApply?.('scissors', { position: currentPosition, point: e.point })
+        break
+
+      case 'smudge':
+        // Smudge effect - slight scale variation
+        const randomScaleVariation = 1 + (Math.random() - 0.5) * 0.1 * (toolSettings?.smudge?.intensity || 0.7)
+        const newSize: [number, number, number] = [
+          currentSize[0] * randomScaleVariation,
+          currentSize[1] * randomScaleVariation,
+          currentSize[2] * randomScaleVariation
+        ]
+        setCurrentSize(newSize)
+        onSizeChange?.(newSize)
+        onToolApply?.('smudge', { position: currentPosition, intensity: toolSettings?.smudge?.intensity })
+        break
+
+      case 'deform':
+        // Deform effect - position offset
+        const deformStrength = toolSettings?.deform?.strength || 0.3
+        const offset = (Math.random() - 0.5) * deformStrength
+        const newPos: [number, number, number] = [
+          currentPosition[0] + offset,
+          currentPosition[1] + offset * 0.5,
+          currentPosition[2] + offset
+        ]
+        setCurrentPosition(newPos)
+        onPositionChange?.(newPos)
+        onToolApply?.('deform', { oldPosition: currentPosition, newPosition: newPos })
+        break
+    }
+  }
+
   // Handle model click
   const handleClick = (e: any) => {
     e.stopPropagation?.()
-    onClick?.()
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
+    
+    if (activeTool && isSelected) {
+      handleToolInteraction(e)
+    } else {
+      onClick?.()
+    }
   }
 
   const renderPrimitive = () => {
+    const getMaterial = () => {
+      if (appliedMaterial) {
+        return appliedMaterial
+      }
+      // Default materials based on selection/hover state
+      if (isSelected) {
+        return new THREE.MeshStandardMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.8 })
+      } else if (hovered) {
+        return new THREE.MeshStandardMaterial({ color: 0x6b7280, transparent: true, opacity: 0.8 })
+      }
+      
+      // Default type-based materials
+      const typeColors = {
+        'cube': 0x8b5cf6,
+        'flat-cube': 0x10b981,
+        'globe': 0xf59e0b
+      }
+      return new THREE.MeshStandardMaterial({ 
+        color: typeColors[type], 
+        transparent: true, 
+        opacity: 0.8 
+      })
+    }
+
     switch (type) {
       case 'cube':
         return (
           <mesh>
             <boxGeometry args={currentSize} />
-            <meshStandardMaterial 
-              color={isSelected ? "#3b82f6" : hovered ? "#6b7280" : "#8b5cf6"} 
-              transparent 
-              opacity={0.8}
-            />
+            <primitive object={getMaterial()} />
           </mesh>
         )
       case 'flat-cube':
         return (
           <mesh>
             <boxGeometry args={currentSize} />
-            <meshStandardMaterial 
-              color={isSelected ? "#3b82f6" : hovered ? "#6b7280" : "#10b981"} 
-              transparent 
-              opacity={0.9}
-            />
+            <primitive object={getMaterial()} />
           </mesh>
         )
       case 'globe':
         return (
           <mesh>
             <sphereGeometry args={[currentSize[0] / 2, 32, 32]} />
-            <meshStandardMaterial 
-              color={isSelected ? "#3b82f6" : hovered ? "#6b7280" : "#f59e0b"} 
-              transparent 
-              opacity={0.8}
-            />
+            <primitive object={getMaterial()} />
           </mesh>
         )
       default:

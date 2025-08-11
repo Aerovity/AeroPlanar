@@ -8,6 +8,7 @@ import { Model3D } from "@/components/model-3d"
 import { Primitive3D } from "@/components/primitive-3d"
 import { GenerationPanel, type GenerationOptions } from "@/components/generation-panel"
 import { ArchitecturePanel } from "@/components/architecture-panel"
+import { Editing3DSidebar } from "@/components/editing-3d-sidebar"
 import { ResizeToolbar } from "@/components/resize-toolbar"
 import { ModelStats } from "@/components/model-stats"
 import { ScenePerformanceMonitor } from "@/components/scene-performance-monitor"
@@ -46,7 +47,18 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeTasks, setActiveTasks] = useState<Task[]>([])
   const [keyboardMove, setKeyboardMove] = useState<{ direction: string; amount: number } | null>(null)
-  const [currentView, setCurrentView] = useState<'generation' | 'architecture'>('generation')
+  const [currentView, setCurrentView] = useState<'generation' | 'architecture' | '3d-editing'>('generation')
+  const [activeTool, setActiveTool] = useState<string | null>(null)
+  const [isDeforming, setIsDeforming] = useState(false)
+  const [deformStartPoint, setDeformStartPoint] = useState<any>(null)
+  const [dynamicLights, setDynamicLights] = useState<any[]>([])
+  const [currentLightingFilter, setCurrentLightingFilter] = useState<string>('natural')
+  const [toolSettings, setToolSettings] = useState<any>({
+    brush: { texture: 'rough', size: 0.5, intensity: 0.7 },
+    deform: { strength: 0.3 },
+    smudge: { intensity: 0.7 },
+    light: { intensity: 1.0 }
+  })
   const [clipboard, setClipboard] = useState<any>(null)
   const [showPerformanceDialog, setShowPerformanceDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
@@ -603,6 +615,127 @@ export default function Home() {
     setShowPerformanceDialog(false)
   }
 
+  const handleToolSelect = (tool: string, options?: any) => {
+    setActiveTool(tool)
+    
+    // Update tool settings
+    if (options) {
+      setToolSettings(prev => ({
+        ...prev,
+        [tool.split('-')[0]]: options
+      }))
+    }
+    
+    // Tool-specific actions
+    switch (tool) {
+      case 'brush':
+        toast({
+          title: "Brush Tool Selected",
+          description: `Texture: ${options?.texture}, Size: ${options?.size?.toFixed(1)}, Intensity: ${options?.intensity?.toFixed(1)}`,
+        })
+        break
+      case 'scissors':
+        toast({
+          title: "Scissors Tool Active",
+          description: "Click and drag across an object to cut it into separate parts.",
+        })
+        break
+      case 'light-create':
+        toast({
+          title: "Light Creation Tool",
+          description: "Click in the scene to place a new light source.",
+        })
+        break
+      case 'smudge':
+        toast({
+          title: "Smudge Tool Active",
+          description: "Click and drag on model surfaces to smudge and deform them.",
+        })
+        break
+      case 'deform':
+        toast({
+          title: "Deform Tool Active",
+          description: "Click on a model, then click and drag in empty space to deform it.",
+        })
+        break
+      default:
+        if (tool.startsWith('lighting-filter')) {
+          const filterName = tool.replace('lighting-filter-', '')
+          setCurrentLightingFilter(filterName)
+          // Force re-render of the lighting by invalidating the frame
+          setTimeout(() => {
+            if (gl) {
+              gl.render()
+            }
+          }, 100)
+          toast({
+            title: `${filterName.charAt(0).toUpperCase() + filterName.slice(1)} Lighting Applied`,
+            description: "Scene lighting has been updated with new filter.",
+          })
+        }
+    }
+  }
+
+  const handleSceneClick = (event: any) => {
+    if (activeTool === 'light-create' && event.point) {
+      const newLight = {
+        id: `light-${Date.now()}`,
+        position: [event.point.x, event.point.y + 2, event.point.z],
+        intensity: toolSettings.light.intensity,
+        color: '#ffffff',
+        type: 'point'
+      }
+      
+      setDynamicLights(prev => [...prev, newLight])
+      
+      toast({
+        title: "Light Created!",
+        description: `New light placed at (${event.point.x.toFixed(1)}, ${event.point.y.toFixed(1)}, ${event.point.z.toFixed(1)})`,
+      })
+    }
+  }
+
+  const handleDeformStart = (event: any) => {
+    if (activeTool === 'deform' && selectedModelId) {
+      setIsDeforming(true)
+      setDeformStartPoint(event.point)
+      event.stopPropagation()
+    }
+  }
+
+  const handleDeformEnd = () => {
+    setIsDeforming(false)
+    setDeformStartPoint(null)
+  }
+
+  const handleDeformMove = (event: any) => {
+    if (isDeforming && selectedModelId && deformStartPoint) {
+      const selectedModel = models.find(m => m.id === selectedModelId)
+      if (!selectedModel) return
+
+      const distance = Math.sqrt(
+        Math.pow(event.point.x - deformStartPoint.x, 2) +
+        Math.pow(event.point.y - deformStartPoint.y, 2) +
+        Math.pow(event.point.z - deformStartPoint.z, 2)
+      )
+
+      const deformStrength = toolSettings.deform.strength * distance
+      const direction = {
+        x: (event.point.x - deformStartPoint.x) / distance,
+        y: (event.point.y - deformStartPoint.y) / distance,
+        z: (event.point.z - deformStartPoint.z) / distance
+      }
+
+      const newPosition: [number, number, number] = [
+        selectedModel.position[0] + direction.x * deformStrength,
+        selectedModel.position[1] + direction.y * deformStrength,
+        selectedModel.position[2] + direction.z * deformStrength
+      ]
+
+      handleModelPositionChange(selectedModelId, newPosition)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Full-screen 3D Background */}
@@ -618,16 +751,40 @@ export default function Home() {
             depth: true
           }}
           performance={{ min: 0.8 }}
-          frameloop="demand"
+          frameloop="always"
+          onClick={handleSceneClick}
+          onPointerDown={handleDeformStart}
+          onPointerMove={handleDeformMove}
+          onPointerUp={handleDeformEnd}
         >
           <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={60} />
 
-          {/* Enhanced lighting setup */}
-          <ambientLight intensity={0.3} color="#ffffff" />
+          {/* Dynamic lighting setup based on filter */}
+          <ambientLight 
+            intensity={
+              currentLightingFilter === 'soft' ? 0.8 : 
+              currentLightingFilter === 'dramatic' ? 0.05 : 
+              currentLightingFilter === 'warm' ? 0.4 :
+              currentLightingFilter === 'cool' ? 0.4 : 0.3
+            } 
+            color={
+              currentLightingFilter === 'warm' ? "#ff9966" : 
+              currentLightingFilter === 'cool' ? "#6699ff" : "#ffffff"
+            } 
+          />
           <directionalLight
             position={[20, 20, 10]}
-            intensity={1.2}
-            color="#ffffff"
+            intensity={
+              currentLightingFilter === 'dramatic' ? 3.0 : 
+              currentLightingFilter === 'soft' ? 0.4 : 
+              currentLightingFilter === 'warm' ? 1.5 :
+              currentLightingFilter === 'cool' ? 1.5 : 1.2
+            }
+            color={
+              currentLightingFilter === 'warm' ? "#ffcc88" : 
+              currentLightingFilter === 'cool' ? "#88ccff" : 
+              currentLightingFilter === 'dramatic' ? "#ffffff" : "#ffffff"
+            }
             castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
@@ -638,8 +795,51 @@ export default function Home() {
             shadow-camera-bottom={-40}
             shadow-bias={-0.0001}
           />
-          <pointLight position={[-20, 10, -20]} intensity={0.4} color="#3b82f6" />
-          <pointLight position={[20, 10, 20]} intensity={0.4} color="#8b5cf6" />
+          <pointLight 
+            position={[-20, 10, -20]} 
+            intensity={
+              currentLightingFilter === 'dramatic' ? 1.2 : 
+              currentLightingFilter === 'soft' ? 0.2 :
+              currentLightingFilter === 'warm' ? 0.8 : 0.4
+            } 
+            color={
+              currentLightingFilter === 'warm' ? "#ff6633" : 
+              currentLightingFilter === 'cool' ? "#3366ff" : "#3b82f6"
+            } 
+          />
+          <pointLight 
+            position={[20, 10, 20]} 
+            intensity={
+              currentLightingFilter === 'dramatic' ? 1.2 : 
+              currentLightingFilter === 'soft' ? 0.2 :
+              currentLightingFilter === 'cool' ? 0.8 : 0.4
+            } 
+            color={
+              currentLightingFilter === 'cool' ? "#3399ff" : 
+              currentLightingFilter === 'warm' ? "#ff9933" : "#8b5cf6"
+            } 
+          />
+
+          {/* Dynamic user-created lights */}
+          {dynamicLights.map((light) => (
+            <group key={light.id}>
+              <pointLight
+                position={light.position}
+                intensity={light.intensity}
+                color={light.color}
+                castShadow
+              />
+              {/* Visual representation of the light */}
+              <mesh position={light.position}>
+                <sphereGeometry args={[0.2, 16, 16]} />
+                <meshBasicMaterial color={light.color} transparent opacity={0.8} />
+              </mesh>
+              <mesh position={light.position}>
+                <sphereGeometry args={[0.4, 16, 16]} />
+                <meshBasicMaterial color={light.color} transparent opacity={0.2} wireframe />
+              </mesh>
+            </group>
+          ))}
 
           {/* Environment for better reflections */}
           <Environment preset="city" />
@@ -671,6 +871,53 @@ export default function Home() {
                 onPositionChange: (newPosition: [number, number, number]) => handleModelPositionChange(model.id, newPosition),
                 onSizeChange: (newSize: [number, number, number]) => handleModelSizeChange(model.id, newSize),
                 keyboardMove: selectedModelId === model.id ? keyboardMove : null,
+                activeTool: selectedModelId === model.id ? activeTool : null,
+                toolSettings,
+                onToolApply: (toolType: string, data: any) => {
+                  // Handle tool application results
+                  switch (toolType) {
+                    case 'brush':
+                      toast({
+                        title: "Brush Applied!",
+                        description: `Applied ${data.material} texture to ${model.name}`,
+                      })
+                      break
+                    case 'scissors':
+                      // Create a duplicate model with offset for scissors effect
+                      const cutModel = {
+                        ...model,
+                        id: `cut-${Date.now()}`,
+                        name: `${model.name} (Cut)`,
+                        position: [model.position[0] + 2, model.position[1], model.position[2]] as [number, number, number]
+                      }
+                      setModels(prev => [...prev, cutModel])
+                      toast({
+                        title: "Object Cut!",
+                        description: `${model.name} has been split into two parts`,
+                      })
+                      break
+                    case 'smudge':
+                      toast({
+                        title: "Surface Smudged!",
+                        description: `Applied smudge effect to ${model.name}`,
+                      })
+                      break
+                    case 'deform':
+                      toast({
+                        title: "Object Deformed!",
+                        description: `Applied deformation to ${model.name}`,
+                      })
+                      break
+                    case 'deform-start':
+                      setIsDeforming(true)
+                      setDeformStartPoint(data.point)
+                      toast({
+                        title: "Deform Mode Active",
+                        description: "Click and drag in empty space to deform the selected object.",
+                      })
+                      break
+                  }
+                },
               }
               
               if (model.type === 'primitive') {
@@ -748,7 +995,12 @@ export default function Home() {
                     <Layers className="w-4 h-4 mr-2" />
                     Mockups
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:bg-gray-800/50 rounded-full">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`${currentView === '3d-editing' ? 'text-white' : 'text-gray-400'} hover:bg-gray-800/50 rounded-full`}
+                    onClick={() => setCurrentView('3d-editing')}
+                  >
                     <Grid3x3 className="w-4 h-4 mr-2" />
                     3D Editing
                   </Button>
@@ -851,6 +1103,12 @@ export default function Home() {
                   </div>
                 )}
               </>
+            ) : currentView === '3d-editing' ? (
+              <Editing3DSidebar
+                selectedModelId={selectedModelId}
+                onToolSelect={handleToolSelect}
+                activeTool={activeTool}
+              />
             ) : (
               <ArchitecturePanel
                 models={models}
@@ -929,6 +1187,90 @@ export default function Home() {
                     </div>
                   </div>
                 )}
+              </>
+            ) : currentView === '3d-editing' ? (
+              <>
+                <ModelStats selectedModel={selectedModel} />
+
+                {/* 3D Editing Instructions */}
+                <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                    <Grid3x3 className="w-4 h-4 text-purple-400" />
+                    3D Editing Mode
+                  </h3>
+                  <div className="space-y-2 text-sm text-gray-300">
+                    <div className="text-purple-300 font-medium">Active Tools:</div>
+                    {activeTool ? (
+                      <div className="bg-purple-900/30 p-2 rounded-lg border border-purple-500/30">
+                        <span className="text-purple-200 capitalize">{activeTool.replace('-', ' ')}</span>
+                      </div>
+                    ) : (
+                      <div className="text-gray-400">No tool selected</div>
+                    )}
+                    
+                    <div className="mt-3 space-y-1">
+                      <div className="text-purple-300 font-medium">Instructions:</div>
+                      <div>• Select a model from the scene</div>
+                      <div>• Choose tools from the left sidebar</div>
+                      <div>• <strong>Brushes:</strong> Click on models to apply textures</div>
+                      <div>• <strong>Scissors:</strong> Click on models to cut/duplicate them</div>
+                      <div>• <strong>Lights:</strong> Click empty space to create lights</div>
+                      <div>• <strong>Lighting Filters:</strong> Apply instantly to scene</div>
+                      <div>• <strong>Deform:</strong> Click model, then drag in empty space to deform</div>
+                      <div>• <strong>Smudge:</strong> Click models for random effects</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Light Management */}
+                {dynamicLights.length > 0 && (
+                  <div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+                    <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4 text-yellow-400" />
+                      Scene Lights ({dynamicLights.length})
+                    </h3>
+                    <div className="space-y-2">
+                      {dynamicLights.map((light, index) => (
+                        <div
+                          key={light.id}
+                          className="flex items-center justify-between p-2 rounded-lg bg-gray-900/50"
+                        >
+                          <div className="flex-1">
+                            <p className="text-white text-sm">Light {index + 1}</p>
+                            <p className="text-gray-400 text-xs">
+                              Pos: ({light.position[0].toFixed(1)}, {light.position[1].toFixed(1)}, {light.position[2].toFixed(1)})
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setDynamicLights(prev => prev.filter(l => l.id !== light.id))
+                              toast({
+                                title: "Light Removed",
+                                description: "Light source has been deleted from the scene.",
+                              })
+                            }}
+                            className="h-6 w-6 p-0 text-gray-400 hover:text-red-400"
+                            title="Remove Light"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Scene Performance Monitor */}
+                <div className="mt-4">
+                  <ScenePerformanceMonitor 
+                    performance={scenePerformance}
+                    onClearScene={handleClearScene}
+                    onOptimizeScene={handleOptimizeScene}
+                    onRemoveLargestModel={handleRemoveLargestModel}
+                  />
+                </div>
               </>
             ) : (
               <>
