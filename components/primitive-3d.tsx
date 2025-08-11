@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect, useCallback } from "react"
+import { useRef, useState, useEffect, useCallback, memo } from "react"
 import { useThree } from "@react-three/fiber"
 import type { Group, Mesh } from "three"
 import * as THREE from "three"
@@ -16,7 +16,7 @@ interface Primitive3DProps {
   keyboardMove?: { direction: string; amount: number } | null
 }
 
-export function Primitive3D({ 
+function Primitive3DComponent({ 
   type, 
   position, 
   size, 
@@ -80,15 +80,15 @@ export function Primitive3D({
 
   // Handle transform gizmo interactions
   const handleGizmoPointerDown = (axis: string) => (e: any) => {
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation?.()
+    e.preventDefault?.()
     setIsDragging(axis)
     gl.domElement.style.cursor = "grabbing"
   }
 
   const handleGizmoPointerUp = (e: any) => {
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation?.()
+    e.preventDefault?.()
     setIsDragging(null)
     gl.domElement.style.cursor = "default"
   }
@@ -96,8 +96,8 @@ export function Primitive3D({
   const handleGizmoPointerMove = (e: any) => {
     if (!isDragging) return
 
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation?.()
+    e.preventDefault?.()
 
     const sensitivity = 0.02
     const scaleSensitivity = 0.01
@@ -136,7 +136,7 @@ export function Primitive3D({
 
   // Handle model click
   const handleClick = (e: any) => {
-    e.stopPropagation()
+    e.stopPropagation?.()
     onClick?.()
   }
 
@@ -297,3 +297,5 @@ export function Primitive3D({
     </group>
   )
 }
+
+export const Primitive3D = memo(Primitive3DComponent)

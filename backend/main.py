@@ -38,6 +38,24 @@ class ImageTo3DRequest(BaseModel):
     texture_resolution: Optional[int] = 1024
     remesh: Optional[str] = "none"
 
+class TextTo3DRequest(BaseModel):
+    prompt: str
+    model_version: Optional[str] = "v2.0-20240919"
+    style: Optional[str] = None
+    texture_resolution: Optional[int] = 1024
+    remesh: Optional[str] = "none"
+
+class MultimodalTo3DRequest(BaseModel):
+    prompt: str
+    model_version: Optional[str] = "v2.0-20240919"
+    style: Optional[str] = None
+    texture_resolution: Optional[int] = 1024
+    remesh: Optional[str] = "none"
+
+class TextToImageRequest(BaseModel):
+    prompt: str
+    negative_prompt: Optional[str] = None
+
 class TaskResponse(BaseModel):
     task_id: str
     status: TaskStatus
@@ -252,6 +270,138 @@ class Tripo3DClient:
             except httpx.RequestError as e:
                 raise HTTPException(status_code=500, detail=f"Task creation request failed: {str(e)}")
 
+    async def create_text_task(self, request_params: TextTo3DRequest) -> str:
+        """Create text to 3D conversion task"""
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            try:
+                # Build payload for text-to-3D
+                payload = {
+                    "type": "text_to_model",
+                    "prompt": request_params.prompt
+                }
+                
+                # Add extra parameters if specified
+                extra = {}
+                if request_params.model_version:
+                    extra["model_version"] = request_params.model_version
+                if request_params.style and request_params.style != "none":
+                    extra["style"] = request_params.style
+                if request_params.texture_resolution:
+                    extra["texture_resolution"] = request_params.texture_resolution
+                if request_params.remesh and request_params.remesh != "none":
+                    extra["remesh"] = request_params.remesh
+                
+                if extra:
+                    payload["extra"] = extra
+                
+                logger.info(f"Creating text task with payload: {json.dumps(payload, indent=2)}")
+                
+                response = await client.post(
+                    f"{self.base_url}/task",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json=payload
+                )
+                
+                logger.info(f"Text task creation response status: {response.status_code}")
+                logger.info(f"Text task creation response: {response.text}")
+                
+                if response.status_code != 200:
+                    error_detail = f"Failed to create text task: Status {response.status_code}, Response: {response.text}"
+                    logger.error(error_detail)
+                    raise HTTPException(
+                        status_code=response.status_code,
+                        detail=error_detail
+                    )
+                
+                result = response.json()
+                
+                # Extract task_id from response
+                if "data" in result and "task_id" in result["data"]:
+                    return result["data"]["task_id"]
+                elif "task_id" in result:
+                    return result["task_id"]
+                else:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Could not extract task_id from response: {result}"
+                    )
+                
+            except httpx.TimeoutException:
+                raise HTTPException(status_code=408, detail="Text task creation timeout")
+            except httpx.RequestError as e:
+                raise HTTPException(status_code=500, detail=f"Text task creation request failed: {str(e)}")
+
+    async def create_multimodal_task(self, file_token: str, request_params: MultimodalTo3DRequest) -> str:
+        """Create multimodal (image + text) to 3D conversion task"""
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            try:
+                # Build payload for multimodal generation
+                payload = {
+                    "type": "multimodal_to_model",
+                    "file": {
+                        "type": "image",
+                        "file_token": file_token
+                    },
+                    "prompt": request_params.prompt
+                }
+                
+                # Add extra parameters if specified
+                extra = {}
+                if request_params.model_version:
+                    extra["model_version"] = request_params.model_version
+                if request_params.style and request_params.style != "none":
+                    extra["style"] = request_params.style
+                if request_params.texture_resolution:
+                    extra["texture_resolution"] = request_params.texture_resolution
+                if request_params.remesh and request_params.remesh != "none":
+                    extra["remesh"] = request_params.remesh
+                
+                if extra:
+                    payload["extra"] = extra
+                
+                logger.info(f"Creating multimodal task with payload: {json.dumps(payload, indent=2)}")
+                
+                response = await client.post(
+                    f"{self.base_url}/task",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json=payload
+                )
+                
+                logger.info(f"Multimodal task creation response status: {response.status_code}")
+                logger.info(f"Multimodal task creation response: {response.text}")
+                
+                if response.status_code != 200:
+                    error_detail = f"Failed to create multimodal task: Status {response.status_code}, Response: {response.text}"
+                    logger.error(error_detail)
+                    raise HTTPException(
+                        status_code=response.status_code,
+                        detail=error_detail
+                    )
+                
+                result = response.json()
+                
+                # Extract task_id from response
+                if "data" in result and "task_id" in result["data"]:
+                    return result["data"]["task_id"]
+                elif "task_id" in result:
+                    return result["task_id"]
+                else:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Could not extract task_id from response: {result}"
+                    )
+                
+            except httpx.TimeoutException:
+                raise HTTPException(status_code=408, detail="Multimodal task creation timeout")
+            except httpx.RequestError as e:
+                raise HTTPException(status_code=500, detail=f"Multimodal task creation request failed: {str(e)}")
+
     async def get_task_status(self, task_id: str) -> TaskResponse:
         """Get task status and results"""
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -335,6 +485,157 @@ async def root():
         "api_configured": TRIPO3D_API_KEY is not None
     }
 
+@app.post("/convert/text-to-3d")
+async def convert_text_to_3d(
+    background_tasks: BackgroundTasks,
+    prompt: str = Form(...),
+    model_version: str = Form("v2.0-20240919"),
+    style: Optional[str] = Form(None),
+    texture_resolution: int = Form(1024),
+    remesh: str = Form("none")
+):
+    """Convert text prompt to 3D model"""
+    
+    if not tripo3d_client:
+        raise HTTPException(
+            status_code=500,
+            detail="Tripo3D API key not configured"
+        )
+    
+    # Validate prompt
+    if not prompt or len(prompt.strip()) < 3:
+        raise HTTPException(
+            status_code=400,
+            detail="Prompt must be at least 3 characters long"
+        )
+    
+    try:
+        logger.info(f"Processing text prompt: {prompt}")
+        
+        # Create request parameters
+        request_params = TextTo3DRequest(
+            prompt=prompt.strip(),
+            model_version=model_version,
+            style=style if style and style != "none" else None,
+            texture_resolution=texture_resolution,
+            remesh=remesh
+        )
+        
+        # Create conversion task
+        task_id = await tripo3d_client.create_text_task(request_params)
+        logger.info(f"Text task created successfully: {task_id}")
+        
+        # Store initial task info
+        task_response = TaskResponse(
+            task_id=task_id,
+            status=TaskStatus.QUEUED,
+            created_time=int(datetime.now().timestamp())
+        )
+        task_storage[task_id] = task_response
+        
+        # Start background task to monitor progress
+        background_tasks.add_task(monitor_task_progress, task_id)
+        
+        return {
+            "task_id": task_id,
+            "status": "queued",
+            "message": "Text to 3D conversion task started"
+        }
+        
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions as-is
+    except Exception as e:
+        logger.error(f"Error converting text to 3D: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+@app.post("/convert/multimodal-to-3d")
+async def convert_multimodal_to_3d(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    prompt: str = Form(...),
+    model_version: str = Form("v2.0-20240919"),
+    style: Optional[str] = Form(None),
+    texture_resolution: int = Form(1024),
+    remesh: str = Form("none")
+):
+    """Convert image + text prompt to 3D model"""
+    
+    if not tripo3d_client:
+        raise HTTPException(
+            status_code=500,
+            detail="Tripo3D API key not configured"
+        )
+    
+    # Validate file type
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"File must be an image. Received content type: {file.content_type}"
+        )
+    
+    # Validate prompt
+    if not prompt or len(prompt.strip()) < 3:
+        raise HTTPException(
+            status_code=400,
+            detail="Prompt must be at least 3 characters long"
+        )
+    
+    # Check file size (max 10MB)
+    if file.size and file.size > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="File size too large. Maximum size is 10MB."
+        )
+    
+    try:
+        # Read image data
+        image_data = await file.read()
+        
+        if len(image_data) == 0:
+            raise HTTPException(status_code=400, detail="Received empty file")
+        
+        logger.info(f"Processing multimodal: {file.filename} ({len(image_data)} bytes) with prompt: {prompt}")
+        
+        # Create request parameters
+        request_params = MultimodalTo3DRequest(
+            prompt=prompt.strip(),
+            model_version=model_version,
+            style=style if style and style != "none" else None,
+            texture_resolution=texture_resolution,
+            remesh=remesh
+        )
+        
+        # Upload image and get token
+        file_token = await tripo3d_client.upload_image(image_data, file.filename or "image.jpg")
+        logger.info(f"Image uploaded successfully for multimodal, token: {file_token}")
+        
+        # Create conversion task
+        task_id = await tripo3d_client.create_multimodal_task(file_token, request_params)
+        logger.info(f"Multimodal task created successfully: {task_id}")
+        
+        # Store initial task info
+        task_response = TaskResponse(
+            task_id=task_id,
+            status=TaskStatus.QUEUED,
+            created_time=int(datetime.now().timestamp())
+        )
+        task_storage[task_id] = task_response
+        
+        # Start background task to monitor progress
+        background_tasks.add_task(monitor_task_progress, task_id)
+        
+        return {
+            "task_id": task_id,
+            "status": "queued",
+            "message": "Multimodal to 3D conversion task started"
+        }
+        
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions as-is
+    except Exception as e:
+        logger.error(f"Error converting multimodal to 3D: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
 @app.post("/convert/image-to-3d")
 async def convert_image_to_3d(
     background_tasks: BackgroundTasks,
@@ -344,7 +645,7 @@ async def convert_image_to_3d(
     texture_resolution: int = Form(1024),
     remesh: str = Form("none")
 ):
-    """Convert 2D image to 3D model"""
+    """Convert 2D image to 3D model (image-only mode)"""
     
     if not tripo3d_client:
         raise HTTPException(
@@ -438,6 +739,105 @@ async def get_task_status(task_id: str):
     except Exception as e:
         logger.error(f"Error getting task status: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/convert/text-to-image")
+async def convert_text_to_image(
+    prompt: str = Form(...),
+    negative_prompt: Optional[str] = Form(None)
+):
+    """Convert text prompt to image using Tripo3D API"""
+    
+    if not TRIPO3D_API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="Tripo3D API key not configured"
+        )
+    
+    # Validate prompt length (max 1024 characters per API docs)
+    if not prompt or len(prompt.strip()) < 3:
+        raise HTTPException(
+            status_code=400,
+            detail="Prompt must be at least 3 characters long"
+        )
+    
+    if len(prompt) > 1024:
+        raise HTTPException(
+            status_code=400,
+            detail="Prompt must be 1024 characters or less"
+        )
+    
+    # Validate negative prompt length (max 255 characters per API docs)
+    if negative_prompt and len(negative_prompt) > 255:
+        raise HTTPException(
+            status_code=400,
+            detail="Negative prompt must be 255 characters or less"
+        )
+    
+    try:
+        # Prepare the request data
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {TRIPO3D_API_KEY}"
+        }
+        
+        data = {
+            "type": "text_to_image",
+            "prompt": prompt.strip()
+        }
+        
+        if negative_prompt and negative_prompt.strip():
+            data["negative_prompt"] = negative_prompt.strip()
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{TRIPO3D_BASE_URL}/task",
+                headers=headers,
+                json=data,
+                timeout=30.0
+            )
+            
+            if response.status_code != 200:
+                logger.error(f"Tripo3D API error: {response.status_code} - {response.text}")
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"Tripo3D API error: {response.text}"
+                )
+            
+            result = response.json()
+            
+            # Extract task_id from response
+            if "data" in result and "task_id" in result["data"]:
+                task_id = result["data"]["task_id"]
+            elif "task_id" in result:
+                task_id = result["task_id"]
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Could not extract task_id from response: {result}"
+                )
+            
+            # Store initial task info
+            task_storage[task_id] = TaskResponse(
+                task_id=task_id,
+                status=TaskStatus.QUEUED,
+                input={"prompt": prompt, "negative_prompt": negative_prompt}
+            )
+            
+            logger.info(f"Started text-to-image task: {task_id}")
+            return {"task_id": task_id}
+            
+    except httpx.RequestError as e:
+        logger.error(f"Request error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to connect to Tripo3D API: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {str(e)}"
+        )
 
 @app.get("/task/{task_id}/download")
 async def download_3d_model(task_id: str, format: str = "glb"):

@@ -2,7 +2,7 @@
 
 import { useGLTF, Html } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, memo } from "react"
 import type { Group } from "three"
 import * as THREE from "three"
 
@@ -17,7 +17,7 @@ interface Model3DProps {
   keyboardMove?: { direction: string; amount: number } | null
 }
 
-export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove }: Model3DProps) {
+function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove }: Model3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
   const [error, setError] = useState(false)
@@ -30,10 +30,13 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
   const { gl } = useThree()
 
   // Load the 3D model
-  const { scene } = useGLTF(url, undefined, undefined, (error) => {
+  const gltf = useGLTF(url, undefined, undefined, (error) => {
     console.error("Error loading 3D model:", error)
     setError(true)
   })
+
+  // Get a unique scene instance for this component
+  const scene = gltf.scene.clone()
 
   // Calculate initial base scale and center when model loads
   useEffect(() => {
@@ -56,7 +59,7 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
       scene.scale.set(calculatedBaseScale, calculatedBaseScale, calculatedBaseScale)
       scene.position.set(-center.x * calculatedBaseScale, -center.y * calculatedBaseScale, -center.z * calculatedBaseScale)
     }
-  }, [scene])
+  }, [gltf.scene])
 
   // Apply size changes to the model
   useEffect(() => {
@@ -197,7 +200,7 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
-        <primitive object={scene.clone()} />
+        <primitive object={scene} />
 
         {/* Selection highlight */}
         {isSelected && (
@@ -305,3 +308,5 @@ export function Model3D({ url, position, size = [2, 2, 2], isSelected, onClick, 
     </group>
   )
 }
+
+export const Model3D = memo(Model3DComponent)

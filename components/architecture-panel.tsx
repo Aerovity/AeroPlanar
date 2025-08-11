@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge"
 import { UploadZone } from "./upload-zone"
 import { SpotlightButton } from "@/components/ui/spotlight-button"
 import JSZip from 'jszip'
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 import { 
   Building, 
   Upload, 
@@ -21,7 +24,8 @@ import {
   Square,
   Globe,
   Plus,
-  FolderOpen
+  FolderOpen,
+  Package
 } from 'lucide-react'
 import { toast } from "@/hooks/use-toast"
 
@@ -111,8 +115,134 @@ export function ArchitecturePanel({
     }
   }
 
+  const handleDownloadSceneAsGLB = async () => {
+    if (models.length === 0) {
+      toast({
+        title: "No Models",
+        description: "Add some models to the scene before downloading.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Preparing Scene Export",
+      description: "Creating combined GLB file, this may take a moment...",
+    })
+
+    try {
+      const scene = new THREE.Scene()
+      const loader = new GLTFLoader()
+      const exporter = new GLTFExporter()
+
+      // Load all models and add them to scene
+      const loadPromises = models.map(async (model) => {
+        try {
+          if (model.type === 'primitive') {
+            // Create primitive geometry - use the exact same approach as Primitive3D component
+            let geometry
+            const [width, height, depth] = model.size
+            
+            switch (model.primitiveType) {
+              case 'cube':
+                geometry = new THREE.BoxGeometry(width, height, depth)
+                break
+              case 'flat-cube':
+                geometry = new THREE.BoxGeometry(width, height, depth)
+                break
+              case 'globe':
+                geometry = new THREE.SphereGeometry(width / 2, 32, 32) // Same as Primitive3D
+                break
+              default:
+                geometry = new THREE.BoxGeometry(width, height, depth)
+            }
+
+            const material = new THREE.MeshStandardMaterial({ 
+              color: 0x888888,
+              roughness: 0.4,
+              metalness: 0.1 
+            })
+            const mesh = new THREE.Mesh(geometry, material)
+            mesh.position.set(...model.position)
+            
+            // For primitives, don't apply additional scaling - the geometry already uses the correct size
+            // This matches how Primitive3D component works
+            mesh.name = model.name
+            scene.add(mesh)
+          } else if (model.url) {
+            // Load GLB/GLTF model
+            return new Promise((resolve, reject) => {
+              loader.load(
+                model.url,
+                (gltf) => {
+                  // Clone the scene to avoid modifying original
+                  const clonedScene = gltf.scene.clone()
+                  clonedScene.position.set(...model.position)
+                  
+                  // Apply proper scaling - models are displayed with large base scale in viewer
+                  // We need to match the visual scale from the scene
+                  const displayScale = model.size || [2, 2, 2]
+                  const baseScaleFactor = 5 // This matches the 5x multiplier from model-3d.tsx line 50
+                  clonedScene.scale.set(
+                    displayScale[0] * baseScaleFactor,
+                    displayScale[1] * baseScaleFactor,
+                    displayScale[2] * baseScaleFactor
+                  )
+                  
+                  clonedScene.name = model.name
+                  scene.add(clonedScene)
+                  resolve(clonedScene)
+                },
+                undefined,
+                reject
+              )
+            })
+          }
+        } catch (error) {
+          console.error(`Error processing model ${model.name}:`, error)
+        }
+      })
+
+      // Wait for all models to load
+      await Promise.allSettled(loadPromises)
+
+      // Export the combined scene as GLB
+      exporter.parse(
+        scene,
+        (gltf) => {
+          const blob = new Blob([gltf as ArrayBuffer], { type: 'application/octet-stream' })
+          const link = document.createElement('a')
+          link.href = URL.createObjectURL(blob)
+          link.download = 'complete_scene.glb'
+          link.click()
+          
+          toast({
+            title: "Scene Exported!",
+            description: "Complete scene downloaded as single GLB file.",
+          })
+        },
+        (error) => {
+          console.error('Export error:', error)
+          toast({
+            title: "Export Failed",
+            description: "Could not export scene. Please try again.",
+            variant: "destructive",
+          })
+        },
+        { binary: true }
+      )
+    } catch (error) {
+      console.error('Scene export error:', error)
+      toast({
+        title: "Export Failed",
+        description: "Could not create scene export. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleDownloadAll = () => {
-    // Create a zip file with all models
+    // Create a zip file with all models (legacy function for individual files)
     const zip = new JSZip()
     
     models.forEach((model, index) => {
@@ -146,8 +276,8 @@ export function ArchitecturePanel({
     })
     
     toast({
-      title: "Download All",
-      description: "Downloading all models as a zip file...",
+      title: "Download All (Individual)",
+      description: "Downloading all models as separate files in zip...",
     })
   }
 
@@ -303,14 +433,22 @@ export function ArchitecturePanel({
             </Button>
           </div>
           
-          <div className="mt-4">
+          <div className="mt-4 space-y-2">
             <SpotlightButton
-              onClick={handleDownloadAll}
+              onClick={handleDownloadSceneAsGLB}
               className="w-full"
             >
-              <FolderOpen className="w-4 h-4 mr-2" />
-              Download All Models
+              <Package className="w-4 h-4 mr-2" />
+              Download Complete Scene (GLB)
             </SpotlightButton>
+            <Button
+              variant="outline"
+              onClick={handleDownloadAll}
+              className="w-full bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+            >
+              <FolderOpen className="w-4 h-4 mr-2" />
+              Download Individual Files (ZIP)
+            </Button>
           </div>
         </CardContent>
       </Card>

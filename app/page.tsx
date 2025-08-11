@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, Grid, Environment, PerspectiveCamera } from "@react-three/drei"
 import { Suspense } from "react"
@@ -46,7 +46,10 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<'generation' | 'architecture'>('generation')
   const [clipboard, setClipboard] = useState<any>(null)
 
-  const selectedModel = models.find((m) => m.id === selectedModelId)
+  const selectedModel = useMemo(() => 
+    models.find((m) => m.id === selectedModelId), 
+    [models, selectedModelId]
+  )
 
   // Add keyboard event listeners
   useEffect(() => {
@@ -205,66 +208,7 @@ export default function Home() {
       setActiveTasks((prev) => [...prev, { task_id: taskId, status: "queued" }])
 
       // Poll for completion
-      const pollInterval = setInterval(async () => {
-        try {
-          const statusResponse = await fetch(`http://localhost:8000/task/${taskId}`)
-          const taskStatus = await statusResponse.json()
-
-          setActiveTasks((prev) =>
-            prev.map((task) =>
-              task.task_id === taskId ? { ...task, status: taskStatus.status, progress: taskStatus.progress } : task,
-            ),
-          )
-
-          if (taskStatus.status === "success") {
-            clearInterval(pollInterval)
-
-            // Download the model
-            const downloadResponse = await fetch(`http://localhost:8000/task/${taskId}/download?format=glb`)
-            if (downloadResponse.ok) {
-              const blob = await downloadResponse.blob()
-              const modelUrl = URL.createObjectURL(blob)
-
-              // Add model to the scene with better spacing
-              const newModel = {
-                id: taskId,
-                name: file.name.replace(/\.[^/.]+$/, ""),
-                url: modelUrl,
-                position: [Math.random() * 20 - 10, 0, Math.random() * 20 - 10],
-                size: [2, 2, 2] as [number, number, number],
-                originalSize: [2, 2, 2] as [number, number, number],
-                status: "ready",
-                faces: Math.floor(Math.random() * 50000) + 10000,
-                vertices: Math.floor(Math.random() * 25000) + 5000,
-                topology: "Triangle",
-              }
-
-              setModels((prev) => [...prev, newModel])
-              setSelectedModelId(taskId)
-
-              toast({
-                title: "3D Model Generated!",
-                description:
-                  "Your model has been added to the scene. Use arrow keys or transform gizmo to reposition it.",
-              })
-            }
-
-            // Remove from active tasks
-            setActiveTasks((prev) => prev.filter((task) => task.task_id !== taskId))
-          } else if (taskStatus.status === "failed") {
-            clearInterval(pollInterval)
-            setActiveTasks((prev) => prev.filter((task) => task.task_id !== taskId))
-
-            toast({
-              title: "Generation Failed",
-              description: "Please try again with a different image.",
-              variant: "destructive",
-            })
-          }
-        } catch (error) {
-          console.error("Error polling task status:", error)
-        }
-      }, 3000)
+      pollTaskCompletion(taskId, file.name.replace(/\.[^/.]+$/, ""))
     } catch (error) {
       console.error("Error generating model:", error)
       toast({
@@ -272,9 +216,236 @@ export default function Home() {
         description: "Please check your connection and try again.",
         variant: "destructive",
       })
-    } finally {
       setIsGenerating(false)
     }
+  }, [])
+
+  const handleGenerateFromText = useCallback(async (prompt: string, options: GenerationOptions) => {
+    setIsGenerating(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("prompt", prompt)
+      formData.append("model_version", options.modelVersion)
+      formData.append("texture_resolution", options.textureResolution.toString())
+      formData.append("remesh", options.remesh)
+      if (options.style && options.style !== "none") {
+        formData.append("style", options.style)
+      }
+
+      const response = await fetch("http://localhost:8000/convert/text-to-3d", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to start text conversion")
+      }
+
+      const result = await response.json()
+      const taskId = result.task_id
+
+      // Add to active tasks
+      setActiveTasks((prev) => [...prev, { task_id: taskId, status: "queued" }])
+
+      // Poll for completion
+      pollTaskCompletion(taskId, prompt.slice(0, 30) + (prompt.length > 30 ? "..." : ""))
+    } catch (error) {
+      console.error("Error generating from text:", error)
+      toast({
+        title: "Text Generation Failed",
+        description: "Please check your prompt and try again.",
+        variant: "destructive",
+      })
+      setIsGenerating(false)
+    }
+  }, [])
+
+  const handleGenerateMultimodal = useCallback(async (file: File, prompt: string, options: GenerationOptions) => {
+    setIsGenerating(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("prompt", prompt)
+      formData.append("model_version", options.modelVersion)
+      formData.append("texture_resolution", options.textureResolution.toString())
+      formData.append("remesh", options.remesh)
+      if (options.style && options.style !== "none") {
+        formData.append("style", options.style)
+      }
+
+      const response = await fetch("http://localhost:8000/convert/multimodal-to-3d", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to start multimodal conversion")
+      }
+
+      const result = await response.json()
+      const taskId = result.task_id
+
+      // Add to active tasks
+      setActiveTasks((prev) => [...prev, { task_id: taskId, status: "queued" }])
+
+      // Poll for completion
+      pollTaskCompletion(taskId, file.name.replace(/\.[^/.]+$/, "") + " + prompt")
+    } catch (error) {
+      console.error("Error generating multimodal:", error)
+      toast({
+        title: "Multimodal Generation Failed",
+        description: "Please check your image and prompt, then try again.",
+        variant: "destructive",
+      })
+      setIsGenerating(false)
+    }
+  }, [])
+
+  const handleGenerateTextToImage = useCallback(async (prompt: string, negativePrompt?: string) => {
+    setIsGenerating(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("prompt", prompt)
+      if (negativePrompt && negativePrompt.trim()) {
+        formData.append("negative_prompt", negativePrompt.trim())
+      }
+
+      const response = await fetch("http://localhost:8000/convert/text-to-image", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to start text-to-image conversion")
+      }
+
+      const result = await response.json()
+      const taskId = result.task_id
+
+      // Add to active tasks
+      setActiveTasks((prev) => [...prev, { task_id: taskId, status: "queued" }])
+
+      // Poll for completion - for text-to-image, we'll handle the image result differently
+      pollTextToImageCompletion(taskId, prompt.slice(0, 30) + (prompt.length > 30 ? "..." : ""))
+    } catch (error) {
+      console.error("Error generating text-to-image:", error)
+      toast({
+        title: "Text-to-Image Generation Failed",
+        description: "Please check your prompt and try again.",
+        variant: "destructive",
+      })
+      setIsGenerating(false)
+    }
+  }, [])
+
+  const pollTextToImageCompletion = useCallback((taskId: string, promptName: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const statusResponse = await fetch(`http://localhost:8000/task/${taskId}`)
+        const taskStatus = await statusResponse.json()
+
+        setActiveTasks((prev) =>
+          prev.map((task) =>
+            task.task_id === taskId ? { ...task, status: taskStatus.status, progress: taskStatus.progress } : task,
+          ),
+        )
+
+        if (taskStatus.status === "success") {
+          clearInterval(pollInterval)
+
+          // For text-to-image, we need to handle the image result differently
+          // The result should contain an image URL that we can display or download
+          toast({
+            title: "Image Generated!",
+            description: "Your text-to-image generation completed successfully.",
+          })
+
+          // Remove from active tasks
+          setActiveTasks((prev) => prev.filter((task) => task.task_id !== taskId))
+          setIsGenerating(false)
+        } else if (taskStatus.status === "failed") {
+          clearInterval(pollInterval)
+          setActiveTasks((prev) => prev.filter((task) => task.task_id !== taskId))
+          setIsGenerating(false)
+
+          toast({
+            title: "Text-to-Image Generation Failed",
+            description: "Please try again with a different prompt.",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        console.error("Error polling text-to-image task status:", error)
+      }
+    }, 3000)
+  }, [])
+
+  const pollTaskCompletion = useCallback((taskId: string, modelName: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const statusResponse = await fetch(`http://localhost:8000/task/${taskId}`)
+        const taskStatus = await statusResponse.json()
+
+        setActiveTasks((prev) =>
+          prev.map((task) =>
+            task.task_id === taskId ? { ...task, status: taskStatus.status, progress: taskStatus.progress } : task,
+          ),
+        )
+
+        if (taskStatus.status === "success") {
+          clearInterval(pollInterval)
+
+          // Download the model
+          const downloadResponse = await fetch(`http://localhost:8000/task/${taskId}/download?format=glb`)
+          if (downloadResponse.ok) {
+            const blob = await downloadResponse.blob()
+            const modelUrl = URL.createObjectURL(blob)
+
+            // Add model to the scene with better spacing
+            const newModel = {
+              id: taskId,
+              name: modelName,
+              url: modelUrl,
+              position: [Math.random() * 20 - 10, 0, Math.random() * 20 - 10],
+              size: [2, 2, 2] as [number, number, number],
+              originalSize: [2, 2, 2] as [number, number, number],
+              status: "ready",
+              faces: Math.floor(Math.random() * 50000) + 10000,
+              vertices: Math.floor(Math.random() * 25000) + 5000,
+              topology: "Triangle",
+            }
+
+            setModels((prev) => [...prev, newModel])
+            setSelectedModelId(taskId)
+
+            toast({
+              title: "3D Model Generated!",
+              description:
+                "Your model has been added to the scene. Use arrow keys or transform gizmo to reposition it.",
+            })
+          }
+
+          // Remove from active tasks
+          setActiveTasks((prev) => prev.filter((task) => task.task_id !== taskId))
+          setIsGenerating(false)
+        } else if (taskStatus.status === "failed") {
+          clearInterval(pollInterval)
+          setActiveTasks((prev) => prev.filter((task) => task.task_id !== taskId))
+          setIsGenerating(false)
+
+          toast({
+            title: "Generation Failed",
+            description: "Please try again with different input.",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        console.error("Error polling task status:", error)
+      }
+    }, 3000)
   }, [])
 
   const handleDeleteModel = (modelId: string) => {
@@ -323,7 +494,19 @@ export default function Home() {
     <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Full-screen 3D Background */}
       <div className="fixed inset-0 z-0">
-        <Canvas shadows dpr={[1, 2]} gl={{ antialias: true }}>
+        <Canvas 
+          shadows 
+          dpr={[1, 2]} 
+          gl={{ 
+            antialias: true,
+            alpha: false,
+            powerPreference: "high-performance",
+            stencil: false,
+            depth: true
+          }}
+          performance={{ min: 0.8 }}
+          frameloop="demand"
+        >
           <PerspectiveCamera makeDefault position={[20, 20, 20]} fov={60} />
 
           {/* Enhanced lighting setup */}
@@ -333,13 +516,14 @@ export default function Home() {
             intensity={1.2}
             color="#ffffff"
             castShadow
-            shadow-mapSize-width={4096}
-            shadow-mapSize-height={4096}
-            shadow-camera-far={100}
-            shadow-camera-left={-50}
-            shadow-camera-right={50}
-            shadow-camera-top={50}
-            shadow-camera-bottom={-50}
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-camera-far={80}
+            shadow-camera-left={-40}
+            shadow-camera-right={40}
+            shadow-camera-top={40}
+            shadow-camera-bottom={-40}
+            shadow-bias={-0.0001}
           />
           <pointLight position={[-20, 10, -20]} intensity={0.4} color="#3b82f6" />
           <pointLight position={[20, 10, 20]} intensity={0.4} color="#8b5cf6" />
@@ -347,70 +531,68 @@ export default function Home() {
           {/* Environment for better reflections */}
           <Environment preset="city" />
 
-          {/* Enhanced Grid */}
+          {/* Optimized Grid */}
           <Grid
             position={[0, -0.01, 0]}
-            args={[100, 100]}
+            args={[50, 50]}
             cellSize={2}
-            cellThickness={0.8}
+            cellThickness={0.6}
             cellColor="#1f2937"
-            sectionSize={20}
-            sectionThickness={1.5}
+            sectionSize={10}
+            sectionThickness={1.2}
             sectionColor="#374151"
-            fadeDistance={200}
+            fadeDistance={100}
             fadeStrength={1}
             infiniteGrid
           />
 
-          {/* 3D Models */}
+          {/* 3D Models - Optimized rendering */}
           <Suspense fallback={null}>
             {models.map((model) => {
+              const commonProps = {
+                key: model.id,
+                position: model.position,
+                size: model.size,
+                isSelected: selectedModelId === model.id,
+                onClick: () => handleModelSelect(model.id),
+                onPositionChange: (newPosition: [number, number, number]) => handleModelPositionChange(model.id, newPosition),
+                onSizeChange: (newSize: [number, number, number]) => handleModelSizeChange(model.id, newSize),
+                keyboardMove: selectedModelId === model.id ? keyboardMove : null,
+              }
+              
               if (model.type === 'primitive') {
                 return (
                   <Primitive3D
-                    key={model.id}
+                    {...commonProps}
                     type={model.primitiveType}
-                    position={model.position}
-                    size={model.size}
-                    isSelected={selectedModelId === model.id}
-                    onClick={() => handleModelSelect(model.id)}
-                    onPositionChange={(newPosition) => handleModelPositionChange(model.id, newPosition)}
-                    onSizeChange={(newSize) => handleModelSizeChange(model.id, newSize)}
-                    keyboardMove={selectedModelId === model.id ? keyboardMove : null}
                   />
                 )
               } else {
                 return (
                   <Model3D
-                    key={model.id}
+                    {...commonProps}
                     url={model.url}
-                    position={model.position}
-                    size={model.size}
-                    isSelected={selectedModelId === model.id}
-                    onClick={() => handleModelSelect(model.id)}
-                    onPositionChange={(newPosition) => handleModelPositionChange(model.id, newPosition)}
-                    onSizeChange={(newSize) => handleModelSizeChange(model.id, newSize)}
-                    keyboardMove={selectedModelId === model.id ? keyboardMove : null}
                   />
                 )
               }
             })}
           </Suspense>
 
-          {/* Enhanced Controls */}
+          {/* Optimized Controls */}
           <OrbitControls
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
             minDistance={10}
-            maxDistance={200}
+            maxDistance={150}
             minPolarAngle={0}
             maxPolarAngle={Math.PI / 2}
             enableDamping={true}
-            dampingFactor={0.05}
-            rotateSpeed={0.5}
-            panSpeed={0.8}
-            zoomSpeed={0.6}
+            dampingFactor={0.08}
+            rotateSpeed={0.6}
+            panSpeed={1.0}
+            zoomSpeed={0.8}
+            makeDefault
           />
         </Canvas>
       </div>
@@ -480,6 +662,9 @@ export default function Home() {
               <>
                 <GenerationPanel
                   onGenerate={handleGenerate}
+                  onGenerateFromText={handleGenerateFromText}
+                  onGenerateMultimodal={handleGenerateMultimodal}
+                  onGenerateTextToImage={handleGenerateTextToImage}
                   onUpload3DModel={handleUpload3DModel}
                   isGenerating={isGenerating}
                 />
