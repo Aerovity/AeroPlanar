@@ -37,14 +37,7 @@ import {
   Scissors,
   Building,
   Search,
-  Book,
-  ChevronDown,
-  ChevronRight,
-  ArrowRight,
-  Square,
-  Globe,
   Monitor,
-  Activity,
   Lightbulb
 } from "lucide-react"
 
@@ -62,73 +55,87 @@ export default function Home() {
   const [keyboardMove, setKeyboardMove] = useState<{ direction: string; amount: number } | null>(null)
   const [currentView, setCurrentView] = useState<'generation' | 'architecture' | '3d-editing' | 'mockups'>('generation')
   const [showMockupsSidebars, setShowMockupsSidebars] = useState(false)
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(["Buttons", "Forms"])
   const [searchQuery, setSearchQuery] = useState("")
   
   // Undo functionality with limited history (max 10 actions to avoid lag)
   const [undoHistory, setUndoHistory] = useState<any[]>([])
   const MAX_UNDO_HISTORY = 10
 
-  const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    )
-  }
 
 
-  // Sample components library data
-  const componentsLibrary = useMemo(() => [
+  // Sample 3D models data for search
+  const sampleModels = useMemo(() => [
     {
-      category: "Buttons",
-      icon: Square,
-      items: [
-        { name: "Primary Button", type: "button", preview: "Primary" },
-        { name: "Secondary Button", type: "button", preview: "Secondary" },
-        { name: "Icon Button", type: "button", preview: "🔍" },
-        { name: "Floating Action", type: "button", preview: "+" }
-      ]
+      id: "sample-1",
+      name: "Modern Chair",
+      description: "Sleek modern office chair with ergonomic design",
+      preview: "/placeholder.jpg",
+      profilePicture: "/placeholder-user.jpg",
+      author: "John Designer",
+      downloadUrl: "/chair.glb",
+      tags: ["furniture", "chair", "office", "modern"],
+      faces: 15000,
+      vertices: 8500
     },
     {
-      category: "Forms",
-      icon: Grid3x3,
-      items: [
-        { name: "Text Input", type: "input", preview: "Text field..." },
-        { name: "Search Bar", type: "input", preview: "🔍 Search..." },
-        { name: "Dropdown", type: "select", preview: "Select ▼" },
-        { name: "Checkbox", type: "checkbox", preview: "☑" }
-      ]
+      id: "sample-2", 
+      name: "Coffee Table",
+      description: "Minimalist wooden coffee table with clean lines",
+      preview: "/placeholder.jpg",
+      profilePicture: "/placeholder-user.jpg", 
+      author: "Sarah Miller",
+      downloadUrl: "/table.glb",
+      tags: ["furniture", "table", "wood", "minimalist"],
+      faces: 8000,
+      vertices: 4200
     },
     {
-      category: "Navigation",
-      icon: Globe,
-      items: [
-        { name: "Header Nav", type: "nav", preview: "Home | About | Contact" },
-        { name: "Sidebar Nav", type: "nav", preview: "☰ Menu" },
-        { name: "Breadcrumbs", type: "nav", preview: "Home > Products > Item" },
-        { name: "Pagination", type: "nav", preview: "‹ 1 2 3 ›" }
-      ]
+      id: "sample-3",
+      name: "Desk Lamp",
+      description: "Adjustable LED desk lamp with modern styling",
+      preview: "/placeholder.jpg",
+      profilePicture: "/placeholder-user.jpg",
+      author: "Mike Studio", 
+      downloadUrl: "/lamp.glb",
+      tags: ["lighting", "lamp", "desk", "led"],
+      faces: 12000,
+      vertices: 6800
     },
     {
-      category: "Media",
-      icon: Monitor,
-      items: [
-        { name: "Image Card", type: "card", preview: "🖼️" },
-        { name: "Video Player", type: "media", preview: "▶️" },
-        { name: "Gallery Grid", type: "gallery", preview: "📷 📷 📷" },
-        { name: "Avatar", type: "avatar", preview: "👤" }
-      ]
+      id: "sample-4",
+      name: "Bookshelf",
+      description: "Tall wooden bookshelf with 5 shelves",
+      preview: "/placeholder.jpg",
+      profilePicture: "/placeholder-user.jpg",
+      author: "Emma Woods",
+      downloadUrl: "/bookshelf.glb", 
+      tags: ["furniture", "storage", "books", "wood"],
+      faces: 18000,
+      vertices: 9500
     },
     {
-      category: "Data Display",
-      icon: Activity,
-      items: [
-        { name: "Data Table", type: "table", preview: "📊" },
-        { name: "Chart Card", type: "chart", preview: "📈" },
-        { name: "Stats Widget", type: "stats", preview: "123K" },
-        { name: "Progress Bar", type: "progress", preview: "████░ 80%" }
-      ]
+      id: "sample-5",
+      name: "Plant Pot",
+      description: "Ceramic plant pot with decorative patterns",
+      preview: "/placeholder.jpg",
+      profilePicture: "/placeholder-user.jpg",
+      author: "Green Thumb",
+      downloadUrl: "/pot.glb",
+      tags: ["decor", "plants", "ceramic", "patterns"],
+      faces: 6000,
+      vertices: 3200
+    },
+    {
+      id: "sample-6",
+      name: "Wall Clock",
+      description: "Minimalist wall clock with wooden frame",
+      preview: "/placeholder.jpg", 
+      profilePicture: "/placeholder-user.jpg",
+      author: "Time Design",
+      downloadUrl: "/clock.glb",
+      tags: ["decor", "time", "wall", "wood"],
+      faces: 5000,
+      vertices: 2800
     }
   ], [])
   const [activeTool, setActiveTool] = useState<string | null>(null)
@@ -1653,8 +1660,8 @@ export default function Home() {
               <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-white font-medium flex items-center gap-2">
-                    <Book className="w-4 h-4 text-green-400" />
-                    Your Component Library
+                    <Search className="w-4 h-4 text-blue-400" />
+                    3D Model Search
                   </h3>
                   <Button
                     variant="ghost"
@@ -1665,53 +1672,87 @@ export default function Home() {
                     ×
                   </Button>
                 </div>
-                <div className="space-y-2">
-                  {componentsLibrary.map((category) => {
-                    const isExpanded = expandedCategories.includes(category.category)
-                    const CategoryIcon = category.icon
-
-                    return (
-                      <div key={category.category}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleCategory(category.category)}
-                          className="w-full justify-between text-gray-300 hover:text-white p-2"
-                        >
-                          <div className="flex items-center gap-2">
-                            <CategoryIcon className="w-4 h-4" />
-                            <span className="text-xs font-medium">{category.category}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {category.items.length}
-                            </Badge>
+                <div className="space-y-3">
+                  {sampleModels.filter(model => 
+                    searchQuery === "" || 
+                    model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    model.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                  ).map((model) => (
+                    <div
+                      key={model.id}
+                      className="bg-gray-900/50 rounded-lg border border-gray-700/50 p-3 hover:bg-gray-800/50 transition-all cursor-pointer group"
+                    >
+                      <div className="flex gap-3">
+                        <div className="w-12 h-12 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
+                          <img
+                            src={model.preview}
+                            alt={model.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "/placeholder.svg";
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-white font-medium text-sm truncate">{model.name}</h4>
+                          <p className="text-gray-400 text-xs mt-1 line-clamp-2">{model.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <img
+                              src={model.profilePicture}
+                              alt={model.author}
+                              className="w-4 h-4 rounded-full"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/placeholder-user.jpg";
+                              }}
+                            />
+                            <span className="text-gray-500 text-xs">{model.author}</span>
                           </div>
-                          {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                        </Button>
-                        
-                        {isExpanded && (
-                          <div className="ml-6 space-y-1 mt-1">
-                            {category.items.map((item, idx) => (
-                              <div
-                                key={idx}
-                                className="flex items-center justify-between p-2 rounded hover:bg-gray-800/50 cursor-pointer group"
-                              >
-                                <div className="flex items-center gap-2 flex-1">
-                                  <div className="w-6 h-4 bg-gray-700 rounded text-xs flex items-center justify-center text-gray-300">
-                                    {item.preview}
-                                  </div>
-                                  <span className="text-xs text-gray-300 group-hover:text-white">
-                                    {item.name}
-                                  </span>
-                                </div>
-                                <ArrowRight className="w-3 h-3 text-gray-500 group-hover:text-blue-400" />
-                              </div>
-                            ))}
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex gap-1">
+                              {model.tags.slice(0, 2).map((tag, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs px-1 py-0">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                const link = document.createElement("a")
+                                link.href = model.downloadUrl
+                                link.download = `${model.name.replace(/\s+/g, '_')}.glb`
+                                link.click()
+                                toast({
+                                  title: "Download Started",
+                                  description: `Downloading ${model.name}...`,
+                                })
+                              }}
+                              className="h-6 w-6 p-0 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50"
+                              title="Download Model"
+                            >
+                              <Download className="w-3 h-3" />
+                            </Button>
                           </div>
-                        )}
+                        </div>
                       </div>
-                    )
-                  })}
+                    </div>
+                  ))}
                 </div>
+                {searchQuery && sampleModels.filter(model => 
+                  model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  model.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                ).length === 0 && (
+                  <div className="text-center py-4 text-gray-400">
+                    <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No models found matching "{searchQuery}"</p>
+                  </div>
+                )}
               </div>
             ) : (
               <ArchitecturePanel
@@ -1753,13 +1794,13 @@ export default function Home() {
                 <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4 mb-4">
                   <h3 className="text-white font-medium mb-3 flex items-center gap-2">
                     <Search className="w-4 h-4 text-blue-400" />
-                    Search Components
+                    Search 3D Models
                   </h3>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                       type="text"
-                      placeholder="Search components..."
+                      placeholder="Search models, tags, authors..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
@@ -1767,9 +1808,11 @@ export default function Home() {
                   </div>
                   {searchQuery && (
                     <div className="text-xs text-gray-400 mt-2">
-                      Found {componentsLibrary.reduce((acc, cat) => acc + cat.items.filter(item => 
-                        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                      ).length, 0)} components
+                      Found {sampleModels.filter(model => 
+                        model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        model.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                      ).length} models
                     </div>
                   )}
                 </div>
