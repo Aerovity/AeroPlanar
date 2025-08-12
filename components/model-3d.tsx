@@ -22,9 +22,10 @@ interface Model3DProps {
   sculptingEnabled?: boolean
   currentBrush?: any
   modelId?: string
+  onMeshModified?: (modelId: string, mesh: THREE.Mesh | null) => void
 }
 
-function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove, activeTool, toolSettings, onToolApply, sculptingEnabled, currentBrush, modelId }: Model3DProps) {
+function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove, activeTool, toolSettings, onToolApply, sculptingEnabled, currentBrush, modelId, onMeshModified }: Model3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
   const [error, setError] = useState(false)
@@ -39,6 +40,21 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
   const sculpting = useSculpting({
     onSculptingChange: (targetId, isModified) => {
       console.log(`Model ${targetId} sculpting changed:`, isModified)
+      
+      // Notify parent component about mesh modifications
+      if (onMeshModified && modelId && isModified) {
+        // Find the modified mesh from the scene
+        let modifiedMesh: THREE.Mesh | null = null
+        scene.traverse((child: any) => {
+          if (child.isMesh && child.userData?.targetId === targetId) {
+            modifiedMesh = child
+          }
+        })
+        
+        if (modifiedMesh) {
+          onMeshModified(modelId, modifiedMesh)
+        }
+      }
     }
   })
 

@@ -147,6 +147,7 @@ export default function Home() {
   const [clipboard, setClipboard] = useState<any>(null)
   const [showPerformanceDialog, setShowPerformanceDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
+  const [modifiedMeshes, setModifiedMeshes] = useState<Map<string, THREE.Mesh>>(new Map())
   const [performanceDialogData, setPerformanceDialogData] = useState<{
     warningLevel: 'none' | 'low' | 'medium' | 'high' | 'critical'
     warnings: string[]
@@ -304,6 +305,21 @@ export default function Home() {
     const randomPosition: [number, number, number] = [Math.random() * 20 - 10, 0, Math.random() * 20 - 10]
     handleModelPositionChange(modelId, randomPosition)
   }
+
+  // Callback to track when models are modified by 3D editing tools
+  const handleMeshModification = useCallback((modelId: string, mesh: THREE.Mesh | null) => {
+    setModifiedMeshes(prev => {
+      const newMap = new Map(prev)
+      if (mesh) {
+        // Store a cloned mesh to capture current state
+        const clonedMesh = mesh.clone()
+        newMap.set(modelId, clonedMesh)
+      } else {
+        newMap.delete(modelId)
+      }
+      return newMap
+    })
+  }, [])
 
   const handleUpload3DModel = useCallback(async (file: File) => {
     try {
@@ -676,65 +692,105 @@ export default function Home() {
       // Load all models and add them to scene
       const loadPromises = models.map(async (model) => {
         try {
+          // Check if we have a modified mesh from 3D editing tools
+          const modifiedMesh = modifiedMeshes.get(model.id)
+          
           if (model.type === 'primitive') {
-            // Create primitive geometry - use the exact same approach as Primitive3D component
             let geometry
+            let material
             const [width, height, depth] = model.size
             
-            switch (model.primitiveType) {
-              case 'cube':
-                geometry = new THREE.BoxGeometry(width, height, depth)
-                break
-              case 'flat-cube':
-                geometry = new THREE.BoxGeometry(width, height, depth)
-                break
-              case 'globe':
-                geometry = new THREE.SphereGeometry(width / 2, 32, 32) // Same as Primitive3D
-                break
-              default:
-                geometry = new THREE.BoxGeometry(width, height, depth)
+            // If we have a modified mesh from 3D editing, use its geometry and material
+            if (modifiedMesh && modifiedMesh.geometry) {
+              geometry = modifiedMesh.geometry.clone()
+              material = modifiedMesh.material.clone()
+            } else {
+              // Create fresh primitive geometry
+              switch (model.primitiveType) {
+                case 'cube':
+                  geometry = new THREE.BoxGeometry(width, height, depth)
+                  break
+                case 'flat-cube':
+                  geometry = new THREE.BoxGeometry(width, height, depth)
+                  break
+                case 'globe':
+                  geometry = new THREE.SphereGeometry(width / 2, 32, 32) // Same as Primitive3D
+                  break
+                default:
+                  geometry = new THREE.BoxGeometry(width, height, depth)
+              }
+              
+              material = new THREE.MeshStandardMaterial({ 
+                color: 0x888888,
+                roughness: 0.4,
+                metalness: 0.1 
+              })
             }
-
-            const material = new THREE.MeshStandardMaterial({ 
-              color: 0x888888,
-              roughness: 0.4,
-              metalness: 0.1 
-            })
+            
             const mesh = new THREE.Mesh(geometry, material)
             mesh.position.set(...model.position)
-            
-            // For primitives, don't apply additional scaling - the geometry already uses the correct size
-            // This matches how Primitive3D component works
             mesh.name = model.name
+            
+            // Store model metadata
+            mesh.userData = {
+              modelId: model.id,
+              originalType: 'primitive',
+              primitiveType: model.primitiveType,
+              wasModified: !!modifiedMesh,
+              exportedAt: new Date().toISOString()
+            }
+            
             scene.add(mesh)
           } else if (model.url) {
-            // Load GLB/GLTF model
-            return new Promise((resolve, reject) => {
-              loader.load(
-                model.url,
-                (gltf) => {
-                  // Clone the scene to avoid modifying original
-                  const clonedScene = gltf.scene.clone()
-                  clonedScene.position.set(...model.position)
-                  
-                  // Apply proper scaling - models are displayed with large base scale in viewer
-                  // We need to match the visual scale from the scene
-                  const displayScale = model.size || [2, 2, 2]
-                  const baseScaleFactor = 5 // This matches the 5x multiplier from model-3d.tsx line 50
-                  clonedScene.scale.set(
-                    displayScale[0] * baseScaleFactor,
-                    displayScale[1] * baseScaleFactor,
-                    displayScale[2] * baseScaleFactor
-                  )
-                  
-                  clonedScene.name = model.name
-                  scene.add(clonedScene)
-                  resolve(clonedScene)
-                },
-                undefined,
-                reject
-              )
-            })
+            // For uploaded models, check if we have a modified version
+            if (modifiedMesh && modifiedMesh.geometry) {
+              // Use the existing modified mesh
+              const clonedMesh = modifiedMesh.clone()
+              clonedMesh.position.set(...model.position)
+              clonedMesh.name = model.name
+              clonedMesh.userData = {
+                modelId: model.id,
+                originalType: 'uploaded',
+                wasModified: true,
+                exportedAt: new Date().toISOString()
+              }
+              scene.add(clonedMesh)
+              return Promise.resolve(clonedMesh)
+            } else {
+              // Load fresh model from URL
+              return new Promise((resolve, reject) => {
+                loader.load(
+                  model.url,
+                  (gltf) => {
+                    // Clone the scene to avoid modifying original
+                    const clonedScene = gltf.scene.clone()
+                    clonedScene.position.set(...model.position)
+                    
+                    // Apply proper scaling - models are displayed with large base scale in viewer
+                    // We need to match the visual scale from the scene
+                    const displayScale = model.size || [2, 2, 2]
+                    const baseScaleFactor = 5 // This matches the 5x multiplier from model-3d.tsx line 50
+                    clonedScene.scale.set(
+                      displayScale[0] * baseScaleFactor,
+                      displayScale[1] * baseScaleFactor,
+                      displayScale[2] * baseScaleFactor
+                    )
+                    
+                    clonedScene.name = model.name
+                    clonedScene.userData = {
+                      modelId: model.id,
+                      originalType: 'uploaded',
+                      wasModified: false,
+                      exportedAt: new Date().toISOString()
+                    }
+                    scene.add(clonedScene)
+                    resolve(clonedScene)
+                  },
+                  undefined,
+                  reject
+                )
+              })
+            }
           }
         } catch (error) {
           console.error(`Error processing model ${model.name}:`, error)
@@ -1293,6 +1349,7 @@ export default function Home() {
                 keyboardMove: selectedModelId === model.id ? keyboardMove : null,
                 activeTool: selectedModelId === model.id ? activeTool : null,
                 toolSettings,
+                onMeshModified: handleMeshModification,
                 onToolApply: (toolType: string, data: any) => {
                   // Save state before tool application (for all tools that modify models)
                   if (['brush', 'scissors', 'smudge', 'deform', 'sculpt-push', 'sculpt-pull', 'sculpt-inflate', 'sculpt-deflate', 'sculpt-smooth', 'sculpt-pinch', 'sculpt-crease', 'sculpt-flatten', 'sculpt-grab'].includes(toolType)) {
@@ -1368,6 +1425,7 @@ export default function Home() {
                     sculptingEnabled={sculptingEnabled}
                     currentBrush={currentSculptBrush}
                     primitiveId={model.id}
+                    onMeshModified={handleMeshModification}
                   />
                 )
               } else {
@@ -1378,6 +1436,7 @@ export default function Home() {
                     sculptingEnabled={sculptingEnabled}
                     currentBrush={currentSculptBrush}
                     modelId={model.id}
+                    onMeshModified={handleMeshModification}
                   />
                 )
               }

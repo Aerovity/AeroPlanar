@@ -21,6 +21,7 @@ interface Primitive3DProps {
   sculptingEnabled?: boolean
   currentBrush?: any
   primitiveId?: string
+  onMeshModified?: (modelId: string, mesh: THREE.Mesh | null) => void
 }
 
 function Primitive3DComponent({ 
@@ -37,7 +38,8 @@ function Primitive3DComponent({
   onToolApply,
   sculptingEnabled,
   currentBrush,
-  primitiveId
+  primitiveId,
+  onMeshModified
 }: Primitive3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
@@ -51,6 +53,11 @@ function Primitive3DComponent({
   const sculpting = useSculpting({
     onSculptingChange: (targetId, isModified) => {
       console.log(`Primitive ${targetId} sculpting changed:`, isModified)
+      
+      // Notify parent component about mesh modifications
+      if (onMeshModified && primitiveId && isModified && meshRef) {
+        onMeshModified(primitiveId, meshRef)
+      }
     }
   })
 
