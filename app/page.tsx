@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
@@ -33,6 +33,16 @@ import {
   Copy,
   Scissors,
   Building,
+  Search,
+  Book,
+  ChevronDown,
+  ChevronRight,
+  ArrowRight,
+  Square,
+  Globe,
+  Monitor,
+  Activity,
+  Lightbulb
 } from "lucide-react"
 
 interface Task {
@@ -47,7 +57,72 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeTasks, setActiveTasks] = useState<Task[]>([])
   const [keyboardMove, setKeyboardMove] = useState<{ direction: string; amount: number } | null>(null)
-  const [currentView, setCurrentView] = useState<'generation' | 'architecture' | '3d-editing'>('generation')
+  const [currentView, setCurrentView] = useState<'generation' | 'architecture' | '3d-editing' | 'mockups'>('generation')
+  const [showMockupsSidebars, setShowMockupsSidebars] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(["Buttons", "Forms"])
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    )
+  }
+
+  // Sample components library data
+  const componentsLibrary = useMemo(() => [
+    {
+      category: "Buttons",
+      icon: Square,
+      items: [
+        { name: "Primary Button", type: "button", preview: "Primary" },
+        { name: "Secondary Button", type: "button", preview: "Secondary" },
+        { name: "Icon Button", type: "button", preview: "🔍" },
+        { name: "Floating Action", type: "button", preview: "+" }
+      ]
+    },
+    {
+      category: "Forms",
+      icon: Grid3x3,
+      items: [
+        { name: "Text Input", type: "input", preview: "Text field..." },
+        { name: "Search Bar", type: "input", preview: "🔍 Search..." },
+        { name: "Dropdown", type: "select", preview: "Select ▼" },
+        { name: "Checkbox", type: "checkbox", preview: "☑" }
+      ]
+    },
+    {
+      category: "Navigation",
+      icon: Globe,
+      items: [
+        { name: "Header Nav", type: "nav", preview: "Home | About | Contact" },
+        { name: "Sidebar Nav", type: "nav", preview: "☰ Menu" },
+        { name: "Breadcrumbs", type: "nav", preview: "Home > Products > Item" },
+        { name: "Pagination", type: "nav", preview: "‹ 1 2 3 ›" }
+      ]
+    },
+    {
+      category: "Media",
+      icon: Monitor,
+      items: [
+        { name: "Image Card", type: "card", preview: "🖼️" },
+        { name: "Video Player", type: "media", preview: "▶️" },
+        { name: "Gallery Grid", type: "gallery", preview: "📷 📷 📷" },
+        { name: "Avatar", type: "avatar", preview: "👤" }
+      ]
+    },
+    {
+      category: "Data Display",
+      icon: Activity,
+      items: [
+        { name: "Data Table", type: "table", preview: "📊" },
+        { name: "Chart Card", type: "chart", preview: "📈" },
+        { name: "Stats Widget", type: "stats", preview: "123K" },
+        { name: "Progress Bar", type: "progress", preview: "████░ 80%" }
+      ]
+    }
+  ], [])
   const [activeTool, setActiveTool] = useState<string | null>(null)
   const [isDeforming, setIsDeforming] = useState(false)
   const [deformStartPoint, setDeformStartPoint] = useState<any>(null)
@@ -456,7 +531,13 @@ export default function Home() {
 
             // Check performance impact before adding generated model
             checkPerformanceBeforeAdding(estimatedFaces, () => {
-              setModels((prev) => [...prev, newModel])
+              setModels((prev) => {
+                // Prevent duplicate models with the same taskId
+                if (prev.some(model => model.id === taskId)) {
+                  return prev
+                }
+                return [...prev, newModel]
+              })
               setSelectedModelId(taskId)
 
               toast({
@@ -1068,15 +1149,6 @@ export default function Home() {
                     <Sparkles className="w-4 h-4 mr-2" />
                     Generation
                   </Button>
-                  <div className="relative">
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:bg-gray-800/50 rounded-full">
-                      <Palette className="w-4 h-4 mr-2" />
-                      Texture
-                    </Button>
-                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
-                      Soon Available
-                    </div>
-                  </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -1084,9 +1156,17 @@ export default function Home() {
                     onClick={() => setCurrentView('architecture')}
                   >
                     <Eye className="w-4 h-4 mr-2" />
-                    Architecture Modeling
+                    Modelling
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:bg-gray-800/50 rounded-full">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`${currentView === 'mockups' ? 'text-white' : 'text-gray-400'} hover:bg-gray-800/50 rounded-full`}
+                    onClick={() => {
+                      setCurrentView('mockups')
+                      setShowMockupsSidebars(true)
+                    }}
+                  >
                     <Layers className="w-4 h-4 mr-2" />
                     Mockups
                   </Button>
@@ -1100,8 +1180,23 @@ export default function Home() {
                       <Grid3x3 className="w-4 h-4 mr-2" />
                       3D Editing
                     </Button>
-                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-blue-400 whitespace-nowrap">
-                      Beta
+                  </div>
+                  <div className="relative">
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:bg-gray-800/50 rounded-full">
+                      <Palette className="w-4 h-4 mr-2" />
+                      Texture
+                    </Button>
+                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
+                      Soon Available
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:bg-gray-800/50 rounded-full">
+                      <Monitor className="w-4 h-4 mr-2" />
+                      Rendering
+                    </Button>
+                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
+                      Soon Available
                     </div>
                   </div>
                 </nav>
@@ -1210,6 +1305,70 @@ export default function Home() {
                 onSculptingToolSelect={handleSculptingToolSelect}
                 activeTool={activeTool}
               />
+            ) : currentView === 'mockups' ? (
+              <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-white font-medium flex items-center gap-2">
+                    <Book className="w-4 h-4 text-green-400" />
+                    Your Component Library
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowMockupsSidebars(false)}
+                    className="text-gray-400 hover:text-white h-6 w-6 p-0"
+                  >
+                    ×
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {componentsLibrary.map((category) => {
+                    const isExpanded = expandedCategories.includes(category.category)
+                    const CategoryIcon = category.icon
+
+                    return (
+                      <div key={category.category}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleCategory(category.category)}
+                          className="w-full justify-between text-gray-300 hover:text-white p-2"
+                        >
+                          <div className="flex items-center gap-2">
+                            <CategoryIcon className="w-4 h-4" />
+                            <span className="text-xs font-medium">{category.category}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              {category.items.length}
+                            </Badge>
+                          </div>
+                          {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                        </Button>
+                        
+                        {isExpanded && (
+                          <div className="ml-6 space-y-1 mt-1">
+                            {category.items.map((item, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center justify-between p-2 rounded hover:bg-gray-800/50 cursor-pointer group"
+                              >
+                                <div className="flex items-center gap-2 flex-1">
+                                  <div className="w-6 h-4 bg-gray-700 rounded text-xs flex items-center justify-center text-gray-300">
+                                    {item.preview}
+                                  </div>
+                                  <span className="text-xs text-gray-300 group-hover:text-white">
+                                    {item.name}
+                                  </span>
+                                </div>
+                                <ArrowRight className="w-3 h-3 text-gray-500 group-hover:text-blue-400" />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             ) : (
               <ArchitecturePanel
                 models={models}
@@ -1235,6 +1394,43 @@ export default function Home() {
                 <ModelStats selectedModel={selectedModel} />
 
                 {/* Scene Performance Monitor */}
+                <div className="mt-4">
+                  <ScenePerformanceMonitor 
+                    performance={scenePerformance}
+                    onClearScene={handleClearScene}
+                    onOptimizeScene={handleOptimizeScene}
+                    onRemoveLargestModel={handleRemoveLargestModel}
+                  />
+                </div>
+              </>
+            ) : currentView === 'mockups' ? (
+              <>
+                {/* Search Bar */}
+                <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4 mb-4">
+                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                    <Search className="w-4 h-4 text-blue-400" />
+                    Search Components
+                  </h3>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Search components..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  {searchQuery && (
+                    <div className="text-xs text-gray-400 mt-2">
+                      Found {componentsLibrary.reduce((acc, cat) => acc + cat.items.filter(item => 
+                        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                      ).length, 0)} components
+                    </div>
+                  )}
+                </div>
+
+                {/* Performance Monitor */}
                 <div className="mt-4">
                   <ScenePerformanceMonitor 
                     performance={scenePerformance}
@@ -1510,8 +1706,10 @@ export default function Home() {
               </>
             )}
           </div>
+
         </div>
       </div>
+
 
       {/* Performance Limit Dialog */}
       <PerformanceLimitDialog
