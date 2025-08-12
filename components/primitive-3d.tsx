@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback, memo } from "react"
 import { useThree } from "@react-three/fiber"
 import type { Group, Mesh } from "three"
 import * as THREE from "three"
+import { useSculpting } from "@/hooks/use-sculpting"
 
 interface Primitive3DProps {
   type: 'cube' | 'flat-cube' | 'globe'
@@ -17,6 +18,9 @@ interface Primitive3DProps {
   activeTool?: string | null
   toolSettings?: any
   onToolApply?: (toolType: string, point: any) => void
+  sculptingEnabled?: boolean
+  currentBrush?: any
+  primitiveId?: string
 }
 
 function Primitive3DComponent({ 
@@ -30,7 +34,10 @@ function Primitive3DComponent({
   keyboardMove,
   activeTool,
   toolSettings,
-  onToolApply
+  onToolApply,
+  sculptingEnabled,
+  currentBrush,
+  primitiveId
 }: Primitive3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
@@ -39,7 +46,13 @@ function Primitive3DComponent({
   const [currentSize, setCurrentSize] = useState<[number, number, number]>(size)
   const [gizmoHovered, setGizmoHovered] = useState<string | null>(null)
   const [appliedMaterial, setAppliedMaterial] = useState<any>(null)
+  const [meshRef, setMeshRef] = useState<THREE.Mesh | null>(null)
   const { gl } = useThree()
+  const sculpting = useSculpting({
+    onSculptingChange: (targetId, isModified) => {
+      console.log(`Primitive ${targetId} sculpting changed:`, isModified)
+    }
+  })
 
   // Update local state when props change
   useEffect(() => {
@@ -84,6 +97,50 @@ function Primitive3DComponent({
       onPositionChange?.(newPosition)
     }
   }, [keyboardMove]) // Removed all dependencies except keyboardMove to prevent infinite re-renders
+
+  // Register/unregister mesh for sculpting
+  useEffect(() => {
+    if (meshRef && primitiveId && sculptingEnabled) {
+      sculpting.registerMesh(primitiveId, meshRef)
+      
+      // Set as current target if selected
+      if (isSelected) {
+        sculpting.setTarget(primitiveId)
+      }
+      
+      return () => {
+        sculpting.unregisterMesh(primitiveId)
+      }
+    }
+  }, [meshRef, primitiveId, sculptingEnabled, sculpting])
+
+  // Update sculpting target when selection changes
+  useEffect(() => {
+    if (primitiveId && sculptingEnabled) {
+      if (isSelected) {
+        sculpting.setTarget(primitiveId)
+      } else if (sculpting.currentTarget === primitiveId) {
+        sculpting.setTarget(null)
+      }
+    }
+  }, [isSelected, primitiveId, sculptingEnabled, sculpting])
+
+  // Update brush when it changes
+  useEffect(() => {
+    if (currentBrush && sculptingEnabled) {
+      const brush = sculpting.createBrush(currentBrush)
+      sculpting.setBrush(brush)
+    }
+  }, [currentBrush, sculptingEnabled, sculpting])
+
+  // Start/stop sculpting based on sculpting mode
+  useEffect(() => {
+    if (sculptingEnabled && isSelected) {
+      sculpting.startSculpting()
+    } else {
+      sculpting.stopSculpting()
+    }
+  }, [sculptingEnabled, isSelected, sculpting])
 
   // Handle transform gizmo interactions
   const handleGizmoPointerDown = (axis: string) => (e: any) => {
@@ -185,6 +242,12 @@ function Primitive3DComponent({
 
     e.stopPropagation()
 
+    // Handle sculpting tools differently
+    if (sculptingEnabled && e.point) {
+      sculpting.sculptAtPosition(e.point)
+      return
+    }
+
     switch (activeTool) {
       case 'brush':
         if (toolSettings?.brush) {
@@ -266,25 +329,50 @@ function Primitive3DComponent({
       })
     }
 
+    // Helper to create geometry with higher subdivision for sculpting
+    const getGeometryArgs = () => {
+      if (sculptingEnabled) {
+        switch (type) {
+          case 'cube':
+          case 'flat-cube':
+            return [currentSize[0], currentSize[1], currentSize[2], 32, 32, 32] // Higher subdivision
+          case 'globe':
+            return [currentSize[0] / 2, 64, 64] // Higher subdivision for sphere
+          default:
+            return currentSize
+        }
+      } else {
+        switch (type) {
+          case 'cube':
+          case 'flat-cube':
+            return currentSize
+          case 'globe':
+            return [currentSize[0] / 2, 32, 32]
+          default:
+            return currentSize
+        }
+      }
+    }
+
     switch (type) {
       case 'cube':
         return (
-          <mesh>
-            <boxGeometry args={currentSize} />
+          <mesh ref={setMeshRef}>
+            <boxGeometry args={getGeometryArgs()} />
             <primitive object={getMaterial()} />
           </mesh>
         )
       case 'flat-cube':
         return (
-          <mesh>
-            <boxGeometry args={currentSize} />
+          <mesh ref={setMeshRef}>
+            <boxGeometry args={getGeometryArgs()} />
             <primitive object={getMaterial()} />
           </mesh>
         )
       case 'globe':
         return (
-          <mesh>
-            <sphereGeometry args={[currentSize[0] / 2, 32, 32]} />
+          <mesh ref={setMeshRef}>
+            <sphereGeometry args={getGeometryArgs()} />
             <primitive object={getMaterial()} />
           </mesh>
         )
@@ -300,6 +388,8 @@ function Primitive3DComponent({
         onClick={handleClick}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
+        onPointerDown={sculptingEnabled ? sculpting.handlePointerDown : undefined}
+        onPointerMove={sculptingEnabled ? sculpting.handlePointerMove : undefined}
       >
         {renderPrimitive()}
 
@@ -307,7 +397,12 @@ function Primitive3DComponent({
         {isSelected && (
           <mesh>
             <sphereGeometry args={[Math.max(...currentSize) * 0.8, 32, 32]} />
-            <meshBasicMaterial color="#3b82f6" transparent opacity={0.1} wireframe />
+            <meshBasicMaterial 
+              color={sculptingEnabled ? "#8b5cf6" : "#3b82f6"} 
+              transparent 
+              opacity={sculptingEnabled ? 0.15 : 0.1} 
+              wireframe 
+            />
           </mesh>
         )}
 
@@ -318,10 +413,18 @@ function Primitive3DComponent({
             <meshBasicMaterial color="#6b7280" transparent opacity={0.05} wireframe />
           </mesh>
         )}
+        
+        {/* Sculpting Mode Indicator */}
+        {sculptingEnabled && isSelected && currentBrush && (
+          <mesh position={[0, Math.max(...currentSize) * 1.5, 0]}>
+            <sphereGeometry args={[0.1, 8, 8]} />
+            <meshBasicMaterial color="#8b5cf6" />
+          </mesh>
+        )}
       </group>
 
-      {/* Inline Transform Gizmo - Only show when selected */}
-      {isSelected && (
+      {/* Inline Transform Gizmo - Only show when selected and not in sculpting mode */}
+      {isSelected && !sculptingEnabled && (
         <group>
           {/* X Axis - Red */}
           <group>

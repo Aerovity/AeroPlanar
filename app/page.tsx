@@ -59,6 +59,8 @@ export default function Home() {
     smudge: { intensity: 0.7 },
     light: { intensity: 1.0 }
   })
+  const [sculptingEnabled, setSculptingEnabled] = useState(false)
+  const [currentSculptBrush, setCurrentSculptBrush] = useState<any>(null)
   const [clipboard, setClipboard] = useState<any>(null)
   const [showPerformanceDialog, setShowPerformanceDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
@@ -615,8 +617,46 @@ export default function Home() {
     setShowPerformanceDialog(false)
   }
 
+  const handleSculptingToolSelect = (brushConfig: any) => {
+    setCurrentSculptBrush(brushConfig)
+    setSculptingEnabled(true)
+    toast({
+      title: "Sculpting Brush Selected",
+      description: `${brushConfig.type.charAt(0).toUpperCase() + brushConfig.type.slice(1)} brush active - Size: ${brushConfig.size.toFixed(1)}, Intensity: ${brushConfig.intensity.toFixed(1)}`,
+    })
+  }
+
   const handleToolSelect = (tool: string, options?: any) => {
     setActiveTool(tool)
+    
+    // Handle sculpting mode toggle
+    if (tool === 'sculpting-mode') {
+      setSculptingEnabled(options?.enabled || false)
+      if (!options?.enabled) {
+        setCurrentSculptBrush(null)
+      }
+      toast({
+        title: options?.enabled ? "Sculpting Mode Enabled" : "Sculpting Mode Disabled",
+        description: options?.enabled ? "Advanced SculptGL-inspired vertex manipulation tools are now active" : "Returned to standard editing mode",
+      })
+      return
+    }
+    
+    // Handle sculpting tools
+    if (tool.startsWith('sculpt-')) {
+      const brushType = tool.replace('sculpt-', '')
+      setCurrentSculptBrush({
+        type: brushType,
+        size: options?.size || 1.0,
+        intensity: options?.intensity || 0.5,
+        falloff: 'smooth'
+      })
+      toast({
+        title: `${brushType.charAt(0).toUpperCase() + brushType.slice(1)} Sculpting Tool`,
+        description: `Selected ${brushType} brush - Size: ${(options?.size || 1.0).toFixed(1)}, Intensity: ${(options?.intensity || 0.5).toFixed(1)}`,
+      })
+      return
+    }
     
     // Update tool settings
     if (options) {
@@ -662,12 +702,6 @@ export default function Home() {
         if (tool.startsWith('lighting-filter')) {
           const filterName = tool.replace('lighting-filter-', '')
           setCurrentLightingFilter(filterName)
-          // Force re-render of the lighting by invalidating the frame
-          setTimeout(() => {
-            if (gl) {
-              gl.render()
-            }
-          }, 100)
           toast({
             title: `${filterName.charAt(0).toUpperCase() + filterName.slice(1)} Lighting Applied`,
             description: "Scene lighting has been updated with new filter.",
@@ -820,6 +854,46 @@ export default function Home() {
             } 
           />
 
+          {/* Scene ambient lighting based on filter */}
+          <ambientLight 
+            intensity={
+              currentLightingFilter === 'natural' ? 0.4 :
+              currentLightingFilter === 'dramatic' ? 0.1 :
+              currentLightingFilter === 'soft' ? 0.6 :
+              currentLightingFilter === 'cool' ? 0.3 :
+              currentLightingFilter === 'warm' ? 0.5 : 0.4
+            }
+            color={
+              currentLightingFilter === 'natural' ? "#ffffff" :
+              currentLightingFilter === 'dramatic' ? "#4c1d95" :
+              currentLightingFilter === 'soft' ? "#fef3c7" :
+              currentLightingFilter === 'cool' ? "#93c5fd" :
+              currentLightingFilter === 'warm' ? "#fed7aa" : "#ffffff"
+            }
+          />
+
+          {/* Directional light based on filter */}
+          <directionalLight
+            position={[10, 10, 5]}
+            intensity={
+              currentLightingFilter === 'natural' ? 1.0 :
+              currentLightingFilter === 'dramatic' ? 1.5 :
+              currentLightingFilter === 'soft' ? 0.8 :
+              currentLightingFilter === 'cool' ? 0.9 :
+              currentLightingFilter === 'warm' ? 1.2 : 1.0
+            }
+            color={
+              currentLightingFilter === 'natural' ? "#ffffff" :
+              currentLightingFilter === 'dramatic' ? "#8b5cf6" :
+              currentLightingFilter === 'soft' ? "#fbbf24" :
+              currentLightingFilter === 'cool' ? "#60a5fa" :
+              currentLightingFilter === 'warm' ? "#f97316" : "#ffffff"
+            }
+            castShadow
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+          />
+
           {/* Dynamic user-created lights */}
           {dynamicLights.map((light) => (
             <group key={light.id}>
@@ -827,6 +901,8 @@ export default function Home() {
                 position={light.position}
                 intensity={light.intensity}
                 color={light.color}
+                distance={20}
+                decay={2}
                 castShadow
               />
               {/* Visual representation of the light */}
@@ -841,8 +917,16 @@ export default function Home() {
             </group>
           ))}
 
-          {/* Environment for better reflections */}
-          <Environment preset="city" />
+          {/* Environment for better reflections - Dynamic based on lighting filter */}
+          <Environment 
+            preset={
+              currentLightingFilter === 'natural' ? "city" :
+              currentLightingFilter === 'dramatic' ? "night" :
+              currentLightingFilter === 'soft' ? "dawn" :
+              currentLightingFilter === 'cool' ? "forest" :
+              currentLightingFilter === 'warm' ? "sunset" : "city"
+            } 
+          />
 
           {/* Optimized Grid */}
           <Grid
@@ -925,6 +1009,9 @@ export default function Home() {
                   <Primitive3D
                     {...commonProps}
                     type={model.primitiveType}
+                    sculptingEnabled={sculptingEnabled}
+                    currentBrush={currentSculptBrush}
+                    primitiveId={model.id}
                   />
                 )
               } else {
@@ -932,6 +1019,9 @@ export default function Home() {
                   <Model3D
                     {...commonProps}
                     url={model.url}
+                    sculptingEnabled={sculptingEnabled}
+                    currentBrush={currentSculptBrush}
+                    modelId={model.id}
                   />
                 )
               }
@@ -1117,6 +1207,7 @@ export default function Home() {
               <Editing3DSidebar
                 selectedModelId={selectedModelId}
                 onToolSelect={handleToolSelect}
+                onSculptingToolSelect={handleSculptingToolSelect}
                 activeTool={activeTool}
               />
             ) : (
@@ -1210,7 +1301,15 @@ export default function Home() {
                   </h3>
                   <div className="space-y-2 text-sm text-gray-300">
                     <div className="text-purple-300 font-medium">Active Tools:</div>
-                    {activeTool ? (
+                    {sculptingEnabled && currentSculptBrush ? (
+                      <div className="bg-purple-900/30 p-2 rounded-lg border border-purple-500/30">
+                        <div className="text-purple-200 capitalize font-medium">Sculpting: {currentSculptBrush.type}</div>
+                        <div className="text-xs text-purple-300 mt-1">
+                          Size: {currentSculptBrush.size?.toFixed(1)} | Intensity: {currentSculptBrush.intensity?.toFixed(1)}
+                          {currentSculptBrush.symmetry?.enabled && ` | Symmetry: ${currentSculptBrush.symmetry.axis.toUpperCase()}`}
+                        </div>
+                      </div>
+                    ) : activeTool ? (
                       <div className="bg-purple-900/30 p-2 rounded-lg border border-purple-500/30">
                         <span className="text-purple-200 capitalize">{activeTool.replace('-', ' ')}</span>
                       </div>
@@ -1219,15 +1318,30 @@ export default function Home() {
                     )}
                     
                     <div className="mt-3 space-y-1">
-                      <div className="text-purple-300 font-medium">Instructions:</div>
+                      <div className="text-purple-300 font-medium">Mode: {sculptingEnabled ? 'Advanced Sculpting' : 'Standard Tools'}</div>
+                      <div className="text-white font-medium mb-2 mt-2">Instructions:</div>
                       <div>• Select a model from the scene</div>
                       <div>• Choose tools from the left sidebar</div>
-                      <div>• <strong>Brushes:</strong> Click on models to apply textures</div>
-                      <div>• <strong>Scissors:</strong> Click on models to cut/duplicate them</div>
-                      <div>• <strong>Lights:</strong> Click empty space to create lights</div>
-                      <div>• <strong>Lighting Filters:</strong> Apply instantly to scene</div>
-                      <div>• <strong>Deform:</strong> Click model, then drag in empty space to deform</div>
-                      <div>• <strong>Smudge:</strong> Click models for random effects</div>
+                      {sculptingEnabled ? (
+                        <>
+                          <div>• <strong>Sculpting Brushes:</strong> Advanced vertex manipulation</div>
+                          <div>• <strong>Push/Pull:</strong> Click and drag to move vertices along normals</div>
+                          <div>• <strong>Inflate/Deflate:</strong> Expand or contract mesh areas</div>
+                          <div>• <strong>Smooth:</strong> Average vertex positions for smoothing</div>
+                          <div>• <strong>Pinch/Crease:</strong> Create sharp details or indentations</div>
+                          <div>• <strong>Flatten/Grab:</strong> Flatten surfaces or grab and move vertices</div>
+                          <div>• <strong>Symmetry:</strong> Mirror edits across X, Y, or Z axis</div>
+                        </>
+                      ) : (
+                        <>
+                          <div>• <strong>Material Brushes:</strong> Click on models to apply textures</div>
+                          <div>• <strong>Scissors:</strong> Click on models to cut/duplicate them</div>
+                          <div>• <strong>Lights:</strong> Click empty space to create lights</div>
+                          <div>• <strong>Lighting Filters:</strong> Apply instantly to scene</div>
+                          <div>• <strong>Deform:</strong> Click model, then drag in empty space to deform</div>
+                          <div>• <strong>Smudge:</strong> Click models for random effects</div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -6,17 +6,24 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
 import { 
   Paintbrush, 
-  Scissors, 
   Lightbulb, 
   Filter,
   Move3d,
-  RotateCcw,
   Sun,
   Zap,
   Sparkles,
-  Hand
+  ArrowUp,
+  ArrowDown,
+  Maximize2,
+  Minimize2,
+  Waves,
+  Zap as PinchIcon,
+  Mountain,
+  Minus,
+  MousePointer
 } from 'lucide-react'
 
 interface Editing3DSidebarProps {
@@ -47,20 +54,18 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
   const [brushSize, setBrushSize] = useState([0.5])
   const [brushIntensity, setBrushIntensity] = useState([0.7])
   const [selectedTexture, setSelectedTexture] = useState('rough')
-  const [deformStrength, setDeformStrength] = useState([0.3])
   const [lightIntensity, setLightIntensity] = useState([1.0])
+  const [sculptingMode, setSculptingMode] = useState(false)
+  const [sculptingSize, setSculptingSize] = useState([1.0])
+  const [sculptingIntensity, setSculptingIntensity] = useState([0.5])
 
-  const handleBrushSelect = (texture: string) => {
-    setSelectedTexture(texture)
+  const handleMaterialBrushSelect = (textureId: string) => {
+    setSelectedTexture(textureId)
     onToolSelect('brush', { 
-      texture, 
+      texture: textureId, 
       size: brushSize[0], 
       intensity: brushIntensity[0] 
     })
-  }
-
-  const handleScissorsSelect = () => {
-    onToolSelect('scissors')
   }
 
   const handleLightCreate = () => {
@@ -68,16 +73,10 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
   }
 
   const handleLightingFilter = (filter: string) => {
-    onToolSelect('lighting-filter', { filter, intensity: lightIntensity[0] })
+    onToolSelect(`lighting-filter-${filter}`, { filter, intensity: lightIntensity[0] })
   }
 
-  const handleSmudgeSelect = () => {
-    onToolSelect('smudge', { intensity: brushIntensity[0] })
-  }
 
-  const handleDeformSelect = () => {
-    onToolSelect('deform', { strength: deformStrength[0] })
-  }
 
   return (
     <div className="space-y-4">
@@ -89,6 +88,222 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
             3D Editing Tools
           </CardTitle>
         </CardHeader>
+      </Card>
+
+      {/* Advanced Sculpting Toggle - Available for all models */}
+      <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-white text-sm">
+            <Move3d className="w-4 h-4 text-purple-400" />
+            Advanced Sculpting
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-300">Enable Advanced Sculpting</span>
+            <Switch
+              checked={sculptingMode}
+              onCheckedChange={(checked) => {
+                setSculptingMode(checked)
+                onToolSelect('sculpting-mode', { enabled: checked })
+              }}
+            />
+          </div>
+          {sculptingMode && (
+            <div className="space-y-3">
+              <p className="text-xs text-gray-400">
+                SculptGL-inspired vertex manipulation tools
+              </p>
+              
+              {/* Sculpting Tools - Individual button+label pairs */}
+              <div className="grid grid-cols-3 gap-3">
+                {/* Push Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-push' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-push'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-push', { type: 'push', size: sculptingSize[0], intensity: sculptingIntensity[0] })}
+                  >
+                    <ArrowUp className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Push</span>
+                </div>
+                
+                {/* Pull Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-pull' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-pull'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-pull', { type: 'pull', size: sculptingSize[0], intensity: sculptingIntensity[0] })}
+                  >
+                    <ArrowDown className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Pull</span>
+                </div>
+                
+                {/* Inflate Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-inflate' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-inflate'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-inflate', { type: 'inflate', size: sculptingSize[0] * 1.2, intensity: sculptingIntensity[0] * 0.3 })}
+                  >
+                    <Maximize2 className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Inflate</span>
+                </div>
+                
+                {/* Deflate Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-deflate' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-deflate'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-deflate', { type: 'deflate', size: sculptingSize[0] * 1.2, intensity: sculptingIntensity[0] * 0.3 })}
+                  >
+                    <Minimize2 className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Deflate</span>
+                </div>
+                
+                {/* Smooth Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-smooth' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-smooth'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-smooth', { type: 'smooth', size: sculptingSize[0] * 1.5, intensity: sculptingIntensity[0] * 0.7 })}
+                  >
+                    <Waves className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Smooth</span>
+                </div>
+                
+                {/* Pinch Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-pinch' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-pinch'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-pinch', { type: 'pinch', size: sculptingSize[0] * 0.8, intensity: sculptingIntensity[0] * 0.6 })}
+                  >
+                    <PinchIcon className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Pinch</span>
+                </div>
+                
+                {/* Crease Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-crease' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-crease'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-crease', { type: 'crease', size: sculptingSize[0] * 0.6, intensity: sculptingIntensity[0] * 0.8 })}
+                  >
+                    <Mountain className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Crease</span>
+                </div>
+                
+                {/* Flatten Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-flatten' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-flatten'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-flatten', { type: 'flatten', size: sculptingSize[0] * 1.5, intensity: sculptingIntensity[0] * 0.5 })}
+                  >
+                    <Minus className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Flatten</span>
+                </div>
+                
+                {/* Grab Tool */}
+                <div className="flex flex-col items-center space-y-1">
+                  <Button
+                    variant={activeTool === 'sculpt-grab' ? "default" : "outline"}
+                    size="sm"
+                    className={`w-full justify-center ${
+                      activeTool === 'sculpt-grab'
+                        ? "bg-purple-600 border-purple-500"
+                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    }`}
+                    onClick={() => onToolSelect('sculpt-grab', { type: 'grab', size: sculptingSize[0] * 2.0, intensity: 1.0 })}
+                  >
+                    <MousePointer className="w-3 h-3" />
+                  </Button>
+                  <span className="text-xs text-gray-400 text-center">Grab</span>
+                </div>
+              </div>
+              
+              {/* Sculpting Tool Controls */}
+              <div className="space-y-3 mt-4">
+                {/* Sculpting Size */}
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-300">Sculpting Size</label>
+                  <Slider
+                    value={sculptingSize}
+                    onValueChange={setSculptingSize}
+                    max={3}
+                    min={0.1}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-400">{sculptingSize[0].toFixed(1)}</span>
+                </div>
+
+                {/* Sculpting Intensity */}
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-300">Sculpting Intensity</label>
+                  <Slider
+                    value={sculptingIntensity}
+                    onValueChange={setSculptingIntensity}
+                    max={1}
+                    min={0.1}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-400">{sculptingIntensity[0].toFixed(1)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
       </Card>
 
       {!selectedModelId && (
@@ -122,7 +337,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                         ? "bg-blue-600 border-blue-500"
                         : "bg-gray-900/50 border-gray-700 hover:bg-gray-800/50"
                     }`}
-                    onClick={() => handleBrushSelect(texture.id)}
+                    onClick={() => handleMaterialBrushSelect(texture.id)}
                     title={texture.name}
                   >
                     <div 
@@ -141,7 +356,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                   onValueChange={(value) => {
                     setBrushSize(value)
                     if (activeTool === 'brush') {
-                      handleBrushSelect(selectedTexture)
+                      handleMaterialBrushSelect(selectedTexture)
                     }
                   }}
                   max={2}
@@ -159,7 +374,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                   onValueChange={(value) => {
                     setBrushIntensity(value)
                     if (activeTool === 'brush') {
-                      handleBrushSelect(selectedTexture)
+                      handleMaterialBrushSelect(selectedTexture)
                     }
                   }}
                   max={1}
@@ -171,73 +386,6 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
             </CardContent>
           </Card>
 
-          {/* Object Tools */}
-          <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-white text-sm">
-                <Scissors className="w-4 h-4 text-red-400" />
-                Object Tools
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button
-                variant={activeTool === 'scissors' ? "default" : "outline"}
-                className={`w-full justify-start ${
-                  activeTool === 'scissors'
-                    ? "bg-red-600 border-red-500"
-                    : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
-                }`}
-                onClick={handleScissorsSelect}
-              >
-                <Scissors className="w-4 h-4 mr-2" />
-                Cut Object
-              </Button>
-              
-              <Button
-                variant={activeTool === 'smudge' ? "default" : "outline"}
-                className={`w-full justify-start ${
-                  activeTool === 'smudge'
-                    ? "bg-purple-600 border-purple-500"
-                    : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
-                }`}
-                onClick={handleSmudgeSelect}
-              >
-                <Hand className="w-4 h-4 mr-2" />
-                Smudge Tool
-              </Button>
-              
-              <Button
-                variant={activeTool === 'deform' ? "default" : "outline"}
-                className={`w-full justify-start ${
-                  activeTool === 'deform'
-                    ? "bg-orange-600 border-orange-500"
-                    : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
-                }`}
-                onClick={handleDeformSelect}
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Deform Tool
-              </Button>
-
-              {/* Deform Strength (only show when deform is active) */}
-              {activeTool === 'deform' && (
-                <div className="space-y-2 pt-2">
-                  <label className="text-xs text-gray-300">Deform Strength</label>
-                  <Slider
-                    value={deformStrength}
-                    onValueChange={(value) => {
-                      setDeformStrength(value)
-                      handleDeformSelect()
-                    }}
-                    max={1}
-                    min={0.1}
-                    step={0.1}
-                    className="w-full"
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           {/* Lighting Tools */}
           <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">

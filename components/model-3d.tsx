@@ -5,6 +5,7 @@ import { useThree } from "@react-three/fiber"
 import { useRef, useState, useEffect, memo } from "react"
 import type { Group } from "three"
 import * as THREE from "three"
+import { useSculpting } from "@/hooks/use-sculpting"
 
 interface Model3DProps {
   url: string
@@ -18,9 +19,12 @@ interface Model3DProps {
   activeTool?: string | null
   toolSettings?: any
   onToolApply?: (toolType: string, point: any) => void
+  sculptingEnabled?: boolean
+  currentBrush?: any
+  modelId?: string
 }
 
-function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove, activeTool, toolSettings, onToolApply }: Model3DProps) {
+function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick, onPositionChange, onSizeChange, keyboardMove, activeTool, toolSettings, onToolApply, sculptingEnabled, currentBrush, modelId }: Model3DProps) {
   const groupRef = useRef<Group>(null)
   const [hovered, setHovered] = useState(false)
   const [error, setError] = useState(false)
@@ -32,6 +36,11 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
   const [modelCenter, setModelCenter] = useState<[number, number, number]>([0, 0, 0])
   const [appliedMaterials, setAppliedMaterials] = useState<Map<string, any>>(new Map())
   const { gl } = useThree()
+  const sculpting = useSculpting({
+    onSculptingChange: (targetId, isModified) => {
+      console.log(`Model ${targetId} sculpting changed:`, isModified)
+    }
+  })
 
   // Load the 3D model
   const gltf = useGLTF(url, undefined, undefined, (error) => {
@@ -41,6 +50,7 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
 
   // Get a unique scene instance for this component
   const scene = gltf.scene.clone()
+  const [sceneReady, setSceneReady] = useState(false)
 
   // Calculate initial base scale and center when model loads
   useEffect(() => {
@@ -62,6 +72,8 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
       // Apply initial scaling
       scene.scale.set(calculatedBaseScale, calculatedBaseScale, calculatedBaseScale)
       scene.position.set(-center.x * calculatedBaseScale, -center.y * calculatedBaseScale, -center.z * calculatedBaseScale)
+      
+      setSceneReady(true)
     }
   }, [gltf.scene])
 
@@ -84,6 +96,60 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
   useEffect(() => {
     setCurrentSize(size)
   }, [size])
+
+  // Register/unregister mesh for sculpting
+  useEffect(() => {
+    if (sceneReady && scene && modelId && sculptingEnabled) {
+      // Find the first mesh in the scene
+      let targetMesh: THREE.Mesh | null = null
+      scene.traverse((child) => {
+        if (child instanceof THREE.Mesh && !targetMesh) {
+          targetMesh = child
+        }
+      })
+      
+      if (targetMesh) {
+        sculpting.registerMesh(modelId, targetMesh)
+        
+        // Set as current target if selected
+        if (isSelected) {
+          sculpting.setTarget(modelId)
+        }
+      }
+      
+      return () => {
+        sculpting.unregisterMesh(modelId)
+      }
+    }
+  }, [sceneReady, scene, modelId, sculptingEnabled, sculpting])
+
+  // Update sculpting target when selection changes
+  useEffect(() => {
+    if (modelId && sculptingEnabled) {
+      if (isSelected) {
+        sculpting.setTarget(modelId)
+      } else if (sculpting.currentTarget === modelId) {
+        sculpting.setTarget(null)
+      }
+    }
+  }, [isSelected, modelId, sculptingEnabled, sculpting])
+
+  // Update brush when it changes
+  useEffect(() => {
+    if (currentBrush && sculptingEnabled) {
+      const brush = sculpting.createBrush(currentBrush)
+      sculpting.setBrush(brush)
+    }
+  }, [currentBrush, sculptingEnabled, sculpting])
+
+  // Start/stop sculpting based on sculpting mode
+  useEffect(() => {
+    if (sculptingEnabled && isSelected) {
+      sculpting.startSculpting()
+    } else {
+      sculpting.stopSculpting()
+    }
+  }, [sculptingEnabled, isSelected, sculpting])
 
   // Handle keyboard movement
   useEffect(() => {
@@ -225,6 +291,12 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
 
     e.stopPropagation()
 
+    // Handle sculpting tools differently
+    if (sculptingEnabled && e.point) {
+      sculpting.sculptAtPosition(e.point)
+      return
+    }
+
     switch (activeTool) {
       case 'brush':
         if (toolSettings?.brush) {
@@ -295,6 +367,8 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
         onClick={handleClick}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
+        onPointerDown={sculptingEnabled ? sculpting.handlePointerDown : undefined}
+        onPointerMove={sculptingEnabled ? sculpting.handlePointerMove : undefined}
       >
         <primitive object={scene} />
 
@@ -302,7 +376,12 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
         {isSelected && (
           <mesh>
             <sphereGeometry args={[Math.max(8, Math.max(...currentSize) * baseScale * 1.5), 32, 32]} />
-            <meshBasicMaterial color="#3b82f6" transparent opacity={0.1} wireframe />
+            <meshBasicMaterial 
+              color={sculptingEnabled ? "#8b5cf6" : "#3b82f6"} 
+              transparent 
+              opacity={sculptingEnabled ? 0.15 : 0.1} 
+              wireframe 
+            />
           </mesh>
         )}
 
@@ -313,10 +392,18 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
             <meshBasicMaterial color="#6b7280" transparent opacity={0.05} wireframe />
           </mesh>
         )}
+        
+        {/* Sculpting Mode Indicator */}
+        {sculptingEnabled && isSelected && currentBrush && (
+          <mesh position={[0, Math.max(...currentSize) * baseScale * 2, 0]}>
+            <sphereGeometry args={[0.1, 8, 8]} />
+            <meshBasicMaterial color="#8b5cf6" />
+          </mesh>
+        )}
       </group>
 
-      {/* Inline Transform Gizmo - Only show when selected */}
-      {isSelected && (
+      {/* Inline Transform Gizmo - Only show when selected and not in sculpting mode */}
+      {isSelected && !sculptingEnabled && (
         <group>
           {/* X Axis - Red */}
           <group>
