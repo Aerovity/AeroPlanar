@@ -123,14 +123,18 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
   // Handle transform gizmo interactions
   const handleGizmoPointerDown = (axis: string) => (e: any) => {
     e.stopPropagation()
-    e.preventDefault()
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
     setIsDragging(axis)
     gl.domElement.style.cursor = "grabbing"
   }
 
   const handleGizmoPointerUp = (e: any) => {
     e.stopPropagation()
-    e.preventDefault()
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
     setIsDragging(null)
     gl.domElement.style.cursor = "default"
   }
@@ -139,7 +143,9 @@ function Model3DComponent({ url, position, size = [2, 2, 2], isSelected, onClick
     if (!isDragging) return
 
     e.stopPropagation()
-    e.preventDefault()
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
 
     const sensitivity = 0.02
     const scaleSensitivity = 0.01
