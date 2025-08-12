@@ -18,6 +18,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/hooks/use-toast"
 import { useScenePerformance, estimateModelImpact } from "@/hooks/use-scene-performance"
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter'
 import {
   Sparkles,
   Eye,
@@ -61,6 +64,10 @@ export default function Home() {
   const [showMockupsSidebars, setShowMockupsSidebars] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState<string[]>(["Buttons", "Forms"])
   const [searchQuery, setSearchQuery] = useState("")
+  
+  // Undo functionality with limited history (max 10 actions to avoid lag)
+  const [undoHistory, setUndoHistory] = useState<any[]>([])
+  const MAX_UNDO_HISTORY = 10
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => 
@@ -69,6 +76,7 @@ export default function Home() {
         : [...prev, category]
     )
   }
+
 
   // Sample components library data
   const componentsLibrary = useMemo(() => [
@@ -154,15 +162,55 @@ export default function Home() {
   // Performance monitoring
   const scenePerformance = useScenePerformance(models)
 
+  // Save current state to undo history
+  const saveToHistory = useCallback(() => {
+    setUndoHistory(prev => {
+      const newHistory = [...prev, { 
+        models: [...models], 
+        selectedModelId,
+        dynamicLights: [...dynamicLights],
+        timestamp: Date.now()
+      }].slice(-MAX_UNDO_HISTORY) // Keep only last 10 states
+      return newHistory
+    })
+  }, [models, selectedModelId, dynamicLights])
+
+  // Undo functionality
+  const handleUndo = useCallback(() => {
+    if (undoHistory.length === 0) return
+    
+    const lastState = undoHistory[undoHistory.length - 1]
+    setModels(lastState.models)
+    setSelectedModelId(lastState.selectedModelId)
+    if (lastState.dynamicLights) {
+      setDynamicLights(lastState.dynamicLights)
+    }
+    setUndoHistory(prev => prev.slice(0, -1)) // Remove the restored state from history
+    
+    toast({
+      title: "Undo",
+      description: "Action undone successfully.",
+    })
+  }, [undoHistory])
+
   // Add keyboard event listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle Ctrl+Z for undo (works globally, not just when model is selected)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault()
+        handleUndo()
+        return
+      }
+
       if (!selectedModelId) return
 
       const moveAmount = 0.05 // Movement step size (10x slower)
 
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "W", "s", "S"].includes(e.key)) {
         e.preventDefault()
+        // Save state before movement
+        saveToHistory()
         setKeyboardMove({ direction: e.key, amount: moveAmount })
 
         // Clear the movement after a short delay to prevent continuous movement
@@ -183,6 +231,8 @@ export default function Home() {
           }
         } else if (e.key === 'v' && clipboard) {
           e.preventDefault()
+          // Save state before pasting
+          saveToHistory()
           const newModel = {
             ...clipboard,
             id: `pasted-${Date.now()}`,
@@ -198,6 +248,8 @@ export default function Home() {
           })
         } else if (e.key === 'x' && selectedModelId) {
           e.preventDefault()
+          // Save state before cutting
+          saveToHistory()
           const modelToCut = models.find(m => m.id === selectedModelId)
           if (modelToCut) {
             setClipboard({ ...modelToCut, id: `cut-${Date.now()}` })
@@ -214,7 +266,7 @@ export default function Home() {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [selectedModelId, clipboard]) // Removed 'models' from dependencies to prevent infinite re-renders
+  }, [selectedModelId, clipboard, handleUndo, saveToHistory]) // Added new dependencies
 
   const handleModelSelect = (modelId: string) => {
     setSelectedModelId(modelId)
@@ -225,6 +277,8 @@ export default function Home() {
   }
 
   const handleModelSizeChange = (modelId: string, newSize: [number, number, number]) => {
+    // Save state before resizing
+    saveToHistory()
     // Ensure minimum size to prevent models from disappearing
     const minSize = 0.1
     const clampedSize: [number, number, number] = [
@@ -236,6 +290,8 @@ export default function Home() {
   }
 
   const handleResetSize = (modelId: string) => {
+    // Save state before resetting size
+    saveToHistory()
     const model = models.find(m => m.id === modelId)
     if (model && model.originalSize) {
       setModels((prev) => prev.map((m) => (m.id === modelId ? { ...m, size: model.originalSize } : m)))
@@ -243,6 +299,8 @@ export default function Home() {
   }
 
   const handleResetPosition = (modelId: string) => {
+    // Save state before resetting position
+    saveToHistory()
     const randomPosition: [number, number, number] = [Math.random() * 20 - 10, 0, Math.random() * 20 - 10]
     handleModelPositionChange(modelId, randomPosition)
   }
@@ -271,6 +329,8 @@ export default function Home() {
 
       // Check performance impact before adding
       checkPerformanceBeforeAdding(estimatedFaces, () => {
+        // Save state before adding uploaded model
+        saveToHistory()
         setModels((prev) => [...prev, newModel])
         setSelectedModelId(newModel.id)
 
@@ -531,6 +591,8 @@ export default function Home() {
 
             // Check performance impact before adding generated model
             checkPerformanceBeforeAdding(estimatedFaces, () => {
+              // Save state before adding generated model
+              saveToHistory()
               setModels((prev) => {
                 // Prevent duplicate models with the same taskId
                 if (prev.some(model => model.id === taskId)) {
@@ -569,6 +631,8 @@ export default function Home() {
   }, [])
 
   const handleDeleteModel = (modelId: string) => {
+    // Save state before deletion
+    saveToHistory()
     setModels((prev) => prev.filter((m) => m.id !== modelId))
     if (selectedModelId === modelId) {
       setSelectedModelId(null)
@@ -589,6 +653,189 @@ export default function Home() {
     }
   }
 
+  const handleDownloadWholeScene = async () => {
+    if (models.length === 0) {
+      toast({
+        title: "No Models",
+        description: "Add some models to the scene before downloading.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Preparing Scene Export",
+      description: "Creating combined GLB file with lights and advanced editing data, this may take a moment...",
+    })
+
+    try {
+      const scene = new THREE.Scene()
+      const loader = new GLTFLoader()
+      const exporter = new GLTFExporter()
+
+      // Load all models and add them to scene
+      const loadPromises = models.map(async (model) => {
+        try {
+          if (model.type === 'primitive') {
+            // Create primitive geometry - use the exact same approach as Primitive3D component
+            let geometry
+            const [width, height, depth] = model.size
+            
+            switch (model.primitiveType) {
+              case 'cube':
+                geometry = new THREE.BoxGeometry(width, height, depth)
+                break
+              case 'flat-cube':
+                geometry = new THREE.BoxGeometry(width, height, depth)
+                break
+              case 'globe':
+                geometry = new THREE.SphereGeometry(width / 2, 32, 32) // Same as Primitive3D
+                break
+              default:
+                geometry = new THREE.BoxGeometry(width, height, depth)
+            }
+
+            const material = new THREE.MeshStandardMaterial({ 
+              color: 0x888888,
+              roughness: 0.4,
+              metalness: 0.1 
+            })
+            const mesh = new THREE.Mesh(geometry, material)
+            mesh.position.set(...model.position)
+            
+            // For primitives, don't apply additional scaling - the geometry already uses the correct size
+            // This matches how Primitive3D component works
+            mesh.name = model.name
+            scene.add(mesh)
+          } else if (model.url) {
+            // Load GLB/GLTF model
+            return new Promise((resolve, reject) => {
+              loader.load(
+                model.url,
+                (gltf) => {
+                  // Clone the scene to avoid modifying original
+                  const clonedScene = gltf.scene.clone()
+                  clonedScene.position.set(...model.position)
+                  
+                  // Apply proper scaling - models are displayed with large base scale in viewer
+                  // We need to match the visual scale from the scene
+                  const displayScale = model.size || [2, 2, 2]
+                  const baseScaleFactor = 5 // This matches the 5x multiplier from model-3d.tsx line 50
+                  clonedScene.scale.set(
+                    displayScale[0] * baseScaleFactor,
+                    displayScale[1] * baseScaleFactor,
+                    displayScale[2] * baseScaleFactor
+                  )
+                  
+                  clonedScene.name = model.name
+                  scene.add(clonedScene)
+                  resolve(clonedScene)
+                },
+                undefined,
+                reject
+              )
+            })
+          }
+        } catch (error) {
+          console.error(`Error processing model ${model.name}:`, error)
+        }
+      })
+
+      // Wait for all models to load
+      await Promise.allSettled(loadPromises)
+
+      // Add dynamic lights to the scene
+      dynamicLights.forEach((light, index) => {
+        const pointLight = new THREE.PointLight(light.color, light.intensity, 20, 2)
+        pointLight.position.set(...light.position)
+        pointLight.castShadow = true
+        pointLight.name = `DynamicLight_${index}`
+        scene.add(pointLight)
+        
+        // Add a visible light indicator
+        const lightGeometry = new THREE.SphereGeometry(0.2, 16, 16)
+        const lightMaterial = new THREE.MeshBasicMaterial({ color: light.color, transparent: true, opacity: 0.8 })
+        const lightMesh = new THREE.Mesh(lightGeometry, lightMaterial)
+        lightMesh.position.set(...light.position)
+        lightMesh.name = `LightIndicator_${index}`
+        scene.add(lightMesh)
+      })
+
+      // Add scene lighting setup based on current filter
+      const ambientLight = new THREE.AmbientLight(
+        currentLightingFilter === 'warm' ? "#ff9966" : 
+        currentLightingFilter === 'cool' ? "#6699ff" : "#ffffff",
+        currentLightingFilter === 'soft' ? 0.8 : 
+        currentLightingFilter === 'dramatic' ? 0.05 : 
+        currentLightingFilter === 'warm' ? 0.4 :
+        currentLightingFilter === 'cool' ? 0.4 : 0.3
+      )
+      ambientLight.name = "SceneAmbientLight"
+      scene.add(ambientLight)
+
+      const directionalLight = new THREE.DirectionalLight(
+        currentLightingFilter === 'warm' ? "#ffcc88" : 
+        currentLightingFilter === 'cool' ? "#88ccff" : 
+        currentLightingFilter === 'dramatic' ? "#ffffff" : "#ffffff",
+        currentLightingFilter === 'dramatic' ? 3.0 : 
+        currentLightingFilter === 'soft' ? 0.4 : 
+        currentLightingFilter === 'warm' ? 1.5 :
+        currentLightingFilter === 'cool' ? 1.5 : 1.2
+      )
+      directionalLight.position.set(20, 20, 10)
+      directionalLight.castShadow = true
+      directionalLight.name = "SceneDirectionalLight"
+      scene.add(directionalLight)
+
+      // Store advanced editing tools and scene metadata
+      const sceneMetadata = {
+        lightingFilter: currentLightingFilter,
+        dynamicLights: dynamicLights,
+        toolSettings: toolSettings,
+        sculptingEnabled: sculptingEnabled,
+        currentSculptBrush: currentSculptBrush,
+        exportedAt: new Date().toISOString(),
+        version: "1.0"
+      }
+
+      // Add metadata as a custom property to the scene
+      scene.userData.aeroplanarMetadata = sceneMetadata
+
+      // Export the combined scene as GLB
+      exporter.parse(
+        scene,
+        (gltf) => {
+          const blob = new Blob([gltf as ArrayBuffer], { type: 'application/octet-stream' })
+          const link = document.createElement('a')
+          link.href = URL.createObjectURL(blob)
+          link.download = 'complete_scene_with_lighting.glb'
+          link.click()
+          
+          toast({
+            title: "Scene Exported!",
+            description: "Complete scene with lighting effects and advanced tools metadata downloaded as GLB file.",
+          })
+        },
+        (error) => {
+          console.error('Export error:', error)
+          toast({
+            title: "Export Failed",
+            description: "Could not export scene. Please try again.",
+            variant: "destructive",
+          })
+        },
+        { binary: true }
+      )
+    } catch (error) {
+      console.error('Scene export error:', error)
+      toast({
+        title: "Export Failed",
+        description: "Could not create scene export. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleAddPrimitive = (primitive: any) => {
     const newModel = {
       id: `primitive-${Date.now()}`,
@@ -605,6 +852,8 @@ export default function Home() {
 
     // Check performance impact before adding
     checkPerformanceBeforeAdding(newModel.faces || 1000, () => {
+      // Save state before adding
+      saveToHistory()
       setModels(prev => [...prev, newModel])
       setSelectedModelId(newModel.id)
       
@@ -643,6 +892,8 @@ export default function Home() {
   }
 
   const handleClearScene = () => {
+    // Save state before clearing
+    saveToHistory()
     setModels([])
     setSelectedModelId(null)
     toast({
@@ -793,6 +1044,8 @@ export default function Home() {
 
   const handleSceneClick = (event: any) => {
     if (activeTool === 'light-create' && event.point) {
+      // Save state before adding light (lights affect scene state)
+      saveToHistory()
       const newLight = {
         id: `light-${Date.now()}`,
         position: [event.point.x, event.point.y + 2, event.point.z],
@@ -812,6 +1065,8 @@ export default function Home() {
 
   const handleDeformStart = (event: any) => {
     if (activeTool === 'deform' && selectedModelId) {
+      // Save state before starting deform
+      saveToHistory()
       setIsDeforming(true)
       setDeformStartPoint(event.point)
       event.stopPropagation()
@@ -1039,6 +1294,11 @@ export default function Home() {
                 activeTool: selectedModelId === model.id ? activeTool : null,
                 toolSettings,
                 onToolApply: (toolType: string, data: any) => {
+                  // Save state before tool application (for all tools that modify models)
+                  if (['brush', 'scissors', 'smudge', 'deform', 'sculpt-push', 'sculpt-pull', 'sculpt-inflate', 'sculpt-deflate', 'sculpt-smooth', 'sculpt-pinch', 'sculpt-crease', 'sculpt-flatten', 'sculpt-grab'].includes(toolType)) {
+                    saveToHistory()
+                  }
+                  
                   // Handle tool application results
                   switch (toolType) {
                     case 'brush':
@@ -1079,6 +1339,21 @@ export default function Home() {
                       toast({
                         title: "Deform Mode Active",
                         description: "Click and drag in empty space to deform the selected object.",
+                      })
+                      break
+                    // Advanced sculpting tools
+                    case 'sculpt-push':
+                    case 'sculpt-pull':
+                    case 'sculpt-inflate':
+                    case 'sculpt-deflate':
+                    case 'sculpt-smooth':
+                    case 'sculpt-pinch':
+                    case 'sculpt-crease':
+                    case 'sculpt-flatten':
+                    case 'sculpt-grab':
+                      toast({
+                        title: "Sculpting Applied!",
+                        description: `Applied ${toolType.replace('sculpt-', '')} sculpting to ${model.name}`,
                       })
                       break
                   }
@@ -1207,6 +1482,16 @@ export default function Home() {
                       Generating... {task.progress ? `${task.progress}%` : ""}
                     </Badge>
                   ))}
+                  <Button
+                    onClick={handleDownloadWholeScene}
+                    disabled={models.length === 0}
+                    variant="outline"
+                    size="sm"
+                    className="bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50 disabled:opacity-50"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Whole Scene
+                  </Button>
                   <SpotlightButton>Get Started</SpotlightButton>
                 </div>
               </div>
@@ -1565,6 +1850,8 @@ export default function Home() {
                             size="sm"
                             variant="ghost"
                             onClick={() => {
+                              // Save state before removing light
+                              saveToHistory()
                               setDynamicLights(prev => prev.filter(l => l.id !== light.id))
                               toast({
                                 title: "Light Removed",
