@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import vaultLight from "../../../public/vault-light.png";
-import vaultDark from "../../../public/vault.png";
+import renderLight from "../../../public/render.png";
+import renderDark from "../../../public/render.png";
 import { CtaLink } from "@/components/shared/cta-link";
 import { DynamicImage } from "@/components/shared/dynamic-image";
 import { ExportToast } from "@/components/shared/export-toast";
@@ -12,26 +12,26 @@ export function SectionFive() {
 		<section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
 			<div className="border border-border lg:basis-2/3 bg-card rounded-md p-10 flex lg:space-x-8 lg:flex-row flex-col-reverse lg:items-start group">
 				<DynamicImage
-					lightSrc={vaultLight}
-					darkSrc={vaultDark}
+					lightSrc={renderLight}
+					darkSrc={renderDark}
 					quality={90}
-					alt="Vault"
+					alt="AI Rendering"
 					className="mt-8 lg:mt-0 basis-1/2 object-contain max-w-[70%] sm:max-w-[50%] md:max-w-[35%]"
 				/>
 
 				<div className="flex flex-col basis-1/2 relative h-full">
 					<h4 className="font-medium text-xl md:text-2xl mb-4">
-						Vault
+						AI Rendering Engine
 					</h4>
 
 					<p className="text-[#878787] mb-4 text-sm">
-						Store your files securely in AeroPlanar.
+						Transform your concepts with our advanced AI rendering capabilities.
 					</p>
 
 					<p className="text-[#878787] text-sm">
-						There’s no need to scramble for things across different
-						drives. Keep all of your files, such as contracts and
-						agreements safe in one place.
+						Generate photorealistic renders, apply intelligent lighting,
+						and create stunning visualizations from your 3D models with
+						just a few clicks.
 					</p>
 
 					<div className="flex flex-col space-y-2 h-full">
@@ -48,8 +48,7 @@ export function SectionFive() {
 								/>
 							</svg>
 							<span className="text-primary">
-								Automatic classification of documents for easy
-								search & find
+								AI-powered lighting optimization
 							</span>
 						</div>
 						<div className="flex space-x-2 items-center text-sm">
@@ -64,11 +63,11 @@ export function SectionFive() {
 									d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
 								/>
 							</svg>
-							<span className="text-primary">Smart search</span>
+							<span className="text-primary">Photorealistic material rendering</span>
 						</div>
 
 						<div className="absolute bottom-0 left-0">
-							<CtaLink text="Centralize Your Files now" />
+							<CtaLink text="Start AI rendering" />
 						</div>
 					</div>
 				</div>
@@ -76,14 +75,12 @@ export function SectionFive() {
 
 			<div className="border border-border basis-1/3 bg-card rounded-lg p-10 flex flex-col group">
 				<h4 className="font-medium text-xl md:text-2xl mb-4">
-					Seamless export
+					Multi-Format Export
 				</h4>
 				<p className="text-[#878787] text-sm mb-8">
-					Take the hassle out of preparing exports for your
-					accountant. Just select any time period or transaction you
-					want and hit export. We package everything up neatly in a
-					CSV file (accountants loves these) clearly pointing to the
-					right attachment.
+					Export your 3D models in any format you need. Whether it's 
+					OBJ, FBX, GLTF, or STL, AeroPlanar ensures your models are 
+					optimized and ready for use in any platform or application.
 				</p>
 
 				<motion.div
@@ -97,7 +94,7 @@ export function SectionFive() {
 				</motion.div>
 
 				<div className="mt-8 hidden md:flex">
-					<CtaLink text="Streamline your workflow" />
+					<CtaLink text="Export your models" />
 				</div>
 			</div>
 		</section>

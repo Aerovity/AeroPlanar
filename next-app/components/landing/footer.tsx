@@ -2,19 +2,24 @@
 import Link from "next/link";
 // import { GithubStars } from "./github-stars";
 // import { StatusWidget } from "./status-widget";
-import { LogoLarge } from "../shared/logo-large";
 import { SocialLinks } from "../shared/social-links";
+import Image from "next/image";
 
 export function Footer() {
 	return (
-		<footer className="border-t border-border px-4 md:px-6 pt-10 md:pt-16 bg-background overflow-hidden md:max-h-[820px]">
+		<footer className="border-t border-border px-4 md:px-6 pt-10 md:pt-16 overflow-hidden md:max-h-[820px]" style={{backgroundColor: '#000208'}}>
 			<div className="container">
 				<div className="flex justify-between items-center border-border border-b pb-10 md:pb-16 mb-12">
 					<Link
 						href="/"
-						className="scale-50 -ml-[52px] md:ml-0 md:scale-100"
 					>
-						<LogoLarge />
+						<Image
+							src="/logo.png"
+							alt="AeroPlanar Logo"
+							width={64}
+							height={64}
+							className="h-16 w-auto"
+						/>
 						<span className="sr-only">AeroPlanar</span>
 					</Link>
 
@@ -130,9 +135,6 @@ export function Footer() {
 				</div>
 			</div>
 
-			<h5 className="text-muted/50 text-[320px] leading-none text-center pointer-events-none pt-20">
-				AeroPlanar
-			</h5>
 		</footer>
 	);
 }

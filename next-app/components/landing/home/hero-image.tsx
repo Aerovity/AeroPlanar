@@ -10,7 +10,7 @@ export function HeroImage() {
 	const [isLoaded, setIsLoaded] = useState(false);
 
 	return (
-		<div className="scale-100 sm:scale-100 md:scale-[0.9] lg:scale-[0.7] xl:scale-100 mt-10 md:mt-0 lg:absolute -right-[420px] -top-[100px] 2xl:scale-[1.35] 2xl:-top-[20px] z-10">
+		<div className="scale-100 sm:scale-100 md:scale-[0.9] lg:scale-[0.7] xl:scale-100 mt-10 md:mt-0 lg:absolute -right-[420px] top-[50px] 2xl:scale-[1.35] 2xl:top-[80px] z-10">
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
@@ -20,7 +20,7 @@ export function HeroImage() {
 					<DynamicImage
 						lightSrc={heroImageLight}
 						darkSrc={heroImageDark}
-						alt="Dashboard interface showing financial data and charts"
+						alt="3D modeling interface"
 						width={1141}
 						height={641}
 						quality={80}

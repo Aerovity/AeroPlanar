@@ -7,8 +7,7 @@ import breakdownLight from "../../../public/breakdown-light.png";
 import breakdownDark from "../../../public/breakdown.png";
 import timeFormatLight from "../../../public/time-format-light.png";
 import timeFormatDark from "../../../public/time-format.png";
-import timetrackerLight from "../../../public/time-tracker-light.png";
-import timetrackerDark from "../../../public/time-tracker.png";
+import blackholeImage from "../../../public/blackhole.jpeg";
 
 export function SectionThree() {
 	return (
@@ -17,15 +16,14 @@ export function SectionThree() {
 				<div className="flex flex-col md:space-x-12 md:flex-row">
 					<div className="xl:mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
 						<h3 className="font-medium text-xl md:text-2xl mb-4 text-foreground font-sans">
-							Monitor your 3D projects
+							Advanced 3D Project Management
 						</h3>
 
 						<p className="text-muted-foreground md:mb-4 text-sm font-sans">
-							Track rendering times, monitor asset performance,
-							optimize workflows and
+							Monitor model complexity, track performance metrics,
+							optimize rendering workflows and
 							<br />
-							generate detailed reports from your 3D creation
-							sessions.
+							generate comprehensive project reports for your 3D creations.
 						</p>
 
 						<div className="flex flex-col space-y-2">
@@ -42,7 +40,7 @@ export function SectionThree() {
 									/>
 								</svg>
 								<span className="text-primary">
-									Get a monthly overview of tracked hours
+									Real-time model performance monitoring
 								</span>
 							</div>
 							<div className="flex space-x-2 items-center text-sm">
@@ -58,24 +56,7 @@ export function SectionThree() {
 									/>
 								</svg>
 								<span className="text-primary">
-									Set billable rate & time estimates
-								</span>
-							</div>
-
-							<div className="flex space-x-2 items-center text-sm">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width={18}
-									height={13}
-									fill="none"
-								>
-									<path
-										fill="currentColor"
-										d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
-									/>
-								</svg>
-								<span className="text-primary">
-									See billable amount & monthly breakdown
+									Automated geometry optimization
 								</span>
 							</div>
 
@@ -92,7 +73,7 @@ export function SectionThree() {
 									/>
 								</svg>
 								<span className="text-primary">
-									Create invoice based on recorded time
+									Project timeline and milestone tracking
 								</span>
 							</div>
 
@@ -109,13 +90,30 @@ export function SectionThree() {
 									/>
 								</svg>
 								<span className="text-primary">
-									Export as CSV
+									Collaborative project sharing
+								</span>
+							</div>
+
+							<div className="flex space-x-2 items-center text-sm">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width={18}
+									height={13}
+									fill="none"
+								>
+									<path
+										fill="currentColor"
+										d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
+									/>
+								</svg>
+								<span className="text-primary">
+									Export in multiple 3D formats
 								</span>
 							</div>
 						</div>
 
 						<div className="absolute bottom-6">
-							<CtaLink text="Start tracking time now" />
+							<CtaLink text="Start managing projects" />
 						</div>
 					</div>
 
@@ -157,13 +155,11 @@ export function SectionThree() {
 								/>
 							</motion.div>
 						</div>
-						<DynamicImage
-							lightSrc={timetrackerLight}
-							darkSrc={timetrackerDark}
+						<img
+							src={blackholeImage.src || blackholeImage}
 							height={400}
 							className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
-							quality={90}
-							alt="Tracker"
+							alt="Black Hole Project Management"
 						/>
 					</div>
 				</div>

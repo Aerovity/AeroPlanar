@@ -6,8 +6,8 @@ import { WordAnimation } from "./word-animation";
 
 export function Hero() {
 	return (
-		<section className="mt-[60px] lg:mt-[180px] min-h-[530px] relative lg:h-[calc(100vh-300px)]">
-			<div className="flex flex-col">
+		<section className="mt-[60px] lg:mt-[80px] min-h-[530px] relative lg:h-[calc(100vh-300px)]">
+			<div className="flex flex-col container max-w-none pl-8 lg:pl-16">
 				<Link href="/updates/aeroplanar-v1">
 					<Button
 						variant="outline"
