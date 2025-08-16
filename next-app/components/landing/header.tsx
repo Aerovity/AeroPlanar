@@ -30,7 +30,7 @@ import { useEffect, useState } from "react";
 // } from "react-icons/md";
 // import { DynamicImage } from "../shared/dynamic-image";
 import { Icons } from "../shared/icons";
-import { ThemeToggle } from "../ui/theme-toggle";
+import Image from "next/image";
 
 const listVariant = {
 	show: {
@@ -147,13 +147,19 @@ export function Header() {
 	}
 
 	return (
-		<header className="sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
-			<nav className="border border-border rounded-md px-4 flex items-center backdrop-filter backdrop-blur-xl bg-background/70 h-[50px] z-20 relative">
+		<header className="z-50 px-2 md:px-4 md:flex justify-center">
+			<nav className="border border-border rounded-md px-4 flex items-center backdrop-filter backdrop-blur-xl bg-background/30 h-[70px] z-20 relative">
 				<ContextMenu>
 					<ContextMenuTrigger>
 						<Link href="/">
 							<span className="sr-only">AeroPlanar Logo</span>
-							<Icons.LogoSmall className="size-6" />
+							<Image
+								src="/logo.png"
+								alt="AeroPlanar Logo"
+								width={64}
+								height={64}
+								className="h-16 w-auto"
+							/>
 						</Link>
 					</ContextMenuTrigger>
 
@@ -290,7 +296,6 @@ export function Header() {
 					)}
 				</ul>
 
-				<ThemeToggle />
 
 				<button
 					type="button"
@@ -327,7 +332,13 @@ export function Header() {
 					<div className="mt-4 flex justify-between p-3 px-4 relative ml-[1px]">
 						<button type="button" onClick={handleToggleMenu}>
 							<span className="sr-only">AeroPlanar Logo</span>
-							<Icons.LogoSmall />
+							<Image
+								src="/logo.png"
+								alt="AeroPlanar Logo"
+								width={64}
+								height={64}
+								className="h-16 w-auto"
+							/>
 						</button>
 
 						<button

@@ -57,7 +57,7 @@ export function ModelStats({ selectedModel }: ModelStatsProps) {
 				<div className="space-y-3">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2 text-gray-300">
-							<Box className="w-4 h-4" />
+							<Box className="w-4 h-4 text-white" />
 							<span className="text-sm">Topology</span>
 						</div>
 						<span className="text-white text-sm font-medium">
@@ -67,7 +67,7 @@ export function ModelStats({ selectedModel }: ModelStatsProps) {
 
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2 text-gray-300">
-							<Triangle className="w-4 h-4" />
+							<Triangle className="w-4 h-4 text-white" />
 							<span className="text-sm">Faces</span>
 						</div>
 						<span className="text-white text-sm font-medium">
@@ -77,7 +77,7 @@ export function ModelStats({ selectedModel }: ModelStatsProps) {
 
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2 text-gray-300">
-							<Dot className="w-4 h-4" />
+							<Dot className="w-4 h-4 text-white" />
 							<span className="text-sm">Vertices</span>
 						</div>
 						<span className="text-white text-sm font-medium">

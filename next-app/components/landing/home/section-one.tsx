@@ -5,8 +5,7 @@ export function SectionOne() {
 				Everything you need
 			</h3>
 			<p className="mt-4 md:mt-8 text-[#878787]">
-				From automated receipt-to-transaction mapping to conversing with
-				your financials and consolidating all your files
+				AeroPlanar is a prototype web application designed to transform how architects, engineers, and designers work with 3D content. With a simple drag-and-drop, it converts 2D images into interactive 3D models, viewable directly in the browser.
 			</p>
 		</section>
 	);

@@ -53,7 +53,7 @@ export function ScenePerformanceMonitor({
 			<CardHeader className="pb-3">
 				<CardTitle className="text-white text-sm flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<Activity className="w-4 h-4 text-blue-400" />
+						<Activity className="w-4 h-4 text-white" />
 						Scene Performance
 					</div>
 					<Badge
@@ -62,7 +62,7 @@ export function ScenePerformanceMonitor({
 							warningColors[performance.warningLevel]
 						} bg-gray-800/50`}
 					>
-						<WarningIcon className="w-3 h-3 mr-1" />
+						<WarningIcon className="w-3 h-3 mr-1 text-white" />
 						{performance.warningLevel === "none"
 							? "Optimal"
 							: performance.warningLevel}
@@ -144,7 +144,7 @@ export function ScenePerformanceMonitor({
 				{/* Warnings */}
 				{performance.warnings.length > 0 && (
 					<Alert className="bg-yellow-900/20 border-yellow-600/30">
-						<AlertTriangle className="w-4 h-4 text-yellow-400" />
+						<AlertTriangle className="w-4 h-4 text-white" />
 						<AlertDescription className="text-yellow-200 text-xs">
 							<div className="space-y-1">
 								{performance.warnings.map((warning, index) => (
@@ -158,7 +158,7 @@ export function ScenePerformanceMonitor({
 				{/* Suggestions */}
 				{performance.suggestions.length > 0 && (
 					<Alert className="bg-blue-900/20 border-blue-600/30">
-						<Info className="w-4 h-4 text-blue-400" />
+						<Info className="w-4 h-4 text-white" />
 						<AlertDescription className="text-blue-200 text-xs">
 							<div className="space-y-1">
 								{performance.suggestions.map(
@@ -186,7 +186,7 @@ export function ScenePerformanceMonitor({
 									onClick={onRemoveLargestModel}
 									className="h-7 text-xs bg-red-900/20 border-red-600/30 text-red-300 hover:bg-red-900/30"
 								>
-									<TrendingDown className="w-3 h-3 mr-1" />
+									<TrendingDown className="w-3 h-3 mr-1 text-white" />
 									Remove Largest
 								</Button>
 							)}
@@ -197,7 +197,7 @@ export function ScenePerformanceMonitor({
 									onClick={onOptimizeScene}
 									className="h-7 text-xs bg-blue-900/20 border-blue-600/30 text-blue-300 hover:bg-blue-900/30"
 								>
-									<Zap className="w-3 h-3 mr-1" />
+									<Zap className="w-3 h-3 mr-1 text-white" />
 									Optimize
 								</Button>
 							)}
@@ -208,7 +208,7 @@ export function ScenePerformanceMonitor({
 									onClick={onClearScene}
 									className="h-7 text-xs bg-gray-900/20 border-gray-600/30 text-gray-300 hover:bg-gray-900/30"
 								>
-									<RotateCcw className="w-3 h-3 mr-1" />
+									<RotateCcw className="w-3 h-3 mr-1 text-white" />
 									Clear Scene
 								</Button>
 							)}

@@ -71,7 +71,7 @@ export function PerformanceLimitDialog({
 							{currentPerformance && (
 								<div className="bg-black/30 p-3 rounded-lg">
 									<div className="flex items-center gap-2 mb-2">
-										<Activity className="w-4 h-4 text-blue-400" />
+										<Activity className="w-4 h-4 text-white" />
 										<span className="text-sm font-medium text-gray-200">
 											Current Scene Status
 										</span>
@@ -99,7 +99,7 @@ export function PerformanceLimitDialog({
 							{/* Warnings */}
 							{warnings.length > 0 && (
 								<Alert className="bg-red-900/20 border-red-600/30">
-									<AlertTriangle className="w-4 h-4 text-red-400" />
+									<AlertTriangle className="w-4 h-4 text-white" />
 									<AlertDescription className="text-red-200 text-sm">
 										<div className="space-y-1">
 											{warnings.map((warning, index) => (
@@ -167,7 +167,7 @@ export function PerformanceLimitDialog({
 										}}
 										className="flex-1 h-8 text-xs bg-orange-900/20 border-orange-600/30 text-orange-300 hover:bg-orange-900/30"
 									>
-										<TrendingDown className="w-3 h-3 mr-1" />
+										<TrendingDown className="w-3 h-3 mr-1 text-white" />
 										Remove Largest
 									</Button>
 								)}
@@ -181,7 +181,7 @@ export function PerformanceLimitDialog({
 										}}
 										className="flex-1 h-8 text-xs bg-gray-900/20 border-gray-600/30 text-gray-300 hover:bg-gray-900/30"
 									>
-										<RotateCcw className="w-3 h-3 mr-1" />
+										<RotateCcw className="w-3 h-3 mr-1 text-white" />
 										Clear Scene
 									</Button>
 								)}

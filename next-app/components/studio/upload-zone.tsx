@@ -119,13 +119,13 @@ export function UploadZone({
 				) : (
 					<div className="space-y-4">
 						{isUploading ? (
-							<Loader2 className="w-12 h-12 mx-auto text-blue-400 animate-spin" />
+							<Loader2 className="w-12 h-12 mx-auto text-white animate-spin" />
 						) : (
 							<div className="w-12 h-12 mx-auto text-gray-400 bg-gray-800/50 rounded-full flex items-center justify-center">
 								{isDragActive ? (
-									<Upload className="w-6 h-6" />
+									<Upload className="w-6 h-6 text-white" />
 								) : (
-									<ImageIcon className="w-6 h-6" />
+									<ImageIcon className="w-6 h-6 text-white" />
 								)}
 							</div>
 						)}

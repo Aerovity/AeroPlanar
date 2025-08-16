@@ -1,4 +1,6 @@
+
 import { Hero } from "@/components/landing/home/hero";
+import { TopTextSection } from "@/components/landing/home/top-text-section";
 import { SectionFive } from "@/components/landing/home/section-five";
 import { SectionFour } from "@/components/landing/home/section-four";
 import { SectionOne } from "@/components/landing/home/section-one";
@@ -28,9 +30,6 @@ export default function Home() {
 			<SectionSix />
 			<SectionSeven />
 			<SectionVideo />
-			<Testimonials />
-			<VibeCodingTweetsSection />
-			<TestimonialsSection />
 			<FAQSection />
 		</>
 	);

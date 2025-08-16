@@ -21,182 +21,69 @@ const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
 const stories = [
 	{
 		id: 1,
-		title: "“We are now saving 1-2 man-days each month.”",
+		title: "\"AI Generation helped me a lot creating 3D website components, and all that with just 1 click\"",
 		description:
-			"Due to improved invoice reconciliation, we are now saving 1-2 man-days each month, and we have a better understanding of our finances thanks to dashboards.",
-		name: "Paweł Michalski ",
-		company: "VC leaders",
-		country: "Poland",
-		src: "/stories/pawel.jpeg",
+			"AI Generation helped me a lot creating 3D website components, and all that with just 1 click",
+		name: "Mohammed el Amine Attoui",
+		company: "Web Developer",
+		country: "London",
+		src: "/placeholder-user.jpg",
 		content: [
 			{
-				type: "heading",
-				content:
-					"VCLeaders is an educational platform for venture capitalists that helps them build better VC firms.  ",
-			},
-			{
-				type: "question",
-				content:
-					"What specific challenges were you facing in managing your design projects before using AeroPlanar?",
-			},
-			{
 				type: "paragraph",
 				content:
-					"We are a small, remote-first team. Each month, we face challenges when reconciling our invoices. We often struggle to track down missing invoices and ensure all payments are accounted for correctly. This manual process takes more than a full day of someone's time and can take even longer if we overlook anything. Not to mention, we didn’t have any time to categorize and analyze our spending properly.",
-			},
-			{
-				type: "question",
-				content:
-					"How has AeroPlanar impacted your workflow or productivity since you started using it? Can you share specific examples or metrics?",
-			},
-			{
-				type: "paragraph",
-				content:
-					"Due to improved 3D modeling workflow, we are now saving 1-2 man-days each month, and we have a better understanding of our design process thanks to the visual analytics.",
-			},
-			{
-				type: "question",
-				content:
-					"What features or aspects of AeroPlanar AI do you find most valuable, and why?",
-			},
-			{
-				type: "paragraph",
-				content:
-					"This tool provides me with a clear overview of my 3D models and design assets. The user interface is also clean, and the user experience is fantastic. Now, I can easily track all the models I create and optimize each month.",
+					"AI Generation helped me a lot creating 3D website components, and all that with just 1 click. The ability to quickly generate complex 3D models for web integration has revolutionized my development workflow.",
 			},
 		],
 	},
 	{
 		id: 2,
-		title: "“Without Midday I would’ve sold my company and lost loads of money”",
-		name: "Guy Solan",
-		company: "Thetis Medical",
-		country: "United Kingdom",
-		src: "/stories/guy.jpeg",
-		video: "https://customer-oh6t55xltlgrfayh.cloudflarestream.com/5b86803383964d52ee6834fd289f4f4e/manifest/video.m3u8",
+		title: "\"Creating 3D maquettes for my presentation saved a lot in my project\"",
+		description:
+			"Using 3D generation and the maquette builder I started creating amazing concepts for my projects as well as using the AI to find inspiration",
+		name: "Tiny Hamdad",
+		company: "Architecture Student",
+		country: "Paris",
+		src: "/placeholder-user.jpg",
 		content: [
 			{
 				type: "paragraph",
 				content:
-					"”Without Midday I would’ve sold my company and lost loads of money. I never had the time to learn Quickbooks or Xero so had no idea what the company cash was doing without ringing up my accountant.”",
+					"Creating 3D maquettes for my presentation saved a lot in my project. Using 3D generation and the maquette builder I started creating amazing concepts for my projects as well as using the AI to find inspiration.",
 			},
 		],
 	},
 	{
 		id: 3,
-		title: "“It has completely transformed how I manage my day-to-day tasks”",
+		title: "\"This will be the revolution for Indie VR devs\"",
 		description:
-			"From generating invoices to tracking projects and having all the information centralized in one place, the change has been remarkable.",
-		name: "Facu Montanaro",
-		company: "Kundo Studio",
-		country: "Argentina",
-		src: "/stories/facu.jpeg",
+			"Many VR devs struggle to transform our sketches to 3D models - this might be the solution. It helped a lot working in my future VR projects",
+		name: "Pear Streatham",
+		company: "VR Game Developer",
+		country: "San Francisco",
+		src: "/placeholder-user.jpg",
 		content: [
 			{
-				type: "heading",
-				content:
-					"At Kundo, I work alongside a talented team to empower clients in achieving successful fundraising, launching impactful products, and driving growth through design and meaningful experiences.",
-			},
-			{
 				type: "paragraph",
 				content:
-					"I’m Facu Montanaro, a freelance visual designer from Argentina, focused on crafting beautiful websites and interfaces. I collaborate with startups, founders, and companies to help them thrive.",
-			},
-			{
-				type: "question",
-				content:
-					"What specific challenges were you facing in managing your business operations before using Midday?",
-			},
-			{
-				type: "paragraph",
-				content:
-					"Above all, I struggled to find a way to manage everything in one place to make the workflow easier, faster, and simpler. At the same time, none of the tools I had tried seemed to address the core issue, which was finding a direct, straightforward, and user-friendly solution.",
-			},
-			{
-				type: "question",
-				content:
-					"How has Midday impacted your workflow or productivity since you started using it? Can you share specific examples or metrics?",
-			},
-			{
-				type: "paragraph",
-				content:
-					"I can’t share specific metrics yet, but it has completely transformed how I manage my day-to-day tasks. From generating invoices to tracking projects and having all the information centralized in one place, the change has been remarkable.",
-			},
-			{
-				type: "question",
-				content:
-					"What features or aspects of Midday AI do you find most valuable, and why?",
-			},
-			{
-				type: "paragraph",
-				content:
-					"Invoices, Proposals, and Track—these three features have been game-changers for me. They’ve significantly improved my daily operations. I’m looking forward to seeing some of the features I suggested implemented, like adding collaborators, but having Midday integrated into my workflow as one of my go-to apps has already been a great experience.",
+					"This will be the revolution for Indie VR devs. As many VR developers struggle to transform our sketches to 3D models, this might be the solution. It helped a lot working in my future VR projects.",
 			},
 		],
 	},
 	{
 		id: 4,
-		title: "“I prefer to have one tool for finances, similar to what Deel is for HR”",
+		title: "\"3D modelling became so easy\"",
 		description:
-			"Midday helped me find a compromise with my tax advisor: I'm not using one of his supported clunky tools but an actually UX-friendly tool and can provide him with acceptable .csv. That's a big one!",
-		name: "Richard Poelderl",
-		company: "Conduct.bln",
-		country: "Germany",
-		src: "/stories/richard.jpeg",
+			"While working on my brand I always would've loved seeing my clothes before production in 3D and here is my solution",
+		name: "Amine Bazine",
+		company: "Clothing Brand Designer",
+		country: "Paris",
+		src: "/placeholder-user.jpg",
 		content: [
 			{
-				type: "heading",
-				content:
-					"Businesses typically hire me because they want to focus their product development resources on the product rather than marketing. I can offer the growth/marketing with engineering as I understand both worlds",
-			},
-			{
-				type: "question",
-				content:
-					"What specific challenges were you facing in managing your business operations before using Midday?",
-			},
-			{
 				type: "paragraph",
 				content:
-					"My preferred accounting app (that let's me submit my tax reports) didn't support my bank. And the account app's data exports required additional formatting.",
-			},
-			{
-				type: "paragraph",
-				content:
-					"Moreover, I moved from the invoicing feature of my business bank to Midday. Not really a big challenge, but Midday makes that just a bit easier (and I prefer to have one tool for finances, similar to what Deel is for HR).",
-			},
-			{
-				type: "question",
-				content:
-					"How has Midday impacted your workflow or productivity since you started using it? Can you share specific examples or metrics?",
-			},
-			{
-				type: "paragraph",
-				content:
-					"The invoice feature took a bit of work to setup as I used one of the earlier versions. But it's nice that it let's me edit almost any field (except for the number formats — I'm sure when you read this, that's included as well).",
-			},
-			{
-				type: "paragraph",
-				content:
-					"Also, it helped me find a compromise with my tax advisor: I'm not using one of his supported clunky tools but an actually UX-friendly tool and can provide him with acceptable .csv formats so that he imports the data into his accounting software. That's a big one! It's not perfect for my tax advisor, but it makes my life much easier.",
-			},
-			{
-				type: "question",
-				content:
-					"What features or aspects of Midday AI do you find most valuable, and why?",
-			},
-			{
-				type: "paragraph",
-				content:
-					"Invoicing - to issue invoices for clients who can't pay 4+ figure sums with a credit card.",
-			},
-			{
-				type: "paragraph",
-				content: "CSV Exports - to share with tax advisor.",
-			},
-			{
-				type: "paragraph",
-				content:
-					"Bank sync - to get an overview of my subscriptions for accounting.",
+					"3D modelling became so easy. While working on my brand I always would've loved seeing my clothes before production in 3D and here is my solution.",
 			},
 		],
 	},
