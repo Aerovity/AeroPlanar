@@ -1919,7 +1919,7 @@ export default function Home() {
 											setCurrentView("generation")
 										}
 									>
-										<Sparkles className="w-4 h-4 mr-2" />
+										<Sparkles className="w-4 h-4 mr-2 text-white" />
 										Generation
 									</Button>
 									<Button
@@ -1934,7 +1934,7 @@ export default function Home() {
 											setCurrentView("architecture")
 										}
 									>
-										<Eye className="w-4 h-4 mr-2" />
+										<Eye className="w-4 h-4 mr-2 text-white" />
 										Modelling
 									</Button>
 									<Button
@@ -1950,7 +1950,7 @@ export default function Home() {
 											setShowMockupsSidebars(true);
 										}}
 									>
-										<Layers className="w-4 h-4 mr-2" />
+										<Layers className="w-4 h-4 mr-2 text-white" />
 										Mockups
 									</Button>
 									<div className="relative">
@@ -1966,7 +1966,7 @@ export default function Home() {
 												setCurrentView("3d-editing")
 											}
 										>
-											<Grid3x3 className="w-4 h-4 mr-2" />
+											<Grid3x3 className="w-4 h-4 mr-2 text-white" />
 											3D Editing
 										</Button>
 									</div>
@@ -1976,7 +1976,7 @@ export default function Home() {
 											size="sm"
 											className="text-gray-400 hover:bg-gray-800/50 rounded-full"
 										>
-											<Palette className="w-4 h-4 mr-2" />
+											<Palette className="w-4 h-4 mr-2 text-white" />
 											Texture
 										</Button>
 										<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
@@ -1989,7 +1989,7 @@ export default function Home() {
 											size="sm"
 											className="text-gray-400 hover:bg-gray-800/50 rounded-full"
 										>
-											<Monitor className="w-4 h-4 mr-2" />
+											<Monitor className="w-4 h-4 mr-2 text-white" />
 											Rendering
 										</Button>
 										<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
@@ -2018,7 +2018,7 @@ export default function Home() {
 										size="sm"
 										className="bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50 disabled:opacity-50"
 									>
-										<Download className="w-4 h-4 mr-2" />
+										<Download className="w-4 h-4 mr-2 text-white" />
 										Download Whole Scene
 									</Button>
 									<SpotlightButton>
@@ -2053,7 +2053,7 @@ export default function Home() {
 								{models.length > 0 && (
 									<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
-											<Move3d className="w-4 h-4" />
+											<Move3d className="w-4 h-4 text-white" />
 											Generated Models
 										</h3>
 										<div className="space-y-2">
@@ -2156,7 +2156,7 @@ export default function Home() {
 							<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 								<div className="flex items-center justify-between mb-3">
 									<h3 className="text-white font-medium flex items-center gap-2">
-										<Search className="w-4 h-4 text-blue-400" />
+										<Search className="w-4 h-4 text-white" />
 										3D Model Search
 									</h3>
 									<Button
@@ -2371,7 +2371,7 @@ export default function Home() {
 								{/* Search Bar */}
 								<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4 mb-4">
 									<h3 className="text-white font-medium mb-3 flex items-center gap-2">
-										<Search className="w-4 h-4 text-blue-400" />
+										<Search className="w-4 h-4 text-white" />
 										Search 3D Models
 									</h3>
 									<div className="relative">
@@ -2432,7 +2432,7 @@ export default function Home() {
 								{selectedModel && (
 									<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
-											<Move3d className="w-4 h-4 text-blue-400" />
+											<Move3d className="w-4 h-4 text-white" />
 											Transform Controls
 										</h3>
 										<div className="space-y-2 text-sm text-gray-300">
@@ -2460,7 +2460,7 @@ export default function Home() {
 												</span>
 											</div>
 											<div className="font-medium text-white mb-2 mt-3 flex items-center gap-2">
-												<Keyboard className="w-4 h-4" />
+												<Keyboard className="w-4 h-4 text-white" />
 												Keyboard Controls:
 											</div>
 											<div className="flex items-center gap-2">
@@ -2498,7 +2498,7 @@ export default function Home() {
 								{/* 3D Editing Instructions */}
 								<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 									<h3 className="text-white font-medium mb-3 flex items-center gap-2">
-										<Grid3x3 className="w-4 h-4 text-purple-400" />
+										<Grid3x3 className="w-4 h-4 text-white" />
 										3D Editing Mode
 									</h3>
 									<div className="space-y-2 text-sm text-gray-300">
@@ -2668,7 +2668,7 @@ export default function Home() {
 								{dynamicLights.length > 0 && (
 									<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
-											<Lightbulb className="w-4 h-4 text-yellow-400" />
+											<Lightbulb className="w-4 h-4 text-white" />
 											Scene Lights ({dynamicLights.length}
 											)
 										</h3>
@@ -2766,7 +2766,7 @@ export default function Home() {
 								{selectedModel && (
 									<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
-											<Building className="w-4 h-4 text-green-400" />
+											<Building className="w-4 h-4 text-white" />
 											Architecture Controls
 										</h3>
 										<div className="space-y-2 text-sm text-gray-300">
@@ -2794,7 +2794,7 @@ export default function Home() {
 												</span>
 											</div>
 											<div className="font-medium text-white mb-2 mt-3 flex items-center gap-2">
-												<Keyboard className="w-4 h-4" />
+												<Keyboard className="w-4 h-4 text-white" />
 												Keyboard Controls:
 											</div>
 											<div className="flex items-center gap-2">
@@ -2834,7 +2834,7 @@ export default function Home() {
 												<span>Move Backward (Z+)</span>
 											</div>
 											<div className="font-medium text-white mb-2 mt-3 flex items-center gap-2">
-												<Copy className="w-4 h-4" />
+												<Copy className="w-4 h-4 text-white" />
 												Copy/Paste Controls:
 											</div>
 											<div className="flex items-center gap-2">
@@ -2878,7 +2878,7 @@ export default function Home() {
 								{/* Scene Info */}
 								<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 									<h3 className="text-white font-medium mb-3 flex items-center gap-2">
-										<Building className="w-4 h-4 text-purple-400" />
+										<Building className="w-4 h-4 text-white" />
 										Scene Information
 									</h3>
 									<div className="space-y-2 text-sm text-gray-300">

@@ -84,7 +84,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
       <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-white text-sm">
-            <Move3d className="w-4 h-4 text-blue-400" />
+            <Move3d className="w-4 h-4 text-white" />
             3D Editing Tools
           </CardTitle>
         </CardHeader>
@@ -94,7 +94,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
       <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-white text-sm">
-            <Move3d className="w-4 h-4 text-purple-400" />
+            <Move3d className="w-4 h-4 text-white" />
             Advanced Sculpting
           </CardTitle>
         </CardHeader>
@@ -129,7 +129,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-push', { type: 'push', size: sculptingSize[0], intensity: sculptingIntensity[0] })}
                   >
-                    <ArrowUp className="w-3 h-3" />
+                    <ArrowUp className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Push</span>
                 </div>
@@ -146,7 +146,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-pull', { type: 'pull', size: sculptingSize[0], intensity: sculptingIntensity[0] })}
                   >
-                    <ArrowDown className="w-3 h-3" />
+                    <ArrowDown className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Pull</span>
                 </div>
@@ -163,7 +163,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-inflate', { type: 'inflate', size: sculptingSize[0] * 1.2, intensity: sculptingIntensity[0] * 0.3 })}
                   >
-                    <Maximize2 className="w-3 h-3" />
+                    <Maximize2 className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Inflate</span>
                 </div>
@@ -180,7 +180,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-deflate', { type: 'deflate', size: sculptingSize[0] * 1.2, intensity: sculptingIntensity[0] * 0.3 })}
                   >
-                    <Minimize2 className="w-3 h-3" />
+                    <Minimize2 className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Deflate</span>
                 </div>
@@ -197,7 +197,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-smooth', { type: 'smooth', size: sculptingSize[0] * 1.5, intensity: sculptingIntensity[0] * 0.7 })}
                   >
-                    <Waves className="w-3 h-3" />
+                    <Waves className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Smooth</span>
                 </div>
@@ -214,7 +214,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-pinch', { type: 'pinch', size: sculptingSize[0] * 0.8, intensity: sculptingIntensity[0] * 0.6 })}
                   >
-                    <PinchIcon className="w-3 h-3" />
+                    <PinchIcon className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Pinch</span>
                 </div>
@@ -231,7 +231,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-crease', { type: 'crease', size: sculptingSize[0] * 0.6, intensity: sculptingIntensity[0] * 0.8 })}
                   >
-                    <Mountain className="w-3 h-3" />
+                    <Mountain className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Crease</span>
                 </div>
@@ -248,7 +248,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-flatten', { type: 'flatten', size: sculptingSize[0] * 1.5, intensity: sculptingIntensity[0] * 0.5 })}
                   >
-                    <Minus className="w-3 h-3" />
+                    <Minus className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Flatten</span>
                 </div>
@@ -265,7 +265,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     }`}
                     onClick={() => onToolSelect('sculpt-grab', { type: 'grab', size: sculptingSize[0] * 2.0, intensity: 1.0 })}
                   >
-                    <MousePointer className="w-3 h-3" />
+                    <MousePointer className="w-3 h-3 text-white" />
                   </Button>
                   <span className="text-xs text-gray-400 text-center">Grab</span>
                 </div>
@@ -320,7 +320,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
           <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-white text-sm">
-                <Paintbrush className="w-4 h-4 text-green-400" />
+                <Paintbrush className="w-4 h-4 text-white" />
                 Brush Tools
               </CardTitle>
             </CardHeader>
@@ -391,7 +391,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
           <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-white text-sm">
-                <Lightbulb className="w-4 h-4 text-yellow-400" />
+                <Lightbulb className="w-4 h-4 text-white" />
                 Lighting Tools
               </CardTitle>
             </CardHeader>
@@ -406,7 +406,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                 }`}
                 onClick={handleLightCreate}
               >
-                <Lightbulb className="w-4 h-4 mr-2" />
+                <Lightbulb className="w-4 h-4 mr-2 text-white" />
                 Create Light
               </Button>
 
@@ -430,7 +430,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                         }`}
                         onClick={() => handleLightingFilter(filter.id)}
                       >
-                        <Icon className="w-3 h-3 mr-2" />
+                        <Icon className="w-3 h-3 mr-2 text-white" />
                         {filter.name}
                       </Button>
                     )

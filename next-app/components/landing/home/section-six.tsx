@@ -11,18 +11,15 @@ export function SectionSix() {
 			id="assistant"
 		>
 			<Tray />
-			<div className="absolute w-full h-full flex items-center justify-center flex-col top-8 xl:top-0">
+			<div className="absolute w-full h-[65%] flex items-center justify-center flex-col top-8 xl:top-0">
 				<h4 className="text-4xl mb-4 font-medium md:text-white">
 					Assistant
 				</h4>
 				<p className="max-w-[790px] px-4 text-center text-sm md:text-white dark:text-[#878787] mb-12 md:mb-0">
-					Ask AeroPlanar anything and get tailored insights into your
-					financial situation. Understand your biggest outgoings and
-					incomings to get a better grasp on your financials to help
-					you cut costs, find opportunities and build a longer runway.
+					Scale with 3d designs like never before.
 				</p>
 
-				<div className="mt-6 hidden xl:block">
+				<div className="mt-6 hidden xl:block flex flex-col items-center space-y-3">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width={139}
@@ -41,7 +38,7 @@ export function SectionSix() {
 				</div> */}
 			</div>
 
-			<div>
+			<div className="h-[65%] overflow-hidden">
 				<div className="absolute right-12 top-[120px] hidden xl:flex flex-col space-y-8 text-center items-center">
 					<div className="text-center">
 						<svg
@@ -55,7 +52,7 @@ export function SectionSix() {
 								d="M7.332 53.667c-1.833 0-3.403-.653-4.708-1.959C1.318 50.404.665 48.834.665 47V7c0-1.833.653-3.403 1.959-4.708C3.929.986 5.499.333 7.332.333h20L33.999 7h26.666c1.834 0 3.403.653 4.709 1.959 1.305 1.305 1.958 2.875 1.958 4.708V47c0 1.834-.653 3.403-1.958 4.709-1.306 1.305-2.875 1.958-4.709 1.958H7.332Z"
 							/>
 						</svg>
-						<span className="text-sm mt-1 block">Misc</span>
+						<span className="text-sm mt-1 block">AI models</span>
 					</div>
 
 					<div className="text-center">
@@ -84,7 +81,7 @@ export function SectionSix() {
 							<path fill="#F5F5F3" d="M18 11h44v57H18z" />
 						</svg>
 
-						<span className="text-sm mt-1 block">invoice.pdf</span>
+						<span className="text-sm mt-1 block">tree.glb</span>
 					</div>
 				</div>
 
@@ -94,7 +91,7 @@ export function SectionSix() {
 					quality={90}
 					alt="Assistant background"
 					priority
-					style={{ width: "100%" }}
+					style={{ width: "100%", height: "100%", objectFit: "cover" }}
 				/>
 			</div>
 		</section>

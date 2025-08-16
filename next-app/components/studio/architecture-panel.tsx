@@ -319,7 +319,7 @@ export function ArchitecturePanel({
 			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-white">
-						<Upload className="w-5 h-5 text-blue-400" />
+						<Upload className="w-5 h-5 text-white" />
 						Upload 3D Models
 					</CardTitle>
 				</CardHeader>
@@ -336,7 +336,7 @@ export function ArchitecturePanel({
 			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-white">
-						<Building className="w-5 h-5 text-green-400" />
+						<Building className="w-5 h-5 text-white" />
 						Object Library
 					</CardTitle>
 				</CardHeader>
@@ -351,7 +351,7 @@ export function ArchitecturePanel({
 									className="justify-start bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
 									onClick={() => handleAddPrimitive(obj)}
 								>
-									<Icon className="w-4 h-4 mr-3" />
+									<Icon className="w-4 h-4 mr-3 text-white" />
 									{obj.name}
 								</Button>
 							);
@@ -365,7 +365,7 @@ export function ArchitecturePanel({
 				<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
 					<CardHeader className="pb-4">
 						<CardTitle className="flex items-center gap-2 text-white">
-							<Move3d className="w-4 h-4" />
+							<Move3d className="w-4 h-4 text-white" />
 							Scene Objects ({models.length})
 						</CardTitle>
 					</CardHeader>
@@ -387,7 +387,7 @@ export function ArchitecturePanel({
 										</p>
 										<p className="text-gray-400 text-xs flex items-center gap-1">
 											{selectedModelId === model.id && (
-												<Keyboard className="w-3 h-3" />
+												<Keyboard className="w-3 h-3 text-white" />
 											)}
 											Position: (
 											{model.position[0].toFixed(1)},{" "}
@@ -412,7 +412,7 @@ export function ArchitecturePanel({
 											className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50"
 											title="Random Position"
 										>
-											<RotateCcw className="w-3 h-3" />
+											<RotateCcw className="w-3 h-3 text-white" />
 										</Button>
 										<Button
 											size="sm"
@@ -424,7 +424,7 @@ export function ArchitecturePanel({
 											className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
 											title="Download Model"
 										>
-											<Download className="w-3 h-3" />
+											<Download className="w-3 h-3 text-white" />
 										</Button>
 										<Button
 											size="sm"
@@ -436,7 +436,7 @@ export function ArchitecturePanel({
 											className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 hover:bg-gray-700/50"
 											title="Delete Model"
 										>
-											<Trash2 className="w-3 h-3" />
+											<Trash2 className="w-3 h-3 text-white" />
 										</Button>
 									</div>
 								</div>
@@ -450,7 +450,7 @@ export function ArchitecturePanel({
 			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-white">
-						<Plus className="w-5 h-5 text-purple-400" />
+						<Plus className="w-5 h-5 text-white" />
 						Quick Actions
 					</CardTitle>
 				</CardHeader>
@@ -463,7 +463,7 @@ export function ArchitecturePanel({
 							onClick={handleCopy}
 							disabled={!selectedModelId}
 						>
-							<Copy className="w-4 h-4 mr-2" />
+							<Copy className="w-4 h-4 mr-2 text-white" />
 							Copy
 						</Button>
 						<Button
@@ -473,7 +473,7 @@ export function ArchitecturePanel({
 							onClick={handleCut}
 							disabled={!selectedModelId}
 						>
-							<Scissors className="w-4 h-4 mr-2" />
+							<Scissors className="w-4 h-4 mr-2 text-white" />
 							Cut
 						</Button>
 					</div>
@@ -483,7 +483,7 @@ export function ArchitecturePanel({
 							onClick={handleDownloadSceneAsGLB}
 							className="w-full"
 						>
-							<Package className="w-4 h-4 mr-2" />
+							<Package className="w-4 h-4 mr-2 text-white" />
 							Download Complete Scene (GLB)
 						</SpotlightButton>
 						<Button
@@ -491,7 +491,7 @@ export function ArchitecturePanel({
 							onClick={handleDownloadAll}
 							className="w-full bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
 						>
-							<FolderOpen className="w-4 h-4 mr-2" />
+							<FolderOpen className="w-4 h-4 mr-2 text-white" />
 							Download Individual Files (ZIP)
 						</Button>
 					</div>
@@ -503,7 +503,7 @@ export function ArchitecturePanel({
 				<Card className="bg-black/40 border-blue-500/30 backdrop-blur-sm">
 					<CardContent className="pt-4">
 						<div className="flex items-center gap-2 text-blue-300 text-sm">
-							<Copy className="w-4 h-4" />
+							<Copy className="w-4 h-4 text-white" />
 							Clipboard: {clipboard.name}
 						</div>
 					</CardContent>

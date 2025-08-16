@@ -121,7 +121,7 @@ export function GenerationPanel({
 		<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
 			<CardHeader className="pb-4">
 				<CardTitle className="flex items-center gap-2 text-white">
-					<Wand2 className="w-5 h-5 text-blue-400" />
+					<Wand2 className="w-5 h-5 text-white" />
 					AI 3D Generation
 				</CardTitle>
 			</CardHeader>
@@ -134,21 +134,21 @@ export function GenerationPanel({
 							value="image"
 							className="flex items-center gap-2 text-xs"
 						>
-							<Image className="w-3 h-3" />
+							<Image className="w-3 h-3 text-white" />
 							Image
 						</TabsTrigger>
 						<TabsTrigger
 							value="text-to-image"
 							className="flex items-center gap-2 text-xs"
 						>
-							<Wand2 className="w-3 h-3" />
+							<Wand2 className="w-3 h-3 text-white" />
 							T2I
 						</TabsTrigger>
 						<TabsTrigger
 							value="multimodal"
 							className="flex items-center gap-2 text-xs"
 						>
-							<Layers className="w-3 h-3" />
+							<Layers className="w-3 h-3 text-white" />
 							Both
 						</TabsTrigger>
 					</TabsList>
@@ -298,7 +298,7 @@ export function GenerationPanel({
 
 				<div className="space-y-4">
 					<div className="flex items-center gap-2 text-sm font-medium text-gray-300">
-						<Settings className="w-4 h-4" />
+						<Settings className="w-4 h-4 text-white" />
 						Generation Settings
 					</div>
 
