@@ -81,7 +81,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
   return (
     <div className="space-y-4">
       {/* Tool Header */}
-      <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+      <Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-white text-sm">
             <Move3d className="w-4 h-4 text-white" />
@@ -91,7 +91,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
       </Card>
 
       {/* Advanced Sculpting Toggle - Available for all models */}
-      <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+      <Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-white text-sm">
             <Move3d className="w-4 h-4 text-white" />
@@ -125,7 +125,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-push'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-push', { type: 'push', size: sculptingSize[0], intensity: sculptingIntensity[0] })}
                   >
@@ -142,7 +142,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-pull'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-pull', { type: 'pull', size: sculptingSize[0], intensity: sculptingIntensity[0] })}
                   >
@@ -159,7 +159,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-inflate'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-inflate', { type: 'inflate', size: sculptingSize[0] * 1.2, intensity: sculptingIntensity[0] * 0.3 })}
                   >
@@ -176,7 +176,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-deflate'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-deflate', { type: 'deflate', size: sculptingSize[0] * 1.2, intensity: sculptingIntensity[0] * 0.3 })}
                   >
@@ -193,7 +193,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-smooth'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-smooth', { type: 'smooth', size: sculptingSize[0] * 1.5, intensity: sculptingIntensity[0] * 0.7 })}
                   >
@@ -210,7 +210,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-pinch'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-pinch', { type: 'pinch', size: sculptingSize[0] * 0.8, intensity: sculptingIntensity[0] * 0.6 })}
                   >
@@ -227,7 +227,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-crease'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-crease', { type: 'crease', size: sculptingSize[0] * 0.6, intensity: sculptingIntensity[0] * 0.8 })}
                   >
@@ -244,7 +244,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-flatten'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-flatten', { type: 'flatten', size: sculptingSize[0] * 1.5, intensity: sculptingIntensity[0] * 0.5 })}
                   >
@@ -261,7 +261,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`w-full justify-center ${
                       activeTool === 'sculpt-grab'
                         ? "bg-purple-600 border-purple-500"
-                        : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                     }`}
                     onClick={() => onToolSelect('sculpt-grab', { type: 'grab', size: sculptingSize[0] * 2.0, intensity: 1.0 })}
                   >
@@ -307,7 +307,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
       </Card>
 
       {!selectedModelId && (
-        <Card className="bg-black/40 border-amber-500/30 backdrop-blur-sm">
+        <Card className="[#080c0c]/70 border-amber-500/30 backdrop-blur-sm">
           <CardContent className="pt-4 text-center">
             <p className="text-amber-300 text-sm">Select a model to start editing</p>
           </CardContent>
@@ -317,7 +317,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
       {selectedModelId && (
         <>
           {/* Brush Tools */}
-          <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+          <Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-white text-sm">
                 <Paintbrush className="w-4 h-4 text-white" />
@@ -335,7 +335,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                     className={`h-8 w-full p-1 ${
                       selectedTexture === texture.id
                         ? "bg-blue-600 border-blue-500"
-                        : "bg-gray-900/50 border-gray-700 hover:bg-gray-800/50"
+                        : "[#080c0c]/70 border-gray-700 hover:[#080c0c]/60"
                     }`}
                     onClick={() => handleMaterialBrushSelect(texture.id)}
                     title={texture.name}
@@ -388,7 +388,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
 
 
           {/* Lighting Tools */}
-          <Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+          <Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-white text-sm">
                 <Lightbulb className="w-4 h-4 text-white" />
@@ -402,7 +402,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                 className={`w-full justify-start ${
                   activeTool === 'light-create'
                     ? "bg-yellow-600 border-yellow-500"
-                    : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                    : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                 }`}
                 onClick={handleLightCreate}
               >
@@ -426,7 +426,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
                         className={`justify-start ${
                           activeTool === `lighting-filter-${filter.id}`
                             ? "bg-blue-600 border-blue-500"
-                            : "bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+                            : "[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
                         }`}
                         onClick={() => handleLightingFilter(filter.id)}
                       >
@@ -465,7 +465,7 @@ export function Editing3DSidebar({ selectedModelId, onToolSelect, activeTool }: 
 
           {/* Active Tool Status */}
           {activeTool && (
-            <Card className="bg-black/40 border-green-500/30 backdrop-blur-sm">
+            <Card className="[#080c0c]/70 border-green-500/30 backdrop-blur-sm">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="bg-green-600 text-white">

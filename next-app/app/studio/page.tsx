@@ -1894,140 +1894,120 @@ export default function Home() {
 			{/* UI Overlay */}
 			<div className="relative z-10 pointer-events-none">
 				{/* Header */}
-				<header className="p-4 pointer-events-auto">
-					<div className="max-w-7xl mx-auto">
-						<div className="bg-black/40 backdrop-blur-xl rounded-full border border-gray-800/50 px-1 py-0">
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-4">
-									<img
-										src="/logo.png"
-										alt="AeroPlanar Logo"
-										className="w-32 h-32 rounded-lg object-contain"
-									/>
-								</div>
-
-								<nav className="flex items-center gap-1">
-									<Button
-										variant="ghost"
-										size="sm"
-										className={`${
-											currentView === "generation"
-												? "text-white"
-												: "text-gray-400"
-										} hover:bg-gray-800/50 rounded-full`}
-										onClick={() =>
-											setCurrentView("generation")
-										}
-									>
-										<Sparkles className="w-4 h-4 mr-2 text-white" />
-										Generation
-									</Button>
-									<Button
-										variant="ghost"
-										size="sm"
-										className={`${
-											currentView === "architecture"
-												? "text-white"
-												: "text-gray-400"
-										} hover:bg-gray-800/50 rounded-full`}
-										onClick={() =>
-											setCurrentView("architecture")
-										}
-									>
-										<Eye className="w-4 h-4 mr-2 text-white" />
-										Modelling
-									</Button>
-									<Button
-										variant="ghost"
-										size="sm"
-										className={`${
-											currentView === "mockups"
-												? "text-white"
-												: "text-gray-400"
-										} hover:bg-gray-800/50 rounded-full`}
-										onClick={() => {
-											setCurrentView("mockups");
-											setShowMockupsSidebars(true);
-										}}
-									>
-										<Layers className="w-4 h-4 mr-2 text-white" />
-										Mockups
-									</Button>
-									<div className="relative">
-										<Button
-											variant="ghost"
-											size="sm"
-											className={`${
-												currentView === "3d-editing"
-													? "text-white"
-													: "text-gray-400"
-											} hover:bg-gray-800/50 rounded-full`}
-											onClick={() =>
-												setCurrentView("3d-editing")
-											}
-										>
-											<Grid3x3 className="w-4 h-4 mr-2 text-white" />
-											3D Editing
-										</Button>
-									</div>
-									<div className="relative">
-										<Button
-											variant="ghost"
-											size="sm"
-											className="text-gray-400 hover:bg-gray-800/50 rounded-full"
-										>
-											<Palette className="w-4 h-4 mr-2 text-white" />
-											Texture
-										</Button>
-										<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
-											Soon Available
-										</div>
-									</div>
-									<div className="relative">
-										<Button
-											variant="ghost"
-											size="sm"
-											className="text-gray-400 hover:bg-gray-800/50 rounded-full"
-										>
-											<Monitor className="w-4 h-4 mr-2 text-white" />
-											Rendering
-										</Button>
-										<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
-											Soon Available
-										</div>
-									</div>
-								</nav>
-
-								<div className="flex items-center gap-2">
-									{activeTasks.map((task) => (
-										<Badge
-											key={task.task_id}
-											variant="secondary"
-											className="bg-blue-600 text-white animate-pulse"
-										>
-											Generating...{" "}
-											{task.progress
-												? `${task.progress}%`
-												: ""}
-										</Badge>
-									))}
-									<Button
-										onClick={handleDownloadWholeScene}
-										disabled={models.length === 0}
-										variant="outline"
-										size="sm"
-										className="bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50 disabled:opacity-50"
-									>
-										<Download className="w-4 h-4 mr-2 text-white" />
-										Download Whole Scene
-									</Button>
-									<SpotlightButton>
-										Get Started
-									</SpotlightButton>
-								</div>
-							</div>
+				<header className="z-50 px-2 md:px-4 md:flex justify-center pointer-events-auto">
+					<nav className="border border-border rounded-md px-4 flex items-center backdrop-filter backdrop-blur-xl h-[70px] z-20 relative w-full max-w-7xl" style={{backgroundColor: 'rgba(8, 12, 12, 0.7)'}}>
+						<div className="flex items-center">
+							<img
+								src="/logo.png"
+								alt="AeroPlanar Logo"
+								className="h-16 w-auto"
+							/>
 						</div>
-					</div>
+
+						<ul className="space-x-2 font-medium text-sm flex mx-3">
+							<li>
+								<button
+									onClick={() => setCurrentView("generation")}
+									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
+										currentView === "generation"
+											? "text-primary"
+											: "text-secondary-foreground"
+									}`}
+								>
+									<Sparkles className="w-4 h-4 mr-2" />
+									Generation
+								</button>
+							</li>
+							<li>
+								<button
+									onClick={() => setCurrentView("architecture")}
+									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
+										currentView === "architecture"
+											? "text-primary"
+											: "text-secondary-foreground"
+									}`}
+								>
+									<Eye className="w-4 h-4 mr-2" />
+									Modelling
+								</button>
+							</li>
+							<li>
+								<button
+									onClick={() => {
+										setCurrentView("mockups");
+										setShowMockupsSidebars(true);
+									}}
+									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
+										currentView === "mockups"
+											? "text-primary"
+											: "text-secondary-foreground"
+									}`}
+								>
+									<Layers className="w-4 h-4 mr-2" />
+									Mockups
+								</button>
+							</li>
+							<li>
+								<button
+									onClick={() => setCurrentView("3d-editing")}
+									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
+										currentView === "3d-editing"
+											? "text-primary"
+											: "text-secondary-foreground"
+									}`}
+								>
+									<Grid3x3 className="w-4 h-4 mr-2" />
+									3D Editing
+								</button>
+							</li>
+							<li className="relative">
+								<button className="h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex text-secondary-foreground/50 cursor-not-allowed">
+									<Palette className="w-4 h-4 mr-2" />
+									Texture
+								</button>
+								<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
+									Soon Available
+								</div>
+							</li>
+							<li className="relative">
+								<button className="h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex text-secondary-foreground/50 cursor-not-allowed">
+									<Monitor className="w-4 h-4 mr-2" />
+									Rendering
+								</button>
+								<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
+									Soon Available
+								</div>
+							</li>
+						</ul>
+
+						<div className="flex items-center gap-2 ml-auto">
+							{activeTasks.map((task) => (
+								<Badge
+									key={task.task_id}
+									variant="secondary"
+									className="bg-blue-600 text-white animate-pulse"
+								>
+									Generating...{" "}
+									{task.progress
+										? `${task.progress}%`
+										: ""}
+								</Badge>
+							))}
+							<Button
+								onClick={handleDownloadWholeScene}
+								disabled={models.length === 0}
+								variant="outline"
+								size="sm"
+								className="text-sm font-medium"
+							>
+								<Download className="w-4 h-4 mr-2" />
+								Download Scene
+							</Button>
+							<SpotlightButton>
+								Get Started
+							</SpotlightButton>
+						</div>
+					</nav>
 				</header>
 
 				{/* Main Content */}
@@ -2051,7 +2031,7 @@ export default function Home() {
 
 								{/* Model List */}
 								{models.length > 0 && (
-									<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+									<div className="[#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
 											<Move3d className="w-4 h-4 text-white" />
 											Generated Models
@@ -2064,7 +2044,7 @@ export default function Home() {
 														selectedModelId ===
 														model.id
 															? "bg-blue-600/20 border border-blue-500/30 shadow-lg"
-															: "bg-gray-900/50 hover:bg-gray-800/50 border border-transparent"
+															: "[#080c0c]/80 hover:[#080c0c]/70 border border-transparent"
 													}`}
 													onClick={() =>
 														setSelectedModelId(
@@ -2103,7 +2083,7 @@ export default function Home() {
 																	model.id
 																);
 															}}
-															className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50"
+															className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:[#080c0c]/60"
 															title="Reset Position"
 														>
 															<RotateCcw className="w-3 h-3" />
@@ -2117,7 +2097,7 @@ export default function Home() {
 																	model.id
 																);
 															}}
-															className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+															className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:[#080c0c]/60"
 															title="Download Model"
 														>
 															<Download className="w-3 h-3" />
@@ -2131,7 +2111,7 @@ export default function Home() {
 																	model.id
 																);
 															}}
-															className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 hover:bg-gray-700/50"
+															className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 hover:[#080c0c]/60"
 															title="Delete Model"
 														>
 															<Trash2 className="w-3 h-3" />
@@ -2153,7 +2133,7 @@ export default function Home() {
 								activeTool={activeTool}
 							/>
 						) : currentView === "mockups" ? (
-							<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+							<div className="[#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 								<div className="flex items-center justify-between mb-3">
 									<h3 className="text-white font-medium flex items-center gap-2">
 										<Search className="w-4 h-4 text-white" />
@@ -2196,10 +2176,10 @@ export default function Home() {
 										.map((model) => (
 											<div
 												key={model.id}
-												className="bg-gray-900/50 rounded-lg border border-gray-700/50 p-3 hover:bg-gray-800/50 transition-all cursor-pointer group"
+												className="[#080c0c]/80 rounded-lg border border-gray-700/50 p-3 hover:[#080c0c]/70 transition-all cursor-pointer group"
 											>
 												<div className="flex gap-3">
-													<div className="w-12 h-12 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
+													<div className="w-12 h-12 [#080c0c] rounded-lg flex-shrink-0 overflow-hidden">
 														<img
 															src={model.preview}
 															alt={model.name}
@@ -2287,7 +2267,7 @@ export default function Home() {
 																		description: `Downloading ${model.name}...`,
 																	});
 																}}
-																className="h-6 w-6 p-0 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50"
+																className="h-6 w-6 p-0 text-gray-400 hover:text-blue-400 hover:[#080c0c]/60"
 																title="Download Model"
 															>
 																<Download className="w-3 h-3" />
@@ -2369,7 +2349,7 @@ export default function Home() {
 						) : currentView === "mockups" ? (
 							<>
 								{/* Search Bar */}
-								<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4 mb-4">
+								<div className="[#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4 mb-4">
 									<h3 className="text-white font-medium mb-3 flex items-center gap-2">
 										<Search className="w-4 h-4 text-white" />
 										Search 3D Models
@@ -2383,7 +2363,7 @@ export default function Home() {
 											onChange={(e) =>
 												setSearchQuery(e.target.value)
 											}
-											className="w-full pl-10 pr-4 py-2 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+											className="w-full pl-10 pr-4 py-2 [#080c0c]/80 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
 										/>
 									</div>
 									{searchQuery && (
@@ -2430,7 +2410,7 @@ export default function Home() {
 
 								{/* Transform Controls Info */}
 								{selectedModel && (
-									<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+									<div className="mt-4 [#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
 											<Move3d className="w-4 h-4 text-white" />
 											Transform Controls
@@ -2464,25 +2444,25 @@ export default function Home() {
 												Keyboard Controls:
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													↑
 												</kbd>
 												<span>Move Forward (Z-)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													↓
 												</kbd>
 												<span>Move Backward (Z+)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													←
 												</kbd>
 												<span>Move Left (X-)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													→
 												</kbd>
 												<span>Move Right (X+)</span>
@@ -2496,7 +2476,7 @@ export default function Home() {
 								<ModelStats selectedModel={selectedModel} />
 
 								{/* 3D Editing Instructions */}
-								<div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+								<div className="[#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 									<h3 className="text-white font-medium mb-3 flex items-center gap-2">
 										<Grid3x3 className="w-4 h-4 text-white" />
 										3D Editing Mode
@@ -2666,7 +2646,7 @@ export default function Home() {
 
 								{/* Light Management */}
 								{dynamicLights.length > 0 && (
-									<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+									<div className="mt-4 [#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
 											<Lightbulb className="w-4 h-4 text-white" />
 											Scene Lights ({dynamicLights.length}
@@ -2677,7 +2657,7 @@ export default function Home() {
 												(light, index) => (
 													<div
 														key={light.id}
-														className="flex items-center justify-between p-2 rounded-lg bg-gray-900/50"
+														className="flex items-center justify-between p-2 rounded-lg [#080c0c]/80"
 													>
 														<div className="flex-1">
 															<p className="text-white text-sm">
@@ -2764,7 +2744,7 @@ export default function Home() {
 
 								{/* Architecture Modeling Controls */}
 								{selectedModel && (
-									<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+									<div className="mt-4 [#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 										<h3 className="text-white font-medium mb-3 flex items-center gap-2">
 											<Building className="w-4 h-4 text-white" />
 											Architecture Controls
@@ -2798,37 +2778,37 @@ export default function Home() {
 												Keyboard Controls:
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													↑
 												</kbd>
 												<span>Move Forward (Z-)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													↓
 												</kbd>
 												<span>Move Backward (Z+)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													←
 												</kbd>
 												<span>Move Left (X-)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													→
 												</kbd>
 												<span>Move Right (X+)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													W
 												</kbd>
 												<span>Move Forward (Z-)</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													S
 												</kbd>
 												<span>Move Backward (Z+)</span>
@@ -2838,19 +2818,19 @@ export default function Home() {
 												Copy/Paste Controls:
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													Ctrl+C
 												</kbd>
 												<span>Copy selected model</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													Ctrl+V
 												</kbd>
 												<span>Paste copied model</span>
 											</div>
 											<div className="flex items-center gap-2">
-												<kbd className="px-2 py-1 text-xs bg-gray-700 rounded">
+												<kbd className="px-2 py-1 text-xs [#080c0c] rounded">
 													Ctrl+X
 												</kbd>
 												<span>Cut selected model</span>
@@ -2876,7 +2856,7 @@ export default function Home() {
 								/>
 
 								{/* Scene Info */}
-								<div className="mt-4 bg-black/40 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
+								<div className="mt-4 [#080c0c]/90 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-4">
 									<h3 className="text-white font-medium mb-3 flex items-center gap-2">
 										<Building className="w-4 h-4 text-white" />
 										Scene Information

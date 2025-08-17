@@ -316,7 +316,7 @@ export function ArchitecturePanel({
 	return (
 		<div className="space-y-6">
 			{/* Upload Section */}
-			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+			<Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-white">
 						<Upload className="w-5 h-5 text-white" />
@@ -333,7 +333,7 @@ export function ArchitecturePanel({
 			</Card>
 
 			{/* Object Library */}
-			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+			<Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-white">
 						<Building className="w-5 h-5 text-white" />
@@ -348,7 +348,7 @@ export function ArchitecturePanel({
 								<Button
 									key={obj.id}
 									variant="outline"
-									className="justify-start bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+									className="justify-start [#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
 									onClick={() => handleAddPrimitive(obj)}
 								>
 									<Icon className="w-4 h-4 mr-3 text-white" />
@@ -362,7 +362,7 @@ export function ArchitecturePanel({
 
 			{/* Model Management */}
 			{models.length > 0 && (
-				<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+				<Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
 					<CardHeader className="pb-4">
 						<CardTitle className="flex items-center gap-2 text-white">
 							<Move3d className="w-4 h-4 text-white" />
@@ -377,7 +377,7 @@ export function ArchitecturePanel({
 									className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200 ${
 										selectedModelId === model.id
 											? "bg-blue-600/20 border border-blue-500/30 shadow-lg"
-											: "bg-gray-900/50 hover:bg-gray-800/50 border border-transparent"
+											: "[#080c0c]/70 hover:[#080c0c]/60 border border-transparent"
 									}`}
 									onClick={() => onModelSelect(model.id)}
 								>
@@ -409,7 +409,7 @@ export function ArchitecturePanel({
 													]
 												);
 											}}
-											className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50"
+											className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:[#080c0c]/50"
 											title="Random Position"
 										>
 											<RotateCcw className="w-3 h-3 text-white" />
@@ -421,7 +421,7 @@ export function ArchitecturePanel({
 												e.stopPropagation();
 												onModelDownload(model.id);
 											}}
-											className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700/50"
+											className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:[#080c0c]/50"
 											title="Download Model"
 										>
 											<Download className="w-3 h-3 text-white" />
@@ -433,7 +433,7 @@ export function ArchitecturePanel({
 												e.stopPropagation();
 												onModelDelete(model.id);
 											}}
-											className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 hover:bg-gray-700/50"
+											className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 hover:[#080c0c]/50"
 											title="Delete Model"
 										>
 											<Trash2 className="w-3 h-3 text-white" />
@@ -447,7 +447,7 @@ export function ArchitecturePanel({
 			)}
 
 			{/* Quick Actions */}
-			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+			<Card className="[#080c0c]/70 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-white">
 						<Plus className="w-5 h-5 text-white" />
@@ -459,7 +459,7 @@ export function ArchitecturePanel({
 						<Button
 							variant="outline"
 							size="sm"
-							className="bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+							className="[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
 							onClick={handleCopy}
 							disabled={!selectedModelId}
 						>
@@ -469,7 +469,7 @@ export function ArchitecturePanel({
 						<Button
 							variant="outline"
 							size="sm"
-							className="bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+							className="[#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
 							onClick={handleCut}
 							disabled={!selectedModelId}
 						>
@@ -489,7 +489,7 @@ export function ArchitecturePanel({
 						<Button
 							variant="outline"
 							onClick={handleDownloadAll}
-							className="w-full bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+							className="w-full [#080c0c]/70 border-gray-700 text-white hover:[#080c0c]/60"
 						>
 							<FolderOpen className="w-4 h-4 mr-2 text-white" />
 							Download Individual Files (ZIP)
@@ -500,7 +500,7 @@ export function ArchitecturePanel({
 
 			{/* Clipboard Status */}
 			{clipboard && (
-				<Card className="bg-black/40 border-blue-500/30 backdrop-blur-sm">
+				<Card className="[#080c0c]/70 border-blue-500/30 backdrop-blur-sm">
 					<CardContent className="pt-4">
 						<div className="flex items-center gap-2 text-blue-300 text-sm">
 							<Copy className="w-4 h-4 text-white" />

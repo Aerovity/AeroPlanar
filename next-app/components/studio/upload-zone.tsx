@@ -83,7 +83,7 @@ export function UploadZone({
           ${
 				isDragActive
 					? "border-blue-400 bg-blue-950/10"
-					: "border-gray-700 hover:border-blue-500 bg-gray-900/30"
+					: "border-gray-700 hover:border-blue-500 [#080c0c]/70"
 			}
           ${isUploading ? "opacity-50 cursor-not-allowed" : ""}
         `}
@@ -121,7 +121,7 @@ export function UploadZone({
 						{isUploading ? (
 							<Loader2 className="w-12 h-12 mx-auto text-white animate-spin" />
 						) : (
-							<div className="w-12 h-12 mx-auto text-gray-400 bg-gray-800/50 rounded-full flex items-center justify-center">
+							<div className="w-12 h-12 mx-auto text-gray-400 [#080c0c]/60 rounded-full flex items-center justify-center">
 								{isDragActive ? (
 									<Upload className="w-6 h-6 text-white" />
 								) : (

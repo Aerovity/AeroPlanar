@@ -47,7 +47,7 @@ export default function SignupFormDemo() {
     console.log("Form submitted:", formData);
   };
   return (
-    <div className="mx-auto w-full max-w-md rounded-none bg-black p-4 md:rounded-2xl md:p-8">
+    <div className="mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8" style={{backgroundColor: '#080c0c'}}>
       <div className="flex flex-col items-center mb-2">
         <img 
           src="/logo.png" 
