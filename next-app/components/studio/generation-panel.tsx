@@ -118,7 +118,7 @@ export function GenerationPanel({
 	};
 
 	return (
-		<Card className="[#080c0c]/90 border-gray-800/50 backdrop-blur-sm">
+		<Card className="[#080c0c]/30 border-gray-800/50 backdrop-blur-sm">
 			<CardHeader className="pb-4">
 				<CardTitle className="flex items-center gap-2 text-white">
 					<Wand2 className="w-5 h-5 text-white" />
@@ -129,7 +129,7 @@ export function GenerationPanel({
 			<CardContent className="space-y-6">
 				{/* Generation Mode Tabs */}
 				<Tabs value={activeTab} onValueChange={setActiveTab}>
-					<TabsList className="grid w-full grid-cols-3 [#080c0c]/70">
+					<TabsList className="grid w-full grid-cols-3 [#080c0c]/20">
 						<TabsTrigger
 							value="image"
 							className="flex items-center gap-2 text-xs"
@@ -173,7 +173,7 @@ export function GenerationPanel({
 								placeholder="e.g., A majestic dragon flying over mountains, a cyberpunk city at night, a beautiful sunset over the ocean..."
 								value={textPrompt}
 								onChange={(e) => setTextPrompt(e.target.value)}
-								className="[#080c0c]/70 border-gray-700 text-white placeholder:text-gray-400 min-h-[80px] resize-none"
+								className="[#080c0c]/20 border-gray-700 text-white placeholder:text-gray-400 min-h-[80px] resize-none"
 								disabled={isGenerating}
 								maxLength={1024}
 							/>
@@ -192,7 +192,7 @@ export function GenerationPanel({
 								onChange={(e) =>
 									setNegativePrompt(e.target.value)
 								}
-								className="[#080c0c]/70 border-gray-700 text-white placeholder:text-gray-400 min-h-[60px] resize-none"
+								className="[#080c0c]/20 border-gray-700 text-white placeholder:text-gray-400 min-h-[60px] resize-none"
 								disabled={isGenerating}
 								maxLength={255}
 							/>
@@ -217,7 +217,7 @@ export function GenerationPanel({
 								placeholder="e.g., Make it more futuristic, add metallic textures, change the color to blue..."
 								value={textPrompt}
 								onChange={(e) => setTextPrompt(e.target.value)}
-								className="[#080c0c]/70 border-gray-700 text-white placeholder:text-gray-400 min-h-[80px] resize-none"
+								className="[#080c0c]/20 border-gray-700 text-white placeholder:text-gray-400 min-h-[80px] resize-none"
 								disabled={isGenerating}
 							/>
 							<p className="text-xs text-gray-400">
@@ -316,10 +316,10 @@ export function GenerationPanel({
 									}))
 								}
 							>
-								<SelectTrigger className="[#080c0c]/70 border-gray-700 text-white">
+								<SelectTrigger className="[#080c0c]/20 border-gray-700 text-white">
 									<SelectValue />
 								</SelectTrigger>
-								<SelectContent className="[#080c0c]/80 border-gray-700">
+								<SelectContent className="[#080c0c]/25 border-gray-700">
 									<SelectItem value="v2.0-20240919">
 										v2.0 (Latest)
 									</SelectItem>
@@ -341,10 +341,10 @@ export function GenerationPanel({
 									}))
 								}
 							>
-								<SelectTrigger className="[#080c0c]/70 border-gray-700 text-white">
+								<SelectTrigger className="[#080c0c]/20 border-gray-700 text-white">
 									<SelectValue />
 								</SelectTrigger>
-								<SelectContent className="[#080c0c]/80 border-gray-700">
+								<SelectContent className="[#080c0c]/25 border-gray-700">
 									<SelectItem value="none">None</SelectItem>
 									<SelectItem value="cartoon">
 										Cartoon
@@ -390,10 +390,10 @@ export function GenerationPanel({
 									}))
 								}
 							>
-								<SelectTrigger className="[#080c0c]/70 border-gray-700 text-white">
+								<SelectTrigger className="[#080c0c]/20 border-gray-700 text-white">
 									<SelectValue />
 								</SelectTrigger>
-								<SelectContent className="[#080c0c]/80 border-gray-700">
+								<SelectContent className="[#080c0c]/25 border-gray-700">
 									<SelectItem value="none">None</SelectItem>
 									<SelectItem value="quad">Quad</SelectItem>
 									<SelectItem value="triangle">

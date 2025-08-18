@@ -18,7 +18,7 @@ interface ModelStatsProps {
 export function ModelStats({ selectedModel }: ModelStatsProps) {
 	if (!selectedModel) {
 		return (
-			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+			<Card className="[#080c0c]/15 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader>
 					<CardTitle className="text-white text-sm">
 						Model Information
@@ -34,7 +34,7 @@ export function ModelStats({ selectedModel }: ModelStatsProps) {
 	}
 
 	return (
-		<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+		<Card className="[#080c0c]/15 border-gray-800/50 backdrop-blur-sm">
 			<CardHeader className="pb-3">
 				<CardTitle className="text-white text-sm flex items-center justify-between">
 					Model Information
