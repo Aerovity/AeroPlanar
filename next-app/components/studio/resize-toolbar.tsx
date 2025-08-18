@@ -44,7 +44,7 @@ export function ResizeToolbar({
 
 	if (!selectedModel) {
 		return (
-			<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+			<Card className="[#080c0c]/15 border-gray-800/50 backdrop-blur-sm">
 				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-white">
 						Resize Toolbar
@@ -121,7 +121,7 @@ export function ResizeToolbar({
 	};
 
 	return (
-		<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+		<Card className="[#080c0c]/15 border-gray-800/50 backdrop-blur-sm">
 			<CardHeader className="pb-4">
 				<CardTitle className="flex items-center gap-2 text-white">
 					Resize Toolbar
@@ -129,7 +129,7 @@ export function ResizeToolbar({
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{/* Object Info */}
-				<div className="bg-gray-900/50 rounded-lg p-3">
+				<div className="[#080c0c]/15 rounded-lg p-3">
 					<p className="text-white text-sm font-medium">
 						{selectedModel.name}
 					</p>
@@ -192,7 +192,7 @@ export function ResizeToolbar({
 										parseFloat(e.target.value) || 1
 									)
 								}
-								className="w-16 h-8 text-xs bg-gray-900/50 border-gray-700 text-white"
+								className="w-16 h-8 text-xs [#080c0c]/15 border-gray-700 text-white"
 								step={0.1}
 								min={0.1}
 							/>
@@ -223,7 +223,7 @@ export function ResizeToolbar({
 										parseFloat(e.target.value) || 1
 									)
 								}
-								className="w-16 h-8 text-xs bg-gray-900/50 border-gray-700 text-white"
+								className="w-16 h-8 text-xs [#080c0c]/15 border-gray-700 text-white"
 								step={0.1}
 								min={0.1}
 							/>
@@ -254,7 +254,7 @@ export function ResizeToolbar({
 										parseFloat(e.target.value) || 1
 									)
 								}
-								className="w-16 h-8 text-xs bg-gray-900/50 border-gray-700 text-white"
+								className="w-16 h-8 text-xs [#080c0c]/15 border-gray-700 text-white"
 								step={0.1}
 								min={0.1}
 							/>
@@ -272,7 +272,7 @@ export function ResizeToolbar({
 							size="sm"
 							variant="outline"
 							onClick={() => handleQuickResize(0.5)}
-							className="bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+							className="[#080c0c]/15 border-gray-700 text-white hover:[#080c0c]/10"
 						>
 							<span className="mr-2">➖</span>
 							Half Size
@@ -281,7 +281,7 @@ export function ResizeToolbar({
 							size="sm"
 							variant="outline"
 							onClick={() => handleQuickResize(2)}
-							className="bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+							className="[#080c0c]/15 border-gray-700 text-white hover:[#080c0c]/10"
 						>
 							<span className="mr-2">➕</span>
 							Double Size
@@ -291,7 +291,7 @@ export function ResizeToolbar({
 						size="sm"
 						variant="outline"
 						onClick={handleReset}
-						className="w-full bg-gray-900/50 border-gray-700 text-white hover:bg-gray-800/50"
+						className="w-full [#080c0c]/15 border-gray-700 text-white hover:[#080c0c]/10"
 					>
 						<span className="mr-2">🔄</span>
 						Reset to Original

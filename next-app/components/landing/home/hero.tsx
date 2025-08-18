@@ -48,9 +48,9 @@ export function Hero() {
 							</Button>
 						</Link>
 
-						<a href="https://app.aeroplanar.io">
+						<Link href="/studio">
 							<Button className="h-11 px-5">Launch Studio</Button>
-						</a>
+						</Link>
 					</div>
 				</div>
 

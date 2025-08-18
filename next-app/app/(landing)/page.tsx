@@ -10,26 +10,26 @@ import { SectionThree } from "@/components/landing/home/section-three";
 import { SectionTwo } from "@/components/landing/home/section-two";
 import { Testimonials } from "@/components/landing/home/testimonials";
 import SectionStories from "@/components/landing/home/section-stories";
-import { SectionVideo } from "@/components/landing/home/section-video";
 import VibeCodingTweetsSection from "@/components/landing/home/vibe-coding-tweets-section";
 import TestimonialsSection from "@/components/landing/home/testimonials-section";
 import FAQSection from "@/components/landing/home/faq-section";
+import { Spotlight } from "@/components/ui/spotlight-new";
 
 export const revalidate = 1800;
 
 export default function Home() {
 	return (
 		<>
-			<Hero />
+			<div className="relative">
+				<Hero />
+				<Spotlight />
+			</div>
 			<SectionStories />
 			<SectionOne />
 			<SectionTwo />
 			<SectionThree />
 			<SectionFour />
 			<SectionFive />
-			<SectionSix />
-			<SectionSeven />
-			<SectionVideo />
 			<FAQSection />
 		</>
 	);

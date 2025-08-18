@@ -49,7 +49,7 @@ export function ScenePerformanceMonitor({
 	const WarningIcon = warningIcons[performance.warningLevel];
 
 	return (
-		<Card className="bg-black/40 border-gray-800/50 backdrop-blur-sm">
+		<Card className="[#080c0c]/15 border-gray-800/50 backdrop-blur-sm">
 			<CardHeader className="pb-3">
 				<CardTitle className="text-white text-sm flex items-center justify-between">
 					<div className="flex items-center gap-2">
@@ -218,7 +218,7 @@ export function ScenePerformanceMonitor({
 
 				{/* Performance Tips */}
 				{performance.performanceScore < 60 && (
-					<div className="mt-3 p-2 bg-gray-900/50 rounded-lg">
+					<div className="mt-3 p-2 [#080c0c]/15 rounded-lg">
 						<div className="text-xs text-gray-400 font-medium mb-1">
 							💡 Performance Tips:
 						</div>
