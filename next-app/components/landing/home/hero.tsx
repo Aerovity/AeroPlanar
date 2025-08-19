@@ -8,12 +8,13 @@ export function Hero() {
 	return (
 		<section className="mt-[60px] lg:mt-[80px] min-h-[530px] relative lg:h-[calc(100vh-300px)]">
 			<div className="flex flex-col container max-w-none pl-8 lg:pl-16">
-				<Link href="/updates/aeroplanar-v1">
+				<div className="mt-8">
+					<Link href="/updates/aeroplanar-v1">
 					<Button
 						variant="outline"
-						className="rounded-full bg-background/80 backdrop-blur-sm border-border flex space-x-2 items-center hover:bg-background/90 transition-all duration-300 shadow-lg shadow-muted/20"
+						className="rounded-full bg-background/80 backdrop-blur-sm border-[#c3b383] flex space-x-2 items-center hover:bg-[#c3b383]/10 transition-all duration-300 shadow-lg shadow-muted/20"
 					>
-						<span className="font-mono text-xs text-foreground">
+						<span className="font-mono text-xs" style={{color: '#c3b383'}}>
 							AeroPlanar v1.0
 						</span>
 						<svg
@@ -23,12 +24,13 @@ export function Hero() {
 							fill="none"
 						>
 							<path
-								fill="currentColor"
+								fill="#c3b383"
 								d="M8.783 6.667H.667V5.333h8.116L5.05 1.6 6 .667 11.333 6 6 11.333l-.95-.933 3.733-3.733Z"
 							/>
 						</svg>
 					</Button>
-				</Link>
+					</Link>
+				</div>
 
 				<h2 className="mt-6 md:mt-10 max-w-[580px] text-muted-foreground leading-tight text-[24px] md:text-[36px] font-medium">
 					AI-powered 3D modeling, Real-time collaboration, Asset

@@ -7,6 +7,7 @@ import {
   IconBrandGithub,
   IconBrandGoogle,
 } from "@tabler/icons-react";
+import { LogoLarge } from "@/components/shared/logo-large";
 
 export default function SignupFormDemo() {
   const [formData, setFormData] = React.useState({
@@ -47,13 +48,11 @@ export default function SignupFormDemo() {
     console.log("Form submitted:", formData);
   };
   return (
-    <div className="mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8" style={{backgroundColor: '#080c0c'}}>
-      <div className="flex flex-col items-center mb-2">
-        <img 
-          src="/logo.png" 
-          alt="AeroPlanar Logo" 
-          className="h-24 w-auto"
-        />
+    <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
+      <div className="flex justify-center mb-6">
+        <div className="scale-150">
+          <LogoLarge />
+        </div>
       </div>
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to AeroPlanar
@@ -63,66 +62,32 @@ export default function SignupFormDemo() {
       </p>
 
       <form className="my-8" onSubmit={handleSubmit}>
-        <div className="mb-4 flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-2">
-          <div className="flex-1">
-            <label htmlFor="firstname" className="block text-sm font-medium text-white mb-2">First name</label>
-            <input 
-              id="firstname" 
-              placeholder="Tyler" 
-              type="text" 
-              value={formData.firstName}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-            />
-          </div>
-          <div className="flex-1">
-            <label htmlFor="lastname" className="block text-sm font-medium text-white mb-2">Last name</label>
-            <input 
-              id="lastname" 
-              placeholder="Durden" 
-              type="text"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-            />
-          </div>
+        <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+          <LabelInputContainer>
+            <Label htmlFor="firstname">First name</Label>
+            <Input id="firstname" placeholder="Tyler" type="text" />
+          </LabelInputContainer>
+          <LabelInputContainer>
+            <Label htmlFor="lastname">Last name</Label>
+            <Input id="lastname" placeholder="Durden" type="text" />
+          </LabelInputContainer>
         </div>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-white mb-2">Email Address</label>
-          <input 
-            id="email" 
-            placeholder="projectmayhem@fc.com" 
-            type="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-sm font-medium text-white mb-2">Password</label>
-          <input 
-            id="password" 
-            placeholder="••••••••" 
-            type="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-          />
-        </div>
-        <div className="mb-8">
-          <label htmlFor="confirmpassword" className="block text-sm font-medium text-white mb-2">Confirm Password</label>
-          <input
+        <LabelInputContainer className="mb-4">
+          <Label htmlFor="email">Email Address</Label>
+          <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
+        </LabelInputContainer>
+        <LabelInputContainer className="mb-4">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" placeholder="••••••••" type="password" />
+        </LabelInputContainer>
+        <LabelInputContainer className="mb-8">
+          <Label htmlFor="confirmpassword">Confirm Password</Label>
+          <Input
             id="confirmpassword"
             placeholder="••••••••"
             type="password"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
           />
-          {errors.passwordMatch && (
-            <span className="text-red-500 text-xs mt-1">{errors.passwordMatch}</span>
-          )}
-        </div>
+        </LabelInputContainer>
 
         <button
           className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
@@ -157,13 +122,6 @@ export default function SignupFormDemo() {
           </button>
         </div>
       </form>
-      
-      <div className="text-center text-sm">
-        Already have an account?{" "}
-        <a href="/sign-in" className="underline underline-offset-4 hover:text-primary">
-          Sign in
-        </a>
-      </div>
     </div>
   );
 }

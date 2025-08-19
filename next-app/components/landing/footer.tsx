@@ -23,7 +23,7 @@ export function Footer() {
 						<span className="sr-only">AeroPlanar</span>
 					</Link>
 
-					<span className="font-normal md:text-2xl text-right text-foreground">
+					<span className="font-normal md:text-2xl text-right" style={{color: '#c3b383'}}>
 						Build the future with 3D.
 					</span>
 				</div>
