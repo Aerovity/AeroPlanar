@@ -16,7 +16,7 @@ export function FooterCTA() {
 			<span className="text-6xl	md:text-8xl font-medium text-foreground">
 				Transform your ideas with AeroPlanar.
 			</span>
-			<p className="text-muted-foreground mt-6">
+			<p className="mt-6" style={{color: '#c3b383'}}>
 				AI-powered 3D modeling, Real-time collaboration, Asset
 				optimization, Performance monitoring & intelligent tools <br />{" "}
 				for modern creators.

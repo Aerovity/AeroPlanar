@@ -147,8 +147,8 @@ export function Header() {
 	}
 
 	return (
-		<header className="z-50 px-2 md:px-4 md:flex justify-center">
-			<nav className="border border-border rounded-md px-4 flex items-center backdrop-filter backdrop-blur-xl bg-background/30 h-[70px] z-20 relative">
+		<header className="z-50 px-2 md:px-4 md:flex justify-center w-full">
+			<nav className="border border-border rounded-md px-4 flex items-center backdrop-filter backdrop-blur-xl bg-background/30 h-[70px] z-20 relative w-full max-w-none">
 				<ContextMenu>
 					<ContextMenuTrigger>
 						<Link href="/">

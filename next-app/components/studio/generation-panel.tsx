@@ -232,7 +232,7 @@ export function GenerationPanel({
 				{(selectedFile || textPrompt.trim()) && (
 					<div className="p-3 bg-blue-600/10 border border-blue-500/30 rounded-lg">
 						{selectedFile && (
-							<p className="text-sm text-blue-300 font-medium">
+							<p className="text-sm font-medium" style={{color: "#c3b383"}}>
 								Image: {selectedFile.name}
 							</p>
 						)}
@@ -248,7 +248,7 @@ export function GenerationPanel({
 								{negativePrompt.length > 30 ? "..." : ""}
 							</p>
 						)}
-						<p className="text-xs text-blue-400 mt-1">
+						<p className="text-xs mt-1" style={{color: "#c3b383"}}>
 							{activeTab === "text-to-image"
 								? "Ready to generate image"
 								: selectedFile?.name
