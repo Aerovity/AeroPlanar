@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
+import { StudioLoading } from "@/components/shared/studio-loading";
+import { motion } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
 import {
 	OrbitControls,
@@ -57,6 +59,7 @@ interface Task {
 }
 
 export default function Home() {
+	const [isLoading, setIsLoading] = useState(true);
 	const [models, setModels] = useState<any[]>([]);
 	const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
 	const [isGenerating, setIsGenerating] = useState(false);
@@ -70,6 +73,15 @@ export default function Home() {
 	>("generation");
 	const [showMockupsSidebars, setShowMockupsSidebars] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
+
+	// Loading effect
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 3000); // 3 second loading time
+
+		return () => clearTimeout(timer);
+	}, []);
 
 	// Undo functionality with limited history (max 10 actions to avoid lag)
 	const [undoHistory, setUndoHistory] = useState<any[]>([]);
@@ -1476,6 +1488,11 @@ export default function Home() {
 		}
 	};
 
+	// Show loading screen initially
+	if (isLoading) {
+		return <StudioLoading />;
+	}
+
 	return (
 		<div className="min-h-screen bg-black relative overflow-hidden">
 			{/* Full-screen 3D Background */}
@@ -1894,91 +1911,188 @@ export default function Home() {
 			{/* UI Overlay */}
 			<div className="relative z-10 pointer-events-none">
 				{/* Header */}
-				<header className="z-50 px-2 md:px-4 md:flex justify-center pointer-events-auto">
-					<nav className="border border-border rounded-md px-4 flex items-center backdrop-filter backdrop-blur-xl h-[70px] z-20 relative w-full max-w-7xl" style={{backgroundColor: 'rgba(8, 12, 12, 0.3)'}}>
-						<div className="flex items-center">
-							<img
-								src="/logo.png"
-								alt="AeroPlanar Logo"
-								className="h-16 w-auto"
-							/>
+				<header className="fixed left-1/2 -translate-x-1/2 z-50 top-1 pointer-events-none">
+					<div className="flex items-center backdrop-blur-lg shadow-lg transition-all duration-500 ease-in-out pointer-events-auto gap-4 py-3 px-8 rounded-full bg-background/90 border border-border/80 min-w-[1000px]">
+						<img
+							src="/logo.png"
+							alt="AeroPlanar Logo"
+							className="h-20 w-32 object-contain hover:scale-105 transition-all duration-300 mr-6"
+						/>
+						<div className="flex items-center transition-all duration-500 gap-2">
+							<button
+								onClick={() => setCurrentView("generation")}
+								className="relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300 text-white hover:text-[#c3b383] px-4 py-2 flex items-center gap-2"
+							>
+								<Sparkles className="w-4 h-4" />
+								<span className="hidden md:inline">Generation</span>
+								{currentView === "generation" && (
+									<motion.div
+										layoutId="studio-lamp"
+										className="absolute inset-0 w-full rounded-full -z-10"
+										style={{ backgroundColor: "#c3b383" + "20" }}
+										initial={false}
+										transition={{
+											type: "spring",
+											stiffness: 300,
+											damping: 30,
+										}}
+									>
+										<div
+											className="absolute left-1/2 -translate-x-1/2 rounded-t-full transition-all duration-300 -top-3 w-10 h-2"
+											style={{ backgroundColor: "#c3b383" }}
+										>
+											<div
+												className="absolute rounded-full blur-md -left-2 transition-all duration-300 w-14 h-8 -top-3"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-md transition-all duration-300 w-10 h-8 -top-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-sm transition-all duration-300 w-6 h-6 top-0 left-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+										</div>
+									</motion.div>
+								)}
+							</button>
+							<button
+								onClick={() => setCurrentView("architecture")}
+								className="relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300 text-white hover:text-[#c3b383] px-4 py-2 flex items-center gap-2"
+							>
+								<Eye className="w-4 h-4" />
+								<span className="hidden md:inline">Modelling</span>
+								{currentView === "architecture" && (
+									<motion.div
+										layoutId="studio-lamp"
+										className="absolute inset-0 w-full rounded-full -z-10"
+										style={{ backgroundColor: "#c3b383" + "20" }}
+										initial={false}
+										transition={{
+											type: "spring",
+											stiffness: 300,
+											damping: 30,
+										}}
+									>
+										<div
+											className="absolute left-1/2 -translate-x-1/2 rounded-t-full transition-all duration-300 -top-3 w-10 h-2"
+											style={{ backgroundColor: "#c3b383" }}
+										>
+											<div
+												className="absolute rounded-full blur-md -left-2 transition-all duration-300 w-14 h-8 -top-3"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-md transition-all duration-300 w-10 h-8 -top-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-sm transition-all duration-300 w-6 h-6 top-0 left-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+										</div>
+									</motion.div>
+								)}
+							</button>
+							<button
+								onClick={() => {
+									setCurrentView("mockups");
+									setShowMockupsSidebars(true);
+								}}
+								className="relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300 text-white hover:text-[#c3b383] px-4 py-2 flex items-center gap-2"
+							>
+								<Layers className="w-4 h-4" />
+								<span className="hidden md:inline">Mockups</span>
+								{currentView === "mockups" && (
+									<motion.div
+										layoutId="studio-lamp"
+										className="absolute inset-0 w-full rounded-full -z-10"
+										style={{ backgroundColor: "#c3b383" + "20" }}
+										initial={false}
+										transition={{
+											type: "spring",
+											stiffness: 300,
+											damping: 30,
+										}}
+									>
+										<div
+											className="absolute left-1/2 -translate-x-1/2 rounded-t-full transition-all duration-300 -top-3 w-10 h-2"
+											style={{ backgroundColor: "#c3b383" }}
+										>
+											<div
+												className="absolute rounded-full blur-md -left-2 transition-all duration-300 w-14 h-8 -top-3"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-md transition-all duration-300 w-10 h-8 -top-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-sm transition-all duration-300 w-6 h-6 top-0 left-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+										</div>
+									</motion.div>
+								)}
+							</button>
+							<button
+								onClick={() => setCurrentView("3d-editing")}
+								className="relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300 text-white hover:text-[#c3b383] px-4 py-2 flex items-center gap-2"
+							>
+								<Grid3x3 className="w-4 h-4" />
+								<span className="hidden md:inline">3D Editing</span>
+								{currentView === "3d-editing" && (
+									<motion.div
+										layoutId="studio-lamp"
+										className="absolute inset-0 w-full rounded-full -z-10"
+										style={{ backgroundColor: "#c3b383" + "20" }}
+										initial={false}
+										transition={{
+											type: "spring",
+											stiffness: 300,
+											damping: 30,
+										}}
+									>
+										<div
+											className="absolute left-1/2 -translate-x-1/2 rounded-t-full transition-all duration-300 -top-3 w-10 h-2"
+											style={{ backgroundColor: "#c3b383" }}
+										>
+											<div
+												className="absolute rounded-full blur-md -left-2 transition-all duration-300 w-14 h-8 -top-3"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-md transition-all duration-300 w-10 h-8 -top-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+											<div
+												className="absolute rounded-full blur-sm transition-all duration-300 w-6 h-6 top-0 left-2"
+												style={{ backgroundColor: "#c3b383" + "33" }}
+											/>
+										</div>
+									</motion.div>
+								)}
+							</button>
+							<div className="relative group">
+								<button className="cursor-pointer text-sm font-semibold rounded-full transition-all duration-300 text-white/50 cursor-not-allowed px-4 py-2 flex items-center gap-2">
+									<Palette className="w-4 h-4" />
+									<span className="hidden md:inline">Texture</span>
+								</button>
+								<div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 py-1 rounded">
+									Soon Available
+								</div>
+							</div>
+							<div className="relative group">
+								<button className="cursor-pointer text-sm font-semibold rounded-full transition-all duration-300 text-white/50 cursor-not-allowed px-4 py-2 flex items-center gap-2">
+									<Monitor className="w-4 h-4" />
+									<span className="hidden md:inline">Rendering</span>
+								</button>
+								<div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-2 py-1 rounded">
+									Soon Available
+								</div>
+							</div>
 						</div>
-
-						<ul className="space-x-2 font-medium text-sm flex mx-3">
-							<li>
-								<button
-									onClick={() => setCurrentView("generation")}
-									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
-										currentView === "generation"
-											? "text-primary"
-											: "text-secondary-foreground"
-									}`}
-								>
-									<Sparkles className="w-4 h-4 mr-2" />
-									Generation
-								</button>
-							</li>
-							<li>
-								<button
-									onClick={() => setCurrentView("architecture")}
-									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
-										currentView === "architecture"
-											? "text-primary"
-											: "text-secondary-foreground"
-									}`}
-								>
-									<Eye className="w-4 h-4 mr-2" />
-									Modelling
-								</button>
-							</li>
-							<li>
-								<button
-									onClick={() => {
-										setCurrentView("mockups");
-										setShowMockupsSidebars(true);
-									}}
-									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
-										currentView === "mockups"
-											? "text-primary"
-											: "text-secondary-foreground"
-									}`}
-								>
-									<Layers className="w-4 h-4 mr-2" />
-									Mockups
-								</button>
-							</li>
-							<li>
-								<button
-									onClick={() => setCurrentView("3d-editing")}
-									className={`h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex transition-opacity hover:opacity-70 duration-200 ${
-										currentView === "3d-editing"
-											? "text-primary"
-											: "text-secondary-foreground"
-									}`}
-								>
-									<Grid3x3 className="w-4 h-4 mr-2" />
-									3D Editing
-								</button>
-							</li>
-							<li className="relative">
-								<button className="h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex text-secondary-foreground/50 cursor-not-allowed">
-									<Palette className="w-4 h-4 mr-2" />
-									Texture
-								</button>
-								<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
-									Soon Available
-								</div>
-							</li>
-							<li className="relative">
-								<button className="h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex text-secondary-foreground/50 cursor-not-allowed">
-									<Monitor className="w-4 h-4 mr-2" />
-									Rendering
-								</button>
-								<div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
-									Soon Available
-								</div>
-							</li>
-						</ul>
 
 						<div className="flex items-center gap-2 ml-auto">
 							{activeTasks.map((task) => (
@@ -1996,22 +2110,21 @@ export default function Home() {
 							<SpotlightButton
 								onClick={handleDownloadWholeScene}
 								disabled={models.length === 0}
-								className="text-sm font-medium h-8 px-6 w-auto whitespace-nowrap flex items-center justify-center"
+								className="text-sm font-medium h-8 px-3 w-auto whitespace-nowrap flex items-center justify-center"
 							>
-								<Download className="w-4 h-4 mr-2" />
-								Download Scene
+								<Download className="w-4 h-4" />
 							</SpotlightButton>
-							<SpotlightButton className="h-8 px-4 text-sm">
+							<SpotlightButton className="h-8 px-6 text-sm w-auto whitespace-nowrap flex items-center justify-center">
 								Get Started
 							</SpotlightButton>
 						</div>
-					</nav>
+					</div>
 				</header>
 
 				{/* Main Content */}
-				<div className="flex h-[calc(100vh-120px)] gap-6 px-6 pb-6 pt-6 overflow-hidden">
+				<div className="flex h-[calc(100vh-120px)] gap-6 px-6 pb-6 pt-24 overflow-hidden">
 					{/* Left Sidebar */}
-					<div className="w-80 space-y-6 pointer-events-auto overflow-y-auto max-h-[calc(100vh-200px)] pr-2 pb-6 pt-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500">
+					<div className="w-80 space-y-6 pointer-events-auto overflow-y-auto max-h-[calc(100vh-240px)] pr-2 pb-6 pt-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500">
 						{currentView === "generation" ? (
 							<>
 								<GenerationPanel
@@ -2480,7 +2593,7 @@ export default function Home() {
 										3D Editing Mode
 									</h3>
 									<div className="space-y-2 text-sm text-gray-300">
-										<div className="text-purple-300 font-medium">
+										<div className="font-medium" style={{color: "#c3b383"}}>
 											Active Tools:
 										</div>
 										{sculptingEnabled &&
@@ -2520,7 +2633,7 @@ export default function Home() {
 										)}
 
 										<div className="mt-3 space-y-1">
-											<div className="text-purple-300 font-medium">
+											<div className="font-medium" style={{color: "#c3b383"}}>
 												Mode:{" "}
 												{sculptingEnabled
 													? "Advanced Sculpting"

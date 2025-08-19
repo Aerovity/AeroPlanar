@@ -25,7 +25,7 @@ export function ModelStats({ selectedModel }: ModelStatsProps) {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<p className="text-gray-400 text-sm">
+					<p className="text-sm" style={{color: "#c3b383"}}>
 						Select a model to view details
 					</p>
 				</CardContent>

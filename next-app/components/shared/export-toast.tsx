@@ -35,13 +35,13 @@ export function ExportToast() {
 			className="w-full darK:bg-[#121212] flex flex-col border border-border p-4 space-y-3"
 		>
 			<div className="flex items-center space-x-2">
-				<Loader2 className="animate-spin size-5" />
-				<span className="text-sm font-medium">
-					Exporting transactions
+				<Loader2 className="animate-spin size-5 text-[#c3b383]" />
+				<span className="text-sm font-medium text-[#c3b383]">
+					Exporting model
 				</span>
 			</div>
 
-			<Progress value={progress} className="w-full h-0.5" />
+			<Progress value={progress} className="w-full h-0.5" style={{"--progress-foreground": "#c3b383"} as React.CSSProperties} />
 
 			<span className="text-xs text-[#878787]">
 				Please do not close browser until completed

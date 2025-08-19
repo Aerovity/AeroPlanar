@@ -50,7 +50,7 @@ export function StoryCard({
 								height={16}
 							/>
 						</Avatar>
-						<p className="text-sm">{name}</p>
+						<p className="text-sm" style={{color: '#c3b383'}}>{name}</p>
 					</div>
 
 					<div className="flex items-center gap-2 text-[#878787]">

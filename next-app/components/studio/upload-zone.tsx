@@ -138,7 +138,7 @@ export function UploadZone({
 									? "Upload an image or 3D model"
 									: "Upload an image"}
 							</p>
-							<p className="text-sm text-gray-400">
+							<p className="text-sm" style={{color: "#c3b383"}}>
 								Drag and drop or click to select •{" "}
 								{accept3DModels
 									? "PNG, JPG, WEBP, GLB, GLTF, OBJ, FBX, DAE, 3DS, PLY, STL"

@@ -14,23 +14,31 @@ import VibeCodingTweetsSection from "@/components/landing/home/vibe-coding-tweet
 import TestimonialsSection from "@/components/landing/home/testimonials-section";
 import FAQSection from "@/components/landing/home/faq-section";
 import { Spotlight } from "@/components/ui/spotlight-new";
+import { NavBar } from "@/components/ui/tubelight-navbar";
 
 export const revalidate = 1800;
 
 export default function Home() {
 	return (
 		<>
-			<div className="relative">
+			<NavBar items={[]} />
+			<div className="relative" id="hero">
 				<Hero />
 				<Spotlight />
 			</div>
-			<SectionStories />
-			<SectionOne />
+			<div id="testimonials">
+				<SectionStories />
+			</div>
+			<div id="about">
+				<SectionOne />
+			</div>
 			<SectionTwo />
 			<SectionThree />
 			<SectionFour />
 			<SectionFive />
-			<FAQSection />
+			<div id="faq">
+				<FAQSection />
+			</div>
 		</>
 	);
 }

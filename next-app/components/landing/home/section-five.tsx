@@ -67,7 +67,7 @@ export function SectionFive() {
 						</div>
 
 						<div className="absolute bottom-0 left-0">
-							<CtaLink text="Start AI rendering" />
+							<CtaLink text="Start AI rendering" className="text-[#c3b383] hover:text-[#c3b383]" />
 						</div>
 					</div>
 				</div>
@@ -94,7 +94,7 @@ export function SectionFive() {
 				</motion.div>
 
 				<div className="mt-8 hidden md:flex">
-					<CtaLink text="Export your models" />
+					<CtaLink text="Export your models" className="text-[#c3b383] hover:text-[#c3b383]" />
 				</div>
 			</div>
 		</section>
