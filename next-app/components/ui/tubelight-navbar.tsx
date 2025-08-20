@@ -5,10 +5,11 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
 import type { LucideIcon } from "lucide-react"
-import { ShoppingCart, Home, Star, Users, HelpCircle, DollarSign, Settings, LogIn } from "lucide-react"
+import { ShoppingCart, Home, Star, Users, HelpCircle, DollarSign, Settings, LogIn, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
-import test from "node:test"
-import { Testimonials } from "../landing/home/testimonials"
+import { useAuth } from "@/contexts/auth-context"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 
 interface NavItem {
   name: string
@@ -26,6 +27,8 @@ interface NavBarProps {
 }
 
 export function NavBar({ items, className, activeSection, showCart = false, cartCount = 0, onCartClick }: NavBarProps) {
+  const { user, profile, loading, signOut } = useAuth()
+  
   // Default landing page navigation items
   const landingNavItems = [
     { name: "Home", url: "#hero", icon: Home },
@@ -212,22 +215,91 @@ export function NavBar({ items, className, activeSection, showCart = false, cart
             )
           })}
           
-          {/* Sign in separator and link */}
+          {/* User Profile or Sign in */}
           <div className="flex items-center gap-3">
             <div className="w-px h-6 bg-white/30" />
-            <Link
-              href="/sign-in"
-              className={cn(
+            {loading ? (
+              <div className={cn(
                 "relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300",
-                "text-white hover:text-[#c3b383] flex items-center gap-2",
+                "text-white flex items-center gap-2",
                 isScrolled ? "px-3 py-1.5" : isMobile ? "px-2 py-1.5" : "px-4 py-2",
-              )}
-            >
-              <span className="hidden md:inline">Sign in</span>
-              <span className="md:hidden">
-                <LogIn size={isMobile && !isScrolled ? 16 : 18} strokeWidth={2.5} />
-              </span>
-            </Link>
+              )}>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              </div>
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={cn(
+                    "relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300",
+                    "text-white hover:text-[#c3b383] flex items-center gap-2",
+                    isScrolled ? "px-3 py-1.5" : isMobile ? "px-2 py-1.5" : "px-4 py-2",
+                  )}>
+                    <Avatar className={cn(
+                      "border-2 border-white/20 hover:border-[#c3b383]/50",
+                      isScrolled || isMobile ? "h-6 w-6" : "h-8 w-8"
+                    )}>
+                      <AvatarImage 
+                        src={profile?.avatar_url || undefined} 
+                        alt={profile?.username || user.email || "User"} 
+                      />
+                      <AvatarFallback className="bg-[#c3b383]/20 text-white text-xs font-semibold">
+                        {profile?.first_name?.[0] || profile?.username?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden lg:inline max-w-20 truncate">
+                      {profile?.first_name || profile?.username || user.email?.split('@')[0] || 'User'}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-56 bg-background/95 backdrop-blur-sm border border-border/80"
+                >
+                  <div className="px-3 py-2 border-b border-border/50">
+                    <p className="text-sm font-medium">
+                      {profile?.first_name && profile?.last_name 
+                        ? `${profile.first_name} ${profile.last_name}`
+                        : profile?.username || 'User'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                    {profile?.is_admin && (
+                      <p className="text-xs text-[#c3b383] font-medium">Admin</p>
+                    )}
+                  </div>
+                  
+                  <DropdownMenuItem asChild>
+                    <Link href="/account" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Account Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem 
+                    onClick={signOut}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                href="/sign-in"
+                className={cn(
+                  "relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300",
+                  "text-white hover:text-[#c3b383] flex items-center gap-2",
+                  isScrolled ? "px-3 py-1.5" : isMobile ? "px-2 py-1.5" : "px-4 py-2",
+                )}
+              >
+                <span className="hidden md:inline">Sign in</span>
+                <span className="md:hidden">
+                  <LogIn size={isMobile && !isScrolled ? 16 : 18} strokeWidth={2.5} />
+                </span>
+              </Link>
+            )}
           </div>
           
           {/* Cart Icon - Only show when showCart is true */}
