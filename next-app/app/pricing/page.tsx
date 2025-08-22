@@ -21,6 +21,14 @@ export default function PricingPage() {
     // This is where you'd integrate payment
   }
 
+  const handleContactUs = () => {
+    toast.success("Redirecting to contact form...")
+    // In a real app, you'd redirect to contact or open email
+    setTimeout(() => {
+      window.location.href = 'mailto:contact@aeroplanar.com?subject=Company Plan Inquiry'
+    }, 1000)
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#000208' }}>
       <NavBar items={[
@@ -48,7 +56,7 @@ export default function PricingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:gap-6 lg:grid-cols-2 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 gap-8 md:gap-6 lg:grid-cols-3 max-w-7xl mx-auto">
           {/* Free Plan */}
           <AeroplanarPricingCard
             tier="Free Plan"
@@ -104,10 +112,10 @@ export default function PricingPage() {
           {/* Pro Plan */}
           <AeroplanarPricingCard
             tier="Pro Plan"
-            price="$4"
-            credits="100 Credits"
-            bestFor="Unlock unlimited creative potential"
-            CTA="Buy Credits"
+            price="$30"
+            period="/month"
+            bestFor="Perfect for professionals"
+            CTA="Subscribe to Pro"
             featured={true}
             onClick={handleBuyCredits}
             benefits={[
@@ -117,19 +125,24 @@ export default function PricingPage() {
                 icon: <Star className="h-4 w-4" /> 
               },
               { 
-                text: "Studio Unlimited Features", 
+                text: "Model Browser Download", 
                 checked: true, 
-                icon: <Building className="h-4 w-4" /> 
+                icon: <Download className="h-4 w-4" /> 
               },
               { 
-                text: "Unlimited Generations", 
+                text: "1000 Tokens Included", 
                 checked: true, 
                 icon: <Sparkles className="h-4 w-4" /> 
               },
               { 
-                text: "Scene Download", 
+                text: "$1 = 100 Additional Credits", 
                 checked: true, 
-                icon: <Download className="h-4 w-4" /> 
+                icon: <DollarSign className="h-4 w-4" /> 
+              },
+              { 
+                text: "Studio Unlimited Features", 
+                checked: true, 
+                icon: <Building className="h-4 w-4" /> 
               },
               { 
                 text: "Scene Upload", 
@@ -146,10 +159,56 @@ export default function PricingPage() {
                 checked: true, 
                 icon: <Users className="h-4 w-4" /> 
               },
+            ]}
+          />
+
+          {/* Company Plan */}
+          <AeroplanarPricingCard
+            tier="Company Plan"
+            price="Custom"
+            bestFor="Personalized pricing for your business"
+            CTA="Contact Us"
+            onClick={handleContactUs}
+            benefits={[
               { 
-                text: "Advanced Export Options", 
+                text: "Everything in Pro", 
                 checked: true, 
-                icon: <Download className="h-4 w-4" /> 
+                icon: <Star className="h-4 w-4" /> 
+              },
+              { 
+                text: "Custom Token Packages", 
+                checked: true, 
+                icon: <Sparkles className="h-4 w-4" /> 
+              },
+              { 
+                text: "Volume Discounts", 
+                checked: true, 
+                icon: <DollarSign className="h-4 w-4" /> 
+              },
+              { 
+                text: "Team Management", 
+                checked: true, 
+                icon: <Users className="h-4 w-4" /> 
+              },
+              { 
+                text: "Dedicated Support", 
+                checked: true, 
+                icon: <Building className="h-4 w-4" /> 
+              },
+              { 
+                text: "Custom Integrations", 
+                checked: true, 
+                icon: <Share className="h-4 w-4" /> 
+              },
+              { 
+                text: "SLA Agreements", 
+                checked: true, 
+                icon: <Eye className="h-4 w-4" /> 
+              },
+              { 
+                text: "Training & Onboarding", 
+                checked: true, 
+                icon: <Layers className="h-4 w-4" /> 
               },
             ]}
           />

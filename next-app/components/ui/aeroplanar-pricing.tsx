@@ -63,26 +63,26 @@ export const AeroplanarPricingCard = ({
       whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
       whileHover={{ y: -5 }}
-      className="h-full"
+      className={cn("h-full", featured && "pt-3")}
     >
+      {featured && (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
+          <div className="bg-gradient-to-r from-[#c3b383] to-[#d4c496] text-black text-xs font-bold px-4 py-1 rounded-full shadow-lg">
+            RECOMMENDED
+          </div>
+        </div>
+      )}
       <Card
         className={cn(
-          "relative h-full w-full overflow-hidden border transition-all duration-300",
+          "relative h-full w-full border transition-all duration-300",
           "bg-gradient-to-br from-[#000208]/90 to-[#0a0f1a]/90",
           "border-gray-800/50 backdrop-blur-sm",
           "hover:border-[#c3b383]/30 hover:shadow-lg hover:shadow-[#c3b383]/10",
-          featured && "border-[#c3b383]/50 shadow-lg shadow-[#c3b383]/20 scale-105",
+          featured && "border-[#c3b383]/50 shadow-lg shadow-[#c3b383]/20 scale-105 mt-3",
           "p-6",
           className,
         )}
       >
-        {featured && (
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="bg-gradient-to-r from-[#c3b383] to-[#d4c496] text-black text-xs font-bold px-4 py-1 rounded-full">
-              RECOMMENDED
-            </div>
-          </div>
-        )}
 
         <div className="flex flex-col items-center border-b pb-6 border-gray-800/50">
           <div className="flex items-center gap-2 mb-6">
@@ -117,7 +117,7 @@ export const AeroplanarPricingCard = ({
             onClick={onClick}
             className={cn(
               "w-full bg-gradient-to-br from-black to-neutral-800 hover:from-neutral-900 hover:to-black text-[#c3b383] font-medium border border-[#c3b383]/30",
-              featured && "bg-gradient-to-br from-[#c3b383] to-[#d4c496] text-black hover:from-[#d4c496] hover:to-[#c3b383] border-[#c3b383]"
+              featured && "bg-gradient-to-br from-[#c3b383] to-[#d4c496] text-white hover:from-[#d4c496] hover:to-[#c3b383] border-[#c3b383]"
             )}
           >
             {CTA}
