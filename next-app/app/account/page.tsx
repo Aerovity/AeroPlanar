@@ -1,6 +1,5 @@
 "use client"
 
-import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -9,182 +8,252 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "sonner"
-import { Upload, Camera, Save, User } from "lucide-react"
+import { Upload, Save, User, Camera } from "lucide-react"
 import { Footer } from "@/components/landing/footer"
 import { Spotlight } from "@/components/ui/spotlight-new"
 import { NavBar } from "@/components/ui/tubelight-navbar"
 import { SpotlightButton } from "@/components/ui/spotlight-button"
+import { useRouter } from "next/navigation"
+import type { User as SupabaseUser } from "@supabase/supabase-js"
+
+interface Profile {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  username: string | null
+  avatar_url: string | null
+  is_admin: boolean
+  created_at: string
+  updated_at: string
+  email: string | null
+}
 
 export default function AccountPage() {
-  const { user, profile, loading, refreshProfile } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     username: "",
   })
-  const [uploading, setUploading] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
-    if (profile) {
-      setFormData({
-        first_name: profile.first_name || "",
-        last_name: profile.last_name || "",
-        username: profile.username || "",
-      })
+    getProfile()
+  }, [])
+
+  const getProfile = async () => {
+    try {
+      setLoading(true)
+      
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      
+      if (userError) {
+        throw userError
+      }
+
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      setUser(user)
+
+      // Get profile data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError
+      }
+
+      if (profileData) {
+        setProfile(profileData)
+        setFormData({
+          first_name: profileData.first_name || "",
+          last_name: profileData.last_name || "",
+          username: profileData.username || "",
+        })
+        setAvatarUrl(profileData.avatar_url)
+        console.log('Profile loaded:', profileData)
+        console.log('Avatar URL:', profileData.avatar_url)
+      }
+    } catch (error: any) {
+      console.error('Error loading user data:', error)
+      toast.error('Error loading profile data')
+    } finally {
+      setLoading(false)
     }
-  }, [profile])
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0 || !user) {
-      return
-    }
-
-    const file = e.target.files[0]
-    
-    // Check file size (max 2MB for faster uploads)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('File size must be less than 2MB')
-      return
-    }
-
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
-      return
-    }
-
-    const fileExt = file.name.split('.').pop()
-    const filePath = `${user.id}-${Date.now()}.${fileExt}`
-
-    setUploading(true)
-
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      // Compress image if needed
-      const compressedFile = await compressImage(file)
+      if (!event.target.files || event.target.files.length === 0) {
+        return
+      }
+
+      if (!user) {
+        toast.error('You must be logged in to upload an avatar')
+        return
+      }
+
+      const file = event.target.files[0]
       
-      // Upload image to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      // File validation
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('File size must be less than 2MB')
+        return
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file')
+        return
+      }
+
+      setUploading(true)
+      toast.loading('Uploading avatar...', { id: 'avatar-upload' })
+
+      // Create unique filename
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${user.id}-${Math.random()}.${fileExt}`
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, compressedFile, { 
-          upsert: true,
-          cacheControl: '3600'
-        })
+        .upload(filePath, file)
 
       if (uploadError) {
         throw uploadError
       }
 
       // Get public URL
-      const { data: urlData } = supabase.storage
+      const { data: publicUrlData } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath)
 
-      // Update profile with new avatar URL
+      if (!publicUrlData?.publicUrl) {
+        throw new Error('Failed to get public URL')
+      }
+
+      // Update profile with public URL (not file path)
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: urlData.publicUrl })
-        .eq('id', user.id)
+        .upsert({
+          id: user.id,
+          email: user.email,
+          avatar_url: publicUrlData.publicUrl,
+          updated_at: new Date().toISOString(),
+        })
 
       if (updateError) {
         throw updateError
       }
 
-      await refreshProfile()
-      toast.success('Profile picture updated successfully!')
+      setAvatarUrl(publicUrlData.publicUrl)
+      toast.success('Avatar uploaded successfully!', { id: 'avatar-upload' })
+      
+      // Refresh profile
+      await getProfile()
+
     } catch (error: any) {
-      toast.error('Error uploading avatar: ' + error.message)
+      console.error('Error uploading avatar:', error)
+      toast.error('Error uploading avatar: ' + error.message, { id: 'avatar-upload' })
     } finally {
       setUploading(false)
-    }
-  }
-
-  // Image compression function
-  const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')!
-      const img = new Image()
-      
-      img.onload = () => {
-        const maxSize = 400 // Max width/height
-        let { width, height } = img
-        
-        // Calculate new dimensions
-        if (width > height) {
-          if (width > maxSize) {
-            height = (height * maxSize) / width
-            width = maxSize
-          }
-        } else {
-          if (height > maxSize) {
-            width = (width * maxSize) / height
-            height = maxSize
-          }
-        }
-        
-        canvas.width = width
-        canvas.height = height
-        
-        // Draw and compress
-        ctx.drawImage(img, 0, 0, width, height)
-        
-        canvas.toBlob(
-          (blob) => {
-            const compressedFile = new File([blob!], file.name, {
-              type: 'image/jpeg',
-              lastModified: Date.now()
-            })
-            resolve(compressedFile)
-          },
-          'image/jpeg',
-          0.8 // 80% quality
-        )
+      // Clear the input
+      if (event.target) {
+        event.target.value = ''
       }
-      
-      img.src = URL.createObjectURL(file)
-    })
+    }
   }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user) return
-
-    setSaving(true)
+    
+    if (!user) {
+      toast.error('You must be logged in to update your profile')
+      return
+    }
 
     try {
+      setSaving(true)
+      toast.loading('Saving changes...', { id: 'profile-save' })
+
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: user.id,
+          email: user.email,
           first_name: formData.first_name,
           last_name: formData.last_name,
           username: formData.username,
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id)
 
       if (error) {
         throw error
       }
 
-      await refreshProfile()
-      toast.success('Profile updated successfully!')
+      toast.success('Profile updated successfully!', { id: 'profile-save' })
+      await getProfile()
+
     } catch (error: any) {
-      toast.error('Error updating profile: ' + error.message)
+      console.error('Error updating profile:', error)
+      toast.error('Error updating profile: ' + error.message, { id: 'profile-save' })
     } finally {
       setSaving(false)
     }
   }
 
+  // Get avatar image URL (now stored as public URL directly)
+  const getAvatarUrl = () => {
+    return avatarUrl
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+      <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#000208' }}>
+        <NavBar items={[]} />
+        <Spotlight />
+        
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <div className="max-w-2xl mx-auto space-y-8 pt-20">
+            {/* Loading skeleton */}
+            <div className="text-center space-y-2">
+              <div className="h-8 bg-gray-700/50 rounded-lg animate-pulse w-64 mx-auto"></div>
+              <div className="h-4 bg-gray-700/30 rounded-lg animate-pulse w-80 mx-auto"></div>
+            </div>
+
+            <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+              <CardHeader>
+                <div className="h-6 bg-gray-700/50 rounded animate-pulse w-32"></div>
+                <div className="h-4 bg-gray-700/30 rounded animate-pulse w-full max-w-md"></div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-center">
+                  <div className="h-20 w-20 bg-gray-700/50 rounded-full animate-pulse"></div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        
+        <Footer />
       </div>
     )
   }
@@ -226,37 +295,45 @@ export default function AccountPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={profile?.avatar_url || undefined} alt="Profile" />
-                  <AvatarFallback className="bg-gray-700 text-white text-lg">
-                    {formData.first_name?.[0] || formData.username?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-2">
-                  <Label htmlFor="avatar-upload" className="cursor-pointer block">
+              <div className="flex items-center justify-center">
+                <div className="relative">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={getAvatarUrl() || undefined} alt="Profile" />
+                    <AvatarFallback className="bg-gray-700 text-white text-xl">
+                      {formData.first_name?.[0] || formData.username?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="absolute bottom-0 right-0">
                     <SpotlightButton 
                       type="button" 
                       disabled={uploading}
-                      className="bg-gradient-to-br from-black to-neutral-800 hover:from-neutral-900 hover:to-black text-[#c3b383] font-medium w-auto px-4 py-2 h-auto border border-[#c3b383]/30"
+                      className="h-8 w-8 p-0 rounded-full bg-gradient-to-br from-black to-neutral-800 hover:from-neutral-900 hover:to-black text-[#c3b383] border border-[#c3b383]/30 cursor-pointer"
+                      onClick={() => {
+                        const fileInput = document.getElementById('avatar-upload') as HTMLInputElement
+                        if (fileInput) {
+                          fileInput.click()
+                        }
+                      }}
                     >
-                      <Upload className="h-4 w-4 mr-2" />
-                      {uploading ? 'Uploading...' : 'Change Picture'}
+                      <Upload className="h-4 w-4" />
                     </SpotlightButton>
-                    <Input
+                    
+                    <input
                       id="avatar-upload"
                       type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      accept="image/*"
                       className="hidden"
                       onChange={handleAvatarUpload}
                       disabled={uploading}
                     />
-                  </Label>
-                  <p className="text-xs text-gray-400">
-                    JPG, PNG or WebP. Max file size 2MB for faster uploads.
-                  </p>
+                  </div>
                 </div>
               </div>
+              
+              <p className="text-center text-xs text-gray-400">
+                {uploading ? 'Uploading...' : 'Click the upload button to change your profile picture'}
+              </p>
             </CardContent>
           </Card>
 
@@ -348,58 +425,55 @@ export default function AccountPage() {
           </Card>
 
           {/* Account Information */}
-          <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-white">Account Information</CardTitle>
-              <CardDescription className="text-gray-300">
-                View your account details and status
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <Label className="text-gray-400">Account Created</Label>
-                  <p className="font-medium text-white">
-                    {profile?.created_at 
-                      ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long', 
-                          day: 'numeric'
-                        })
-                      : 'N/A'}
-                  </p>
+          {profile && (
+            <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white">Account Information</CardTitle>
+                <CardDescription className="text-gray-300">
+                  View your account details and status
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <Label className="text-gray-400">Account Created</Label>
+                    <p className="font-medium text-white">
+                      {new Date(profile.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long', 
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Last Updated</Label>
+                    <p className="font-medium text-white">
+                      {new Date(profile.updated_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long', 
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">User ID</Label>
+                    <p className="font-mono text-xs bg-gray-800 text-gray-300 p-2 rounded border border-gray-600">
+                      {user.id}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Account Type</Label>
+                    <p className="font-medium text-white">
+                      {profile.is_admin ? 'Administrator' : 'Standard User'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-gray-400">Last Updated</Label>
-                  <p className="font-medium text-white">
-                    {profile?.updated_at 
-                      ? new Date(profile.updated_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long', 
-                          day: 'numeric'
-                        })
-                      : 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-gray-400">User ID</Label>
-                  <p className="font-mono text-xs bg-gray-800 text-gray-300 p-2 rounded border border-gray-600">
-                    {user.id}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-gray-400">Account Type</Label>
-                  <p className="font-medium text-white">
-                    {profile?.is_admin ? 'Administrator' : 'Standard User'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
       
-      {/* Footer */}
       <Footer />
     </div>
   )
