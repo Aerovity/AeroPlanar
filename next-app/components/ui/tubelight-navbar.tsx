@@ -54,29 +54,40 @@ export function NavBar({ items, className, activeSection, showCart = false, cart
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
       
-      // Live scroll detection for section highlighting
-      const sections = ['hero', 'testimonials', 'about', 'faq']
-      const scrollPosition = window.scrollY + 200 // Offset for better detection
+      // Check current URL to set active tab for different pages
+      const currentPath = window.location.pathname
+      if (currentPath === '/pricing') {
+        if (activeTab !== 'Pricing') {
+          setActiveTab('Pricing')
+        }
+        return
+      }
       
-      for (const sectionId of sections) {
-        const element = document.getElementById(sectionId)
-        if (element) {
-          const rect = element.getBoundingClientRect()
-          const elementTop = window.scrollY + rect.top
-          const elementBottom = elementTop + element.offsetHeight
-          
-          if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
-            const sectionToNavMap: { [key: string]: string } = {
-              hero: "Home",
-              testimonials: "Testimonials",
-              about: "About",
-              faq: "FAQ",
+      // Live scroll detection for section highlighting (only on home page)
+      if (currentPath === '/') {
+        const sections = ['hero', 'testimonials', 'about', 'faq']
+        const scrollPosition = window.scrollY + 200 // Offset for better detection
+        
+        for (const sectionId of sections) {
+          const element = document.getElementById(sectionId)
+          if (element) {
+            const rect = element.getBoundingClientRect()
+            const elementTop = window.scrollY + rect.top
+            const elementBottom = elementTop + element.offsetHeight
+            
+            if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
+              const sectionToNavMap: { [key: string]: string } = {
+                hero: "Home",
+                testimonials: "Testimonials",
+                about: "About",
+                faq: "FAQ",
+              }
+              const navName = sectionToNavMap[sectionId]
+              if (navName && navName !== activeTab) {
+                setActiveTab(navName)
+              }
+              break
             }
-            const navName = sectionToNavMap[sectionId]
-            if (navName && navName !== activeTab) {
-              setActiveTab(navName)
-            }
-            break
           }
         }
       }
@@ -230,12 +241,14 @@ export function NavBar({ items, className, activeSection, showCart = false, cart
                   <span className={cn("font-semibold text-white", isScrolled || isMobile ? "text-xs" : "text-sm")}>
                     {profile.is_admin ? '∞' : (profile.credits || 0).toLocaleString()}
                   </span>
-                  <button className={cn(
-                    "bg-[#c3b383]/20 hover:bg-[#c3b383]/30 rounded-full transition-colors duration-200 flex items-center justify-center",
-                    isScrolled || isMobile ? "h-5 w-5" : "h-6 w-6"
-                  )}>
-                    <Plus className={cn("text-[#c3b383]", isScrolled || isMobile ? "h-3 w-3" : "h-4 w-4")} />
-                  </button>
+                  <Link href="/pricing">
+                    <button className={cn(
+                      "bg-[#c3b383]/20 hover:bg-[#c3b383]/30 rounded-full transition-colors duration-200 flex items-center justify-center",
+                      isScrolled || isMobile ? "h-5 w-5" : "h-6 w-6"
+                    )}>
+                      <Plus className={cn("text-[#c3b383]", isScrolled || isMobile ? "h-3 w-3" : "h-4 w-4")} />
+                    </button>
+                  </Link>
                 </div>
                 <div className="w-px h-6 bg-white/30" />
               </>
