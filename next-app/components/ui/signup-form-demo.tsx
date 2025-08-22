@@ -8,6 +8,10 @@ import {
   IconBrandGoogle,
 } from "@tabler/icons-react";
 import { LogoLarge } from "@/components/shared/logo-large";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignupFormDemo() {
   const [formData, setFormData] = React.useState({
@@ -19,7 +23,13 @@ export default function SignupFormDemo() {
   });
   const [errors, setErrors] = React.useState({
     passwordMatch: "",
+    email: "",
+    password: "",
   });
+  const [loading, setLoading] = React.useState(false);
+  const [emailSent, setEmailSent] = React.useState(false);
+  const supabase = createClient();
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -30,23 +40,124 @@ export default function SignupFormDemo() {
        id === "confirmpassword" ? "confirmPassword" : id]: value
     }));
 
-    // Clear password match error when user types
+    // Clear errors when user types
     if (id === "password" || id === "confirmpassword") {
-      setErrors(prev => ({ ...prev, passwordMatch: "" }));
+      setErrors(prev => ({ ...prev, passwordMatch: "", password: "" }));
+    }
+    if (id === "email") {
+      setErrors(prev => ({ ...prev, email: "" }));
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const validateForm = () => {
+    const newErrors = { passwordMatch: "", email: "", password: "" };
+    let isValid = true;
+
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    }
+    
+    if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.passwordMatch = "Passwords do not match";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Check if passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setErrors(prev => ({ ...prev, passwordMatch: "Passwords do not match" }));
-      return;
-    }
+    if (!validateForm()) return;
 
-    console.log("Form submitted:", formData);
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            username: formData.email.split('@')[0],
+          }
+        }
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      if (data?.user && !data?.session) {
+        setEmailSent(true);
+        toast.success("Check your email for the confirmation link!");
+      } else if (data?.session) {
+        toast.success("Account created successfully!");
+        router.push('/');
+      }
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleOAuthSignIn = async (provider: 'github' | 'google') => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        }
+      });
+
+      if (error) {
+        toast.error(error.message);
+      }
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+      console.error(error);
+    }
+  };
+
+  if (emailSent) {
+    return (
+      <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
+        <div className="flex justify-center mb-6">
+          <div className="scale-150">
+            <LogoLarge />
+          </div>
+        </div>
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
+            Email Sent!
+          </h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-300">
+            We've sent a confirmation link to <strong>{formData.email}</strong>. 
+            Please check your email and click the link to verify your account.
+          </p>
+          <div className="pt-4">
+            <Link 
+              href="/sign-in"
+              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              Already verified? Sign in here
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
       <div className="flex justify-center mb-6">
@@ -65,20 +176,48 @@ export default function SignupFormDemo() {
         <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
           <LabelInputContainer>
             <Label htmlFor="firstname">First name</Label>
-            <Input id="firstname" placeholder="Tyler" type="text" />
+            <Input 
+              id="firstname" 
+              placeholder="Tyler" 
+              type="text" 
+              value={formData.firstName}
+              onChange={handleInputChange}
+            />
           </LabelInputContainer>
           <LabelInputContainer>
             <Label htmlFor="lastname">Last name</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
+            <Input 
+              id="lastname" 
+              placeholder="Durden" 
+              type="text" 
+              value={formData.lastName}
+              onChange={handleInputChange}
+            />
           </LabelInputContainer>
         </div>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
+          <Input 
+            id="email" 
+            placeholder="projectmayhem@fc.com" 
+            type="email" 
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+          />
+          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
+          <Input 
+            id="password" 
+            placeholder="••••••••" 
+            type="password" 
+            value={formData.password}
+            onChange={handleInputChange}
+            required
+          />
+          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
         </LabelInputContainer>
         <LabelInputContainer className="mb-8">
           <Label htmlFor="confirmpassword">Confirm Password</Label>
@@ -86,14 +225,19 @@ export default function SignupFormDemo() {
             id="confirmpassword"
             placeholder="••••••••"
             type="password"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            required
           />
+          {errors.passwordMatch && <p className="text-red-500 text-xs mt-1">{errors.passwordMatch}</p>}
         </LabelInputContainer>
 
         <button
-          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
+          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] disabled:opacity-50"
           type="submit"
+          disabled={loading}
         >
-          Sign up &rarr;
+          {loading ? 'Creating account...' : 'Sign up →'}
           <BottomGradient />
         </button>
 
@@ -102,7 +246,8 @@ export default function SignupFormDemo() {
         <div className="flex flex-col space-y-4">
           <button
             className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-            type="submit"
+            type="button"
+            onClick={() => handleOAuthSignIn('github')}
           >
             <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
             <span className="text-sm text-neutral-700 dark:text-neutral-300">
@@ -112,7 +257,8 @@ export default function SignupFormDemo() {
           </button>
           <button
             className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-            type="submit"
+            type="button"
+            onClick={() => handleOAuthSignIn('google')}
           >
             <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
             <span className="text-sm text-neutral-700 dark:text-neutral-300">
@@ -121,6 +267,13 @@ export default function SignupFormDemo() {
             <BottomGradient />
           </button>
         </div>
+
+        <p className="text-center text-sm text-neutral-600 dark:text-neutral-400 mt-4">
+          Already have an account?{" "}
+          <Link href="/sign-in" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+            Sign in here
+          </Link>
+        </p>
       </form>
     </div>
   );

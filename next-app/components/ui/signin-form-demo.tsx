@@ -7,11 +7,73 @@ import {
   IconBrandGithub,
   IconBrandGoogle,
 } from "@tabler/icons-react";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SigninFormDemo() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [formData, setFormData] = React.useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const supabase = createClient();
+  const router = useRouter();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+    setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted");
+    setLoading(true);
+    setError("");
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setError(error.message);
+        toast.error(error.message);
+        return;
+      }
+
+      if (data.session) {
+        toast.success("Successfully signed in!");
+        router.push('/');
+      }
+    } catch (error: any) {
+      setError("An unexpected error occurred");
+      toast.error("An unexpected error occurred");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOAuthSignIn = async (provider: 'github' | 'google') => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        }
+      });
+
+      if (error) {
+        toast.error(error.message);
+      }
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+      console.error(error);
+    }
   };
   return (
     <div className="mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8" style={{backgroundColor: '#080c0c'}}>
@@ -30,13 +92,22 @@ export default function SigninFormDemo() {
       </p>
 
       <form className="my-8" onSubmit={handleSubmit}>
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium text-white mb-2">Email Address</label>
           <input 
             id="email" 
             placeholder="projectmayhem@fc.com" 
             type="email" 
+            value={formData.email}
+            onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+            required
           />
         </div>
         <div className="mb-8">
@@ -45,15 +116,19 @@ export default function SigninFormDemo() {
             id="password" 
             placeholder="••••••••" 
             type="password" 
+            value={formData.password}
+            onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+            required
           />
         </div>
 
         <button
-          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
+          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset] disabled:opacity-50"
           type="submit"
+          disabled={loading}
         >
-          Sign in &rarr;
+          {loading ? 'Signing in...' : 'Sign in →'}
           <BottomGradient />
         </button>
 
@@ -62,7 +137,8 @@ export default function SigninFormDemo() {
         <div className="flex flex-col space-y-4">
           <button
             className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-            type="submit"
+            type="button"
+            onClick={() => handleOAuthSignIn('github')}
           >
             <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
             <span className="text-sm text-neutral-700 dark:text-neutral-300">
@@ -72,7 +148,8 @@ export default function SigninFormDemo() {
           </button>
           <button
             className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-            type="submit"
+            type="button"
+            onClick={() => handleOAuthSignIn('google')}
           >
             <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
             <span className="text-sm text-neutral-700 dark:text-neutral-300">
@@ -85,9 +162,15 @@ export default function SigninFormDemo() {
       
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
-        <a href="/sign-up" className="underline underline-offset-4 hover:text-primary">
+        <Link href="/sign-up" className="underline underline-offset-4 hover:text-primary">
           Join us
-        </a>
+        </Link>
+      </div>
+      
+      <div className="text-center text-sm mt-2">
+        <Link href="/forgot-password" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+          Forgot your password?
+        </Link>
       </div>
     </div>
   );

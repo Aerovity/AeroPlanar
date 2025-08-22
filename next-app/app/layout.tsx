@@ -6,6 +6,7 @@ import ReactQueryProvider from "@/providers/react-query-provider";
 import { ViewTransitions } from "next-view-transitions";
 import { baseUrl } from "./sitemap";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthProvider } from "@/contexts/auth-context";
 
 export const metadata: Metadata = {
 	metadataBase: new URL(baseUrl),
@@ -82,10 +83,12 @@ export default function RootLayout({
 								enableSystem
 								disableTransitionOnChange
 							>
-								<main className="bg-background overflow-x-hidden font-sans antialiased min-h-screen">
-									{children}
-								</main>
-								<Toaster position="top-right" richColors />
+								<AuthProvider>
+									<main className="bg-background overflow-x-hidden font-sans antialiased min-h-screen">
+										{children}
+									</main>
+									<Toaster position="top-right" richColors />
+								</AuthProvider>
 							</ThemeProvider>
 						</ReactQueryProvider>
 					</NetworkProvider>
