@@ -1,6 +1,6 @@
 import { DynamicImage } from "@/components/shared/dynamic-image";
 import computerLight from "../../../public/computer-light.png";
-import computerDark from "../../../public/computer.jpg";
+import computerDark from "../../../public/computer12.jpg";
 
 export function SectionTwo() {
 	return (
