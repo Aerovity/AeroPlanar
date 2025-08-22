@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/auth-context";
+import { checkCredits, deductCredits, addCredits, GENERATION_COST } from "@/lib/credits";
+import { toast } from "sonner";
 import {
 	Select,
 	SelectContent,
@@ -15,7 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UploadZone } from "./upload-zone";
 import { SpotlightButton } from "@/components/ui/spotlight-button";
-import { Wand2, Settings, Image, MessageSquare, Layers } from "lucide-react";
+import { Wand2, Settings, Image, MessageSquare, Layers, Coins } from "lucide-react";
+import Link from "next/link";
 
 interface GenerationPanelProps {
 	onGenerate: (file: File, options: GenerationOptions) => Promise<void>;
@@ -51,6 +55,7 @@ export function GenerationPanel({
 	onUpload3DModel,
 	isGenerating,
 }: GenerationPanelProps) {
+	const { user, profile } = useAuth();
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [textPrompt, setTextPrompt] = useState<string>("");
 	const [negativePrompt, setNegativePrompt] = useState<string>("");
@@ -78,13 +83,76 @@ export function GenerationPanel({
 	};
 
 	const handleGenerate = async () => {
+		if (!user) {
+			toast.error('Please sign in to generate 3D models');
+			return;
+		}
+
 		if (activeTab === "image" && selectedFile) {
-			await onGenerate(selectedFile, options);
+			try {
+				// Check credits before generation
+				const creditCheck = await checkCredits(user.id);
+				
+				if (!creditCheck.success) {
+					// Redirect to pricing if no credits
+					if (creditCheck.remainingCredits === 0) {
+						toast.error('You have no credits remaining. Redirecting to pricing...');
+						setTimeout(() => {
+							window.location.href = '/pricing';
+						}, 2000);
+						return;
+					}
+					toast.error(`Insufficient credits. You need ${GENERATION_COST} credits to generate. Current balance: ${creditCheck.remainingCredits}`);
+					return;
+				}
+
+				// Deduct credits before calling the API
+				const deductResult = await deductCredits(user.id, 'AI 3D Generation');
+				
+				if (!deductResult.success) {
+					toast.error(deductResult.message);
+					return;
+				}
+
+				toast.success(`Credits deducted! Generating... Remaining: ${deductResult.remainingCredits}`);
+
+				// Proceed with generation - with error handling for refund
+				try {
+					await onGenerate(selectedFile, options);
+					// If successful, no need to refund
+				} catch (generationError) {
+					console.error('Generation failed:', generationError);
+					
+					// Refund credits on backend failure
+					try {
+						const refundResult = await addCredits(user.id, GENERATION_COST);
+						if (refundResult.success) {
+							toast.error('Generation failed. Credits have been refunded.');
+						} else {
+							toast.error('Generation failed. Please contact support for credit refund.');
+						}
+					} catch (refundError) {
+						console.error('Refund failed:', refundError);
+						toast.error('Generation failed and refund failed. Please contact support.');
+					}
+					
+					throw generationError; // Re-throw to maintain error flow
+				}
+			} catch (error) {
+				console.error('Error in generation:', error);
+				// Error handling is done above for generation failures
+				// Only show generic error if it's not a generation failure
+				if (!error?.message?.includes('Generation failed')) {
+					toast.error('Failed to process generation request');
+				}
+			}
 		}
 		// Text-to-image, text-to-3D, and multimodal modes are coming soon - no backend calls
 	};
 
 	const canGenerate = () => {
+		if (!user) return false; // Must be logged in
+		
 		if (activeTab === "image") {
 			return (
 				selectedFile &&
@@ -98,6 +166,10 @@ export function GenerationPanel({
 	};
 
 	const getGenerateButtonText = () => {
+		if (!user) {
+			return "Sign in to Generate";
+		}
+
 		if (activeTab === "image") {
 			if (isGenerating) return "Generating...";
 			if (!selectedFile) return "Upload an image first";
@@ -107,7 +179,16 @@ export function GenerationPanel({
 					.match(/\.(glb|gltf|obj|fbx|dae|3ds|ply|stl)$/)
 			)
 				return "3D Model Uploaded";
-			return "Generate from Image";
+			
+			// Show credit cost
+			const userCredits = profile?.credits || 0;
+			const isAdmin = profile?.is_admin || false;
+			if (isAdmin) {
+				return `Generate from Image`;
+			} else if (userCredits < GENERATION_COST) {
+				return `Need ${GENERATION_COST} Credits`;
+			}
+			return `Generate (${GENERATION_COST} Credits)`;
 		} else if (
 			activeTab === "text-to-image" ||
 			activeTab === "multimodal"
@@ -262,23 +343,47 @@ export function GenerationPanel({
 					</div>
 				)}
 
+				{/* Credits Info */}
+				{user && profile && (
+					<div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
+						<div className="flex items-center gap-2">
+							<Coins className="h-4 w-4 text-[#c3b383]" />
+							<span className="text-sm text-white font-medium">Credits:</span>
+							<span className="text-sm font-bold text-[#c3b383]">
+								{profile.is_admin ? '∞' : (profile.credits || 0).toLocaleString()}
+							</span>
+						</div>
+						<div className="text-xs text-gray-400">
+							{GENERATION_COST} credits per generation
+						</div>
+					</div>
+				)}
+
 				{/* Generate Button */}
 				<div className="pt-2">
-					<SpotlightButton
-						onClick={handleGenerate}
-						disabled={
-							activeTab !== "image" ||
-							!canGenerate() ||
-							isGenerating
-						}
-						className={`w-full ${
-							activeTab !== "image" || !canGenerate()
-								? "opacity-50 cursor-not-allowed"
-								: "animate-pulse"
-						}`}
-					>
-						{getGenerateButtonText()}
-					</SpotlightButton>
+					{!user ? (
+						<Link href="/sign-in" className="w-full block">
+							<SpotlightButton className="w-full">
+								Sign in to Generate
+							</SpotlightButton>
+						</Link>
+					) : (
+						<SpotlightButton
+							onClick={handleGenerate}
+							disabled={
+								activeTab !== "image" ||
+								!canGenerate() ||
+								isGenerating
+							}
+							className={`w-full ${
+								activeTab !== "image" || !canGenerate()
+									? "opacity-50 cursor-not-allowed"
+									: "animate-pulse"
+							}`}
+						>
+							{getGenerateButtonText()}
+						</SpotlightButton>
+					)}
 
 					{/* Coming Soon Notice */}
 					{(activeTab === "text-to-image" ||

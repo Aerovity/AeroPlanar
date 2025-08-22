@@ -12,6 +12,7 @@ interface Profile {
   username?: string
   avatar_url?: string
   is_admin?: boolean
+  credits?: number
   updated_at?: string
   created_at?: string
 }

@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
 import type { LucideIcon } from "lucide-react"
-import { ShoppingCart, Home, Star, Users, HelpCircle, DollarSign, Settings, LogIn, LogOut } from "lucide-react"
+import { ShoppingCart, Home, Star, Users, HelpCircle, DollarSign, Settings, LogIn, LogOut, Coins, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -218,6 +218,29 @@ export function NavBar({ items, className, activeSection, showCart = false, cart
           {/* User Profile or Sign in */}
           <div className="flex items-center gap-3">
             <div className="w-px h-6 bg-white/30" />
+            
+            {/* Credits Display */}
+            {user && profile && (
+              <>
+                <div className={cn(
+                  "flex items-center gap-2 text-white transition-all duration-300",
+                  isScrolled ? "px-2 py-1" : isMobile ? "px-2 py-1" : "px-3 py-1.5",
+                )}>
+                  <Coins className={cn("text-[#c3b383]", isScrolled || isMobile ? "h-4 w-4" : "h-5 w-5")} />
+                  <span className={cn("font-semibold text-white", isScrolled || isMobile ? "text-xs" : "text-sm")}>
+                    {profile.is_admin ? '∞' : (profile.credits || 0).toLocaleString()}
+                  </span>
+                  <button className={cn(
+                    "bg-[#c3b383]/20 hover:bg-[#c3b383]/30 rounded-full transition-colors duration-200 flex items-center justify-center",
+                    isScrolled || isMobile ? "h-5 w-5" : "h-6 w-6"
+                  )}>
+                    <Plus className={cn("text-[#c3b383]", isScrolled || isMobile ? "h-3 w-3" : "h-4 w-4")} />
+                  </button>
+                </div>
+                <div className="w-px h-6 bg-white/30" />
+              </>
+            )}
+            
             {loading ? (
               <div className={cn(
                 "relative cursor-pointer text-sm font-semibold rounded-full transition-all duration-300",

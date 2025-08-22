@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "sonner"
-import { Upload, Save, User, Camera } from "lucide-react"
+import { Upload, Save, User, Camera, Home, Users, Star, HelpCircle, DollarSign, Settings } from "lucide-react"
 import { Footer } from "@/components/landing/footer"
 import { Spotlight } from "@/components/ui/spotlight-new"
 import { NavBar } from "@/components/ui/tubelight-navbar"
@@ -23,6 +23,7 @@ interface Profile {
   username: string | null
   avatar_url: string | null
   is_admin: boolean
+  credits: number
   created_at: string
   updated_at: string
   email: string | null
@@ -228,7 +229,14 @@ export default function AccountPage() {
   if (loading) {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#000208' }}>
-        <NavBar items={[]} />
+        <NavBar items={[
+          { name: "Home", url: "/#hero", icon: Home },
+          { name: "Testimonials", url: "/#testimonials", icon: Users },
+          { name: "About", url: "/#about", icon: Star },
+          { name: "FAQ", url: "/#faq", icon: HelpCircle },
+          { name: "Pricing", url: "/pricing", icon: DollarSign },
+          { name: "Studio", url: "/studio", icon: Settings },
+        ]} />
         <Spotlight />
         
         <div className="container mx-auto px-4 py-8 relative z-10">
@@ -272,7 +280,14 @@ export default function AccountPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#000208' }}>
-      <NavBar items={[]} />
+      <NavBar items={[
+        { name: "Home", url: "/#hero", icon: Home },
+        { name: "Testimonials", url: "/#testimonials", icon: Users },
+        { name: "About", url: "/#about", icon: Star },
+        { name: "FAQ", url: "/#faq", icon: HelpCircle },
+        { name: "Pricing", url: "/pricing", icon: DollarSign },
+        { name: "Studio", url: "/studio", icon: Settings },
+      ]} />
       <Spotlight />
       
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -308,7 +323,7 @@ export default function AccountPage() {
                     <SpotlightButton 
                       type="button" 
                       disabled={uploading}
-                      className="h-8 w-8 p-0 rounded-full bg-gradient-to-br from-black to-neutral-800 hover:from-neutral-900 hover:to-black text-[#c3b383] border border-[#c3b383]/30 cursor-pointer"
+                      className="h-8 w-8 p-0 rounded-full bg-gradient-to-br from-black to-neutral-800 hover:from-neutral-900 hover:to-black text-[#c3b383] border border-[#c3b383]/30 cursor-pointer flex items-center justify-center"
                       onClick={() => {
                         const fileInput = document.getElementById('avatar-upload') as HTMLInputElement
                         if (fileInput) {
