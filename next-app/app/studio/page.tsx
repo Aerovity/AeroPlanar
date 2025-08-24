@@ -54,6 +54,10 @@ import {
 	Search,
 	Monitor,
 	Lightbulb,
+	User,
+	LogOut,
+	Settings,
+	ChevronDown,
 } from "lucide-react";
 
 interface Task {
@@ -1992,11 +1996,13 @@ export default function Home() {
 				{/* Header */}
 				<header className="fixed left-1/2 -translate-x-1/2 z-50 top-1 pointer-events-none">
 					<div className="flex items-center backdrop-blur-lg shadow-lg transition-all duration-500 ease-in-out pointer-events-auto gap-4 py-3 px-8 rounded-full bg-background/90 border border-border/80 min-w-[1000px]">
-						<img
-							src="/logo.png"
-							alt="AeroPlanar Logo"
-							className="h-20 w-32 object-contain hover:scale-105 transition-all duration-300 mr-6"
-						/>
+						<Link href="/" className="cursor-pointer">
+							<img
+								src="/logo.png"
+								alt="AeroPlanar Logo"
+								className="h-20 w-32 object-contain hover:scale-105 transition-all duration-300 mr-6"
+							/>
+						</Link>
 						<div className="flex items-center transition-all duration-500 gap-2">
 							<button
 								onClick={() => setCurrentView("generation")}
@@ -2193,9 +2199,39 @@ export default function Home() {
 							>
 								<Download className="w-4 h-4" />
 							</SpotlightButton>
-							<SpotlightButton className="h-8 px-6 text-sm w-auto whitespace-nowrap flex items-center justify-center">
-								Get Started
-							</SpotlightButton>
+							{user ? (
+								<div className="relative group">
+									<button className="h-8 px-4 text-sm w-auto whitespace-nowrap flex items-center justify-center gap-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 border border-white/20">
+										<User className="w-4 h-4" />
+										<span className="hidden md:inline">{user.email?.split('@')[0]}</span>
+										<ChevronDown className="w-3 h-3" />
+									</button>
+									
+									{/* Dropdown Menu */}
+									<div className="absolute right-0 top-full mt-2 w-48 py-2 bg-[#080c0c]/95 backdrop-blur-lg rounded-lg border border-gray-800/50 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+										<Link 
+											href="/account" 
+											className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+										>
+											<Settings className="w-4 h-4" />
+											Account Settings
+										</Link>
+										<button 
+											onClick={handleSignOut}
+											className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+										>
+											<LogOut className="w-4 h-4" />
+											Sign Out
+										</button>
+									</div>
+								</div>
+							) : (
+								<Link href="/sign-in">
+									<SpotlightButton className="h-8 px-6 text-sm w-auto whitespace-nowrap flex items-center justify-center">
+										Get Started
+									</SpotlightButton>
+								</Link>
+							)}
 						</div>
 					</div>
 				</header>

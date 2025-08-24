@@ -277,6 +277,12 @@ export default function SignupFormDemo() {
             Sign in here
           </Link>
         </p>
+        
+        <div className="text-center text-sm mt-2">
+          <Link href="/forgot-password" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+            Forgot your password?
+          </Link>
+        </div>
       </form>
     </div>
   );

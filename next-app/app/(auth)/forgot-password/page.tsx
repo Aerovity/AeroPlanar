@@ -1,7 +1,10 @@
+import ForgotPasswordForm from "@/components/ui/forgot-password-form";
+import React from "react";
+
 export default function ForgotPassword() {
 	return (
-		<div>
-			<h1>ForgotPassword</h1>
+		<div className="flex flex-1 items-center justify-center p-6 md:p-10">
+			<ForgotPasswordForm />
 		</div>
 	);
 }
