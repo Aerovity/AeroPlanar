@@ -524,151 +524,171 @@ function Model3DComponent({
 			{/* Inline Transform Gizmo - Only show when selected and not in sculpting mode */}
 			{isSelected && !sculptingEnabled && (
 				<group>
-					{/* X Axis - Red */}
-					<group>
-						<mesh
-							position={[1.5, 0, 0]}
-							onPointerDown={handleGizmoPointerDown("x")}
-							onPointerOver={() => setGizmoHovered("x")}
-							onPointerOut={() => setGizmoHovered(null)}
-						>
-							<cylinderGeometry args={[0.05, 0.05, 3, 8]} />
-							<meshBasicMaterial
-								color={
-									gizmoHovered === "x" ? "#ff6b6b" : "#ff4444"
-								}
-								transparent
-								opacity={0.8}
-							/>
-						</mesh>
-						<mesh
-							position={[3, 0, 0]}
-							onPointerDown={handleGizmoPointerDown("x")}
-						>
-							<coneGeometry args={[0.15, 0.4, 8]} />
-							<meshBasicMaterial
-								color={
-									gizmoHovered === "x" ? "#ff6b6b" : "#ff4444"
-								}
-								transparent
-								opacity={0.8}
-							/>
-						</mesh>
-					</group>
+					{/* Calculate gizmo scale based on model size and base scale */}
+					{(() => {
+						const effectiveSize = Math.max(...currentSize) * baseScale;
+						const gizmoScale = Math.max(1, effectiveSize * 0.3);
+						
+						return (
+							<>
+								{/* X Axis - Red */}
+								<group>
+									<mesh
+										position={[gizmoScale * 0.8, 0, 0]}
+										onPointerDown={handleGizmoPointerDown("x")}
+										onPointerOver={() => setGizmoHovered("x")}
+										onPointerOut={() => setGizmoHovered(null)}
+									>
+										<cylinderGeometry
+											args={[0.05, 0.05, gizmoScale * 1.6, 8]}
+										/>
+										<meshBasicMaterial
+											color={
+												gizmoHovered === "x" ? "#ff6b6b" : "#ff4444"
+											}
+											transparent
+											opacity={0.8}
+										/>
+									</mesh>
+									<mesh
+										position={[gizmoScale * 1.6, 0, 0]}
+										onPointerDown={handleGizmoPointerDown("x")}
+									>
+										<coneGeometry args={[0.15, 0.4, 8]} />
+										<meshBasicMaterial
+											color={
+												gizmoHovered === "x" ? "#ff6b6b" : "#ff4444"
+											}
+											transparent
+											opacity={0.8}
+										/>
+									</mesh>
+								</group>
 
-					{/* Y Axis - Green */}
-					<group>
-						<mesh
-							position={[0, 1.5, 0]}
-							onPointerDown={handleGizmoPointerDown("y")}
-							onPointerOver={() => setGizmoHovered("y")}
-							onPointerOut={() => setGizmoHovered(null)}
-						>
-							<cylinderGeometry args={[0.05, 0.05, 3, 8]} />
-							<meshBasicMaterial
-								color={
-									gizmoHovered === "y" ? "#6bff6b" : "#44ff44"
-								}
-								transparent
-								opacity={0.8}
-							/>
-						</mesh>
-						<mesh
-							position={[0, 3, 0]}
-							onPointerDown={handleGizmoPointerDown("y")}
-						>
-							<coneGeometry args={[0.15, 0.4, 8]} />
-							<meshBasicMaterial
-								color={
-									gizmoHovered === "y" ? "#6bff6b" : "#44ff44"
-								}
-								transparent
-								opacity={0.8}
-							/>
-						</mesh>
-					</group>
+								{/* Y Axis - Green */}
+								<group>
+									<mesh
+										position={[0, gizmoScale * 0.8, 0]}
+										onPointerDown={handleGizmoPointerDown("y")}
+										onPointerOver={() => setGizmoHovered("y")}
+										onPointerOut={() => setGizmoHovered(null)}
+									>
+										<cylinderGeometry
+											args={[0.05, 0.05, gizmoScale * 1.6, 8]}
+										/>
+										<meshBasicMaterial
+											color={
+												gizmoHovered === "y" ? "#6bff6b" : "#44ff44"
+											}
+											transparent
+											opacity={0.8}
+										/>
+									</mesh>
+									<mesh
+										position={[0, gizmoScale * 1.6, 0]}
+										onPointerDown={handleGizmoPointerDown("y")}
+									>
+										<coneGeometry args={[0.15, 0.4, 8]} />
+										<meshBasicMaterial
+											color={
+												gizmoHovered === "y" ? "#6bff6b" : "#44ff44"
+											}
+											transparent
+											opacity={0.8}
+										/>
+									</mesh>
+								</group>
 
-					{/* Z Axis - Blue */}
-					<group>
-						<mesh
-							position={[0, 0, 1.5]}
-							rotation={[Math.PI / 2, 0, 0]}
-							onPointerDown={handleGizmoPointerDown("z")}
-							onPointerOver={() => setGizmoHovered("z")}
-							onPointerOut={() => setGizmoHovered(null)}
-						>
-							<cylinderGeometry args={[0.05, 0.05, 3, 8]} />
-							<meshBasicMaterial
-								color={
-									gizmoHovered === "z" ? "#6b6bff" : "#4444ff"
-								}
-								transparent
-								opacity={0.8}
-							/>
-						</mesh>
-						<mesh
-							position={[0, 0, 3]}
-							rotation={[Math.PI / 2, 0, 0]}
-							onPointerDown={handleGizmoPointerDown("z")}
-						>
-							<coneGeometry args={[0.15, 0.4, 8]} />
-							<meshBasicMaterial
-								color={
-									gizmoHovered === "z" ? "#6b6bff" : "#4444ff"
-								}
-								transparent
-								opacity={0.8}
-							/>
-						</mesh>
-					</group>
+								{/* Z Axis - Blue */}
+								<group>
+									<mesh
+										position={[0, 0, gizmoScale * 0.8]}
+										rotation={[Math.PI / 2, 0, 0]}
+										onPointerDown={handleGizmoPointerDown("z")}
+										onPointerOver={() => setGizmoHovered("z")}
+										onPointerOut={() => setGizmoHovered(null)}
+									>
+										<cylinderGeometry
+											args={[0.05, 0.05, gizmoScale * 1.6, 8]}
+										/>
+										<meshBasicMaterial
+											color={
+												gizmoHovered === "z" ? "#6b6bff" : "#4444ff"
+											}
+											transparent
+											opacity={0.8}
+										/>
+									</mesh>
+									<mesh
+										position={[0, 0, gizmoScale * 1.6]}
+										rotation={[Math.PI / 2, 0, 0]}
+										onPointerDown={handleGizmoPointerDown("z")}
+									>
+										<coneGeometry args={[0.15, 0.4, 8]} />
+										<meshBasicMaterial
+											color={
+												gizmoHovered === "z" ? "#6b6bff" : "#4444ff"
+											}
+											transparent
+											opacity={0.8}
+										/>
+									</mesh>
+								</group>
 
-					{/* Center sphere */}
-					<mesh onPointerDown={handleGizmoPointerDown("center")}>
-						<sphereGeometry args={[0.2, 16, 16]} />
-						<meshBasicMaterial
-							color={
-								gizmoHovered === "center"
-									? "#ffffff"
-									: "#cccccc"
-							}
-							transparent
-							opacity={0.6}
-						/>
-					</mesh>
+								{/* Center sphere */}
+								<mesh onPointerDown={handleGizmoPointerDown("center")}>
+									<sphereGeometry args={[0.2, 16, 16]} />
+									<meshBasicMaterial
+										color={
+											gizmoHovered === "center"
+												? "#ffffff"
+												: "#cccccc"
+										}
+										transparent
+										opacity={0.6}
+									/>
+								</mesh>
 
-					{/* Resize handles - Corner cubes */}
-					<mesh
-						position={[3, 3, 3]}
-						onPointerDown={handleGizmoPointerDown("scale")}
-						onPointerOver={() => setGizmoHovered("scale")}
-						onPointerOut={() => setGizmoHovered(null)}
-					>
-						<boxGeometry args={[0.2, 0.2, 0.2]} />
-						<meshBasicMaterial
-							color={
-								gizmoHovered === "scale" ? "#ffff00" : "#ffaa00"
-							}
-							transparent
-							opacity={0.8}
-						/>
-					</mesh>
+								{/* Resize handles - Corner cubes */}
+								<mesh
+									position={[
+										gizmoScale * 0.5,
+										gizmoScale * 0.5,
+										gizmoScale * 0.5,
+									]}
+									onPointerDown={handleGizmoPointerDown("scale")}
+									onPointerOver={() => setGizmoHovered("scale")}
+									onPointerOut={() => setGizmoHovered(null)}
+								>
+									<boxGeometry args={[0.2, 0.2, 0.2]} />
+									<meshBasicMaterial
+										color={
+											gizmoHovered === "scale" ? "#ffff00" : "#ffaa00"
+										}
+										transparent
+										opacity={0.8}
+									/>
+								</mesh>
 
-					{/* Axis labels */}
-					<Html position={[3.5, 0, 0]} center>
-						<div className="text-red-400 text-xs font-bold bg-black/50 px-1 rounded">
-							X
-						</div>
-					</Html>
-					<Html position={[0, 3.5, 0]} center>
-						<div className="text-green-400 text-xs font-bold bg-black/50 px-1 rounded">
-							Y
-						</div>
-					</Html>
-					<Html position={[0, 0, 3.5]} center>
-						<div className="text-blue-400 text-xs font-bold bg-black/50 px-1 rounded">
-							Z
-						</div>
-					</Html>
+								{/* Axis labels */}
+								<Html position={[gizmoScale * 1.8, 0, 0]} center>
+									<div className="text-red-400 text-xs font-bold bg-black/50 px-1 rounded">
+										X
+									</div>
+								</Html>
+								<Html position={[0, gizmoScale * 1.8, 0]} center>
+									<div className="text-green-400 text-xs font-bold bg-black/50 px-1 rounded">
+										Y
+									</div>
+								</Html>
+								<Html position={[0, 0, gizmoScale * 1.8]} center>
+									<div className="text-blue-400 text-xs font-bold bg-black/50 px-1 rounded">
+										Z
+									</div>
+								</Html>
+							</>
+						);
+					})()}
 				</group>
 			)}
 		</group>

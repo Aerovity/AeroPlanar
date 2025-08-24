@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { StudioLoading } from "@/components/shared/studio-loading";
 import { motion } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
@@ -73,6 +77,35 @@ export default function Home() {
 	>("generation");
 	const [showMockupsSidebars, setShowMockupsSidebars] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [user, setUser] = useState<User | null>(null);
+	const [loading, setLoading] = useState(true);
+	const supabase = createClient();
+	const router = useRouter();
+
+	// Sign out function
+	const handleSignOut = async () => {
+		await supabase.auth.signOut();
+		router.push('/');
+	};
+
+	// Authentication effect
+	useEffect(() => {
+		const getUser = async () => {
+			const { data: { user } } = await supabase.auth.getUser();
+			setUser(user);
+			setLoading(false);
+		};
+
+		getUser();
+
+		const { data: { subscription } } = supabase.auth.onAuthStateChange(
+			(event, session) => {
+				setUser(session?.user ?? null);
+			}
+		);
+
+		return () => subscription.unsubscribe();
+	}, []);
 
 	// Loading effect
 	useEffect(() => {
@@ -509,6 +542,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start conversion");
 				}
 
@@ -525,11 +561,19 @@ export default function Home() {
 				pollTaskCompletion(taskId, file.name.replace(/\.[^/.]+$/, ""));
 			} catch (error) {
 				console.error("Error generating model:", error);
-				toast({
-					title: "Generation Failed",
-					description: "Please check your connection and try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Generation Failed",
+						description: "Please check your connection and try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -562,6 +606,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start text conversion");
 				}
 
@@ -581,11 +628,19 @@ export default function Home() {
 				);
 			} catch (error) {
 				console.error("Error generating from text:", error);
-				toast({
-					title: "Text Generation Failed",
-					description: "Please check your prompt and try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Text Generation Failed",
+						description: "Please check your prompt and try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -619,6 +674,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start multimodal conversion");
 				}
 
@@ -638,12 +696,20 @@ export default function Home() {
 				);
 			} catch (error) {
 				console.error("Error generating multimodal:", error);
-				toast({
-					title: "Multimodal Generation Failed",
-					description:
-						"Please check your image and prompt, then try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Multimodal Generation Failed",
+						description:
+							"Please check your image and prompt, then try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -670,6 +736,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start text-to-image conversion");
 				}
 
@@ -689,11 +758,19 @@ export default function Home() {
 				);
 			} catch (error) {
 				console.error("Error generating text-to-image:", error);
-				toast({
-					title: "Text-to-Image Generation Failed",
-					description: "Please check your prompt and try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Text-to-Image Generation Failed",
+						description: "Please check your prompt and try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -1743,7 +1820,7 @@ export default function Home() {
 					{/* 3D Models - Optimized rendering */}
 					<Suspense fallback={null}>
 						{models.map((model) => {
-							const commonProps = {
+							const { key, ...restProps } = {
 								key: model.id,
 								position: model.position,
 								size: model.size,
@@ -1866,7 +1943,8 @@ export default function Home() {
 							if (model.type === "primitive") {
 								return (
 									<Primitive3D
-										{...commonProps}
+										key={key}
+										{...restProps}
 										type={model.primitiveType}
 										sculptingEnabled={sculptingEnabled}
 										currentBrush={currentSculptBrush}
@@ -1877,7 +1955,8 @@ export default function Home() {
 							} else {
 								return (
 									<Model3D
-										{...commonProps}
+										key={key}
+										{...restProps}
 										url={model.url}
 										sculptingEnabled={sculptingEnabled}
 										currentBrush={currentSculptBrush}

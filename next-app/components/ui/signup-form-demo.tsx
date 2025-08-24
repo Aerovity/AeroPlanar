@@ -7,7 +7,6 @@ import {
   IconBrandGithub,
   IconBrandGoogle,
 } from "@tabler/icons-react";
-import { LogoLarge } from "@/components/shared/logo-large";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -134,9 +133,11 @@ export default function SignupFormDemo() {
     return (
       <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
         <div className="flex justify-center mb-6">
-          <div className="scale-150">
-            <LogoLarge />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="AeroPlanar Logo" 
+            className="h-32 w-auto"
+          />
         </div>
         <div className="text-center space-y-4">
           <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
@@ -161,9 +162,11 @@ export default function SignupFormDemo() {
   return (
     <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
       <div className="flex justify-center mb-6">
-        <div className="scale-150">
-          <LogoLarge />
-        </div>
+        <img 
+          src="/logo.png" 
+          alt="AeroPlanar Logo" 
+          className="h-32 w-auto"
+        />
       </div>
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
         Welcome to AeroPlanar
