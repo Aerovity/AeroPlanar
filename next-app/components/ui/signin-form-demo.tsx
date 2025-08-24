@@ -77,11 +77,11 @@ export default function SigninFormDemo() {
   };
   return (
     <div className="mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8" style={{backgroundColor: '#080c0c'}}>
-      <div className="flex flex-col items-center mb-2">
+      <div className="flex flex-col items-center mb-4">
         <img 
           src="/logo.png" 
           alt="AeroPlanar Logo" 
-          className="h-24 w-auto"
+          className="h-32 w-auto"
         />
       </div>
       <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">

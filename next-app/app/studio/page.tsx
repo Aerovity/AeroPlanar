@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { StudioLoading } from "@/components/shared/studio-loading";
 import { motion } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
@@ -50,6 +54,10 @@ import {
 	Search,
 	Monitor,
 	Lightbulb,
+	User,
+	LogOut,
+	Settings,
+	ChevronDown,
 } from "lucide-react";
 
 interface Task {
@@ -73,6 +81,35 @@ export default function Home() {
 	>("generation");
 	const [showMockupsSidebars, setShowMockupsSidebars] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [user, setUser] = useState<User | null>(null);
+	const [authLoading, setAuthLoading] = useState(true);
+	const supabase = createClient();
+	const router = useRouter();
+
+	// Sign out function
+	const handleSignOut = async () => {
+		await supabase.auth.signOut();
+		router.push('/');
+	};
+
+	// Authentication effect
+	useEffect(() => {
+		const getUser = async () => {
+			const { data: { user } } = await supabase.auth.getUser();
+			setUser(user);
+			setAuthLoading(false);
+		};
+
+		getUser();
+
+		const { data: { subscription } } = supabase.auth.onAuthStateChange(
+			(event, session) => {
+				setUser(session?.user ?? null);
+			}
+		);
+
+		return () => subscription.unsubscribe();
+	}, []);
 
 	// Loading effect
 	useEffect(() => {
@@ -509,6 +546,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start conversion");
 				}
 
@@ -525,11 +565,19 @@ export default function Home() {
 				pollTaskCompletion(taskId, file.name.replace(/\.[^/.]+$/, ""));
 			} catch (error) {
 				console.error("Error generating model:", error);
-				toast({
-					title: "Generation Failed",
-					description: "Please check your connection and try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Generation Failed",
+						description: "Please check your connection and try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -562,6 +610,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start text conversion");
 				}
 
@@ -581,11 +632,19 @@ export default function Home() {
 				);
 			} catch (error) {
 				console.error("Error generating from text:", error);
-				toast({
-					title: "Text Generation Failed",
-					description: "Please check your prompt and try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Text Generation Failed",
+						description: "Please check your prompt and try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -619,6 +678,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start multimodal conversion");
 				}
 
@@ -638,12 +700,20 @@ export default function Home() {
 				);
 			} catch (error) {
 				console.error("Error generating multimodal:", error);
-				toast({
-					title: "Multimodal Generation Failed",
-					description:
-						"Please check your image and prompt, then try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Multimodal Generation Failed",
+						description:
+							"Please check your image and prompt, then try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -670,6 +740,9 @@ export default function Home() {
 				);
 
 				if (!response.ok) {
+					if (response.status === 403) {
+						throw new Error("CREDIT_LIMIT_EXCEEDED");
+					}
 					throw new Error("Failed to start text-to-image conversion");
 				}
 
@@ -689,11 +762,19 @@ export default function Home() {
 				);
 			} catch (error) {
 				console.error("Error generating text-to-image:", error);
-				toast({
-					title: "Text-to-Image Generation Failed",
-					description: "Please check your prompt and try again.",
-					variant: "destructive",
-				});
+				if (error.message === "CREDIT_LIMIT_EXCEEDED") {
+					toast({
+						title: "Credit Limit Reached",
+						description: "Sorry you're over the 17th user to generate a 3D model. Try again in 1 week!",
+						variant: "destructive",
+					});
+				} else {
+					toast({
+						title: "Text-to-Image Generation Failed",
+						description: "Please check your prompt and try again.",
+						variant: "destructive",
+					});
+				}
 				setIsGenerating(false);
 			}
 		},
@@ -1743,7 +1824,7 @@ export default function Home() {
 					{/* 3D Models - Optimized rendering */}
 					<Suspense fallback={null}>
 						{models.map((model) => {
-							const commonProps = {
+							const { key, ...restProps } = {
 								key: model.id,
 								position: model.position,
 								size: model.size,
@@ -1866,7 +1947,8 @@ export default function Home() {
 							if (model.type === "primitive") {
 								return (
 									<Primitive3D
-										{...commonProps}
+										key={key}
+										{...restProps}
 										type={model.primitiveType}
 										sculptingEnabled={sculptingEnabled}
 										currentBrush={currentSculptBrush}
@@ -1877,7 +1959,8 @@ export default function Home() {
 							} else {
 								return (
 									<Model3D
-										{...commonProps}
+										key={key}
+										{...restProps}
 										url={model.url}
 										sculptingEnabled={sculptingEnabled}
 										currentBrush={currentSculptBrush}
@@ -1912,12 +1995,15 @@ export default function Home() {
 			<div className="relative z-10 pointer-events-none">
 				{/* Header */}
 				<header className="fixed left-1/2 -translate-x-1/2 z-50 top-1 pointer-events-none">
-					<div className="flex items-center backdrop-blur-lg shadow-lg transition-all duration-500 ease-in-out pointer-events-auto gap-4 py-3 px-8 rounded-full bg-background/90 border border-border/80 min-w-[1000px]">
-						<img
-							src="/logo.png"
-							alt="AeroPlanar Logo"
-							className="h-20 w-32 object-contain hover:scale-105 transition-all duration-300 mr-6"
-						/>
+					<div className="flex items-center backdrop-blur-lg shadow-lg transition-all duration-500 ease-in-out pointer-events-auto gap-4 py-3 px-8 rounded-full bg-background/90 border border-border/80 min-w-[1400px]">
+						<Link href="/" className="cursor-pointer">
+							<img
+								src="/logo.png"
+								alt="AeroPlanar Logo"
+								className="h-20 w-32 object-contain hover:scale-105 transition-all duration-300 mr-6"
+								style={{ transform: 'scale(1) translateX(-20px)' }}
+							/>
+						</Link>
 						<div className="flex items-center transition-all duration-500 gap-2">
 							<button
 								onClick={() => setCurrentView("generation")}
@@ -2114,9 +2200,45 @@ export default function Home() {
 							>
 								<Download className="w-4 h-4" />
 							</SpotlightButton>
-							<SpotlightButton className="h-8 px-6 text-sm w-auto whitespace-nowrap flex items-center justify-center">
-								Get Started
-							</SpotlightButton>
+							{user ? (
+								<div className="relative group">
+									<button className="h-8 px-4 text-sm w-auto whitespace-nowrap flex items-center justify-center gap-2 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300 border border-white/20">
+										<User className="w-4 h-4" />
+										<span className="hidden md:inline">{user.email?.split('@')[0]}</span>
+										<ChevronDown className="w-3 h-3" />
+									</button>
+									
+									{/* Dropdown Menu */}
+									<div className="absolute right-0 top-full mt-2 w-48 py-2 bg-[#080c0c]/95 backdrop-blur-lg rounded-lg border border-gray-800/50 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+										<div className="px-4 py-2 border-b border-gray-800/50">
+											<div className="flex items-center gap-2 text-sm">
+												<span className="text-[#c3b383]">Tokens:</span>
+												<span className="text-white font-medium">10</span>
+											</div>
+										</div>
+										<Link 
+											href="/account" 
+											className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+										>
+											<Settings className="w-4 h-4" />
+											Account Settings
+										</Link>
+										<button 
+											onClick={handleSignOut}
+											className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+										>
+											<LogOut className="w-4 h-4" />
+											Sign Out
+										</button>
+									</div>
+								</div>
+							) : (
+								<Link href="/sign-in">
+									<SpotlightButton className="h-8 px-6 text-sm w-auto whitespace-nowrap flex items-center justify-center">
+										Get Started
+									</SpotlightButton>
+								</Link>
+							)}
 						</div>
 					</div>
 				</header>
