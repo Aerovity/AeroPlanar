@@ -82,7 +82,7 @@ export default function Home() {
 	const [showMockupsSidebars, setShowMockupsSidebars] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [user, setUser] = useState<User | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [authLoading, setAuthLoading] = useState(true);
 	const supabase = createClient();
 	const router = useRouter();
 
@@ -97,7 +97,7 @@ export default function Home() {
 		const getUser = async () => {
 			const { data: { user } } = await supabase.auth.getUser();
 			setUser(user);
-			setLoading(false);
+			setAuthLoading(false);
 		};
 
 		getUser();
@@ -1995,12 +1995,13 @@ export default function Home() {
 			<div className="relative z-10 pointer-events-none">
 				{/* Header */}
 				<header className="fixed left-1/2 -translate-x-1/2 z-50 top-1 pointer-events-none">
-					<div className="flex items-center backdrop-blur-lg shadow-lg transition-all duration-500 ease-in-out pointer-events-auto gap-4 py-3 px-8 rounded-full bg-background/90 border border-border/80 min-w-[1000px]">
+					<div className="flex items-center backdrop-blur-lg shadow-lg transition-all duration-500 ease-in-out pointer-events-auto gap-4 py-3 px-8 rounded-full bg-background/90 border border-border/80 min-w-[1400px]">
 						<Link href="/" className="cursor-pointer">
 							<img
 								src="/logo.png"
 								alt="AeroPlanar Logo"
 								className="h-20 w-32 object-contain hover:scale-105 transition-all duration-300 mr-6"
+								style={{ transform: 'scale(1) translateX(-20px)' }}
 							/>
 						</Link>
 						<div className="flex items-center transition-all duration-500 gap-2">
@@ -2209,6 +2210,12 @@ export default function Home() {
 									
 									{/* Dropdown Menu */}
 									<div className="absolute right-0 top-full mt-2 w-48 py-2 bg-[#080c0c]/95 backdrop-blur-lg rounded-lg border border-gray-800/50 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+										<div className="px-4 py-2 border-b border-gray-800/50">
+											<div className="flex items-center gap-2 text-sm">
+												<span className="text-[#c3b383]">Tokens:</span>
+												<span className="text-white font-medium">10</span>
+											</div>
+										</div>
 										<Link 
 											href="/account" 
 											className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
