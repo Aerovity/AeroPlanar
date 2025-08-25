@@ -72,7 +72,7 @@ export function Footer() {
 							</span>
 							<ul>
 								<li className="transition-colors text-muted-foreground hover:text-foreground">
-									<Link href="https://github.com/aeroplanar/aeroplanar">
+									<Link href="https://github.com/Aerovity/AeroPlanar">
 										Github
 									</Link>
 								</li>

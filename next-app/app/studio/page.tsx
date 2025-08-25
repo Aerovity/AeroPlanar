@@ -1095,7 +1095,7 @@ export default function Home() {
 										const displayScale = model.size || [
 											2, 2, 2,
 										];
-										const baseScaleFactor = 5; // This matches the 5x multiplier from model-3d.tsx line 50
+										const baseScaleFactor = 1; // Normalized scale factor
 										clonedScene.scale.set(
 											displayScale[0] * baseScaleFactor,
 											displayScale[1] * baseScaleFactor,

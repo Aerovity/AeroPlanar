@@ -26,7 +26,7 @@ export function SocialLinks() {
 				</Link>
 			</li>
 			<li>
-				<Link target="_blank" rel="noreferrer" href="/">
+				<Link target="_blank" rel="noreferrer" href="https://github.com/Aerovity/AeroPlanar">
 					<span className="sr-only">Github</span>
 					<FaGithub size={22} className="fill-[#878787]" />
 				</Link>
