@@ -108,11 +108,19 @@ export function ShareMockupDialog({ children, sceneData }: ShareMockupDialogProp
 
       // Upload GLB file to Supabase Storage
       const fileName = `${user.id}/${Date.now()}_${glbFile.name}`;
+      
+      console.log('Uploading file:', fileName);
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('shared-mockups')
         .upload(fileName, glbFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      console.log('Upload successful:', uploadData);
 
       setUploadProgress(70);
 
@@ -124,6 +132,8 @@ export function ShareMockupDialog({ children, sceneData }: ShareMockupDialogProp
       setUploadProgress(90);
 
       // Save mockup data to database
+      console.log('Saving to database...');
+      
       const { error: dbError } = await supabase
         .from('shared_mockups')
         .insert({
@@ -135,7 +145,12 @@ export function ShareMockupDialog({ children, sceneData }: ShareMockupDialogProp
           is_public: true,
         });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw new Error(`Database error: ${dbError.message}`);
+      }
+
+      console.log('Database save successful');
 
       setUploadProgress(100);
 
@@ -210,6 +225,9 @@ export function ShareMockupDialog({ children, sceneData }: ShareMockupDialogProp
             <Label className="text-gray-300">
               GLB File * (Max 25MB)
             </Label>
+            <p className="text-xs text-gray-500">
+              💡 Tip: Use the download button to export your scene as GLB first, then select it here to share.
+            </p>
             <div className="relative">
               <input
                 type="file"
