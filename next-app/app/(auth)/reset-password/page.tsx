@@ -1,7 +1,5 @@
+import ResetPasswordForm from "@/components/ui/reset-password-form";
+
 export default function ResetPassword() {
-	return (
-		<div>
-			<h1>ResetPassword</h1>
-		</div>
-	);
+	return <ResetPasswordForm />;
 }

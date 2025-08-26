@@ -457,7 +457,7 @@ function Primitive3DComponent({
 				{isSelected && (
 					<mesh>
 						<sphereGeometry
-							args={[Math.max(...currentSize) * 0.8, 32, 32]}
+							args={[Math.max(...currentSize) * 0.6, 32, 32]}
 						/>
 						<meshBasicMaterial
 							color={sculptingEnabled ? "#8b5cf6" : "#3b82f6"}
@@ -472,7 +472,7 @@ function Primitive3DComponent({
 				{hovered && !isSelected && (
 					<mesh>
 						<sphereGeometry
-							args={[Math.max(...currentSize) * 0.7, 32, 32]}
+							args={[Math.max(...currentSize) * 0.5, 32, 32]}
 						/>
 						<meshBasicMaterial
 							color="#6b7280"

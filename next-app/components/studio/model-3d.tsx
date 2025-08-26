@@ -97,9 +97,9 @@ function Model3DComponent({
 			const box = new THREE.Box3().setFromObject(scene);
 			const size = box.getSize(new THREE.Vector3());
 
-			// Calculate scale to fit within a 2x2x2 cube (much larger than before)
+			// Calculate scale to fit within a 2x2x2 cube
 			const maxDimension = Math.max(size.x, size.y, size.z);
-			const calculatedBaseScale = (2 / maxDimension) * 5; // 10x bigger than original
+			const calculatedBaseScale = 2 / maxDimension; // Normal size scaling
 
 			setBaseScale(calculatedBaseScale);
 
@@ -462,14 +462,14 @@ function Model3DComponent({
 			>
 				<primitive object={scene} />
 
-				{/* Selection highlight - Much larger to encompass the actual model */}
+				{/* Selection highlight - Reduced size for better precision */}
 				{isSelected && (
 					<mesh>
 						<sphereGeometry
 							args={[
 								Math.max(
-									8,
-									Math.max(...currentSize) * baseScale * 1.5
+									4,
+									Math.max(...currentSize) * baseScale * 0.8
 								),
 								32,
 								32,
@@ -490,8 +490,8 @@ function Model3DComponent({
 						<sphereGeometry
 							args={[
 								Math.max(
-									7,
-									Math.max(...currentSize) * baseScale * 1.3
+									3.5,
+									Math.max(...currentSize) * baseScale * 0.7
 								),
 								32,
 								32,

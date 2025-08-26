@@ -96,11 +96,20 @@ importers:
         specifier: 1.1.6
         version: 1.1.6(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@react-three/drei':
-        specifier: ^9.109.2
-        version: 9.122.0(@react-three/fiber@8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(@types/react@19.1.10)(@types/three@0.167.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)(use-sync-external-store@1.5.0(react@19.1.1))
+        specifier: ^9.122.0
+        version: 9.122.0(@react-three/fiber@9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(@types/react@19.1.10)(@types/three@0.167.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)(use-sync-external-store@1.5.0(react@19.1.1))
       '@react-three/fiber':
-        specifier: ^8.16.8
-        version: 8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)
+        specifier: ^9.3.0
+        version: 9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)
+      '@supabase/ssr':
+        specifier: ^0.6.1
+        version: 0.6.1(@supabase/supabase-js@2.56.0)
+      '@supabase/supabase-js':
+        specifier: ^2.55.0
+        version: 2.56.0
+      '@tabler/icons-react':
+        specifier: ^3.34.1
+        version: 3.34.1(react@19.1.1)
       '@tanstack/react-query':
         specifier: ^5.85.3
         version: 5.85.3(react@19.1.1)
@@ -1176,17 +1185,17 @@ packages:
       react-dom:
         optional: true
 
-  '@react-three/fiber@8.18.0':
-    resolution: {integrity: sha512-FYZZqD0UUHUswKz3LQl2Z7H24AhD14XGTsIRw3SJaXUxyfVMi+1yiZGmqTcPt/CkPpdU7rrxqcyQ1zJE5DjvIQ==}
+  '@react-three/fiber@9.3.0':
+    resolution: {integrity: sha512-myPe3YL/C8+Eq939/4qIVEPBW/uxV0iiUbmjfwrs9sGKYDG8ib8Dz3Okq7BQt8P+0k4igedONbjXMQy84aDFmQ==}
     peerDependencies:
       expo: '>=43.0'
       expo-asset: '>=8.4'
       expo-file-system: '>=11.0'
       expo-gl: '>=11.0'
-      react: '>=18 <19'
-      react-dom: '>=18 <19'
-      react-native: '>=0.64'
-      three: '>=0.133'
+      react: ^19.0.0
+      react-dom: ^19.0.0
+      react-native: '>=0.78'
+      three: '>=0.156'
     peerDependenciesMeta:
       expo:
         optional: true
@@ -1201,8 +1210,43 @@ packages:
       react-native:
         optional: true
 
+  '@supabase/auth-js@2.71.1':
+    resolution: {integrity: sha512-mMIQHBRc+SKpZFRB2qtupuzulaUhFYupNyxqDj5Jp/LyPvcWvjaJzZzObv6URtL/O6lPxkanASnotGtNpS3H2Q==}
+
+  '@supabase/functions-js@2.4.5':
+    resolution: {integrity: sha512-v5GSqb9zbosquTo6gBwIiq7W9eQ7rE5QazsK/ezNiQXdCbY+bH8D9qEaBIkhVvX4ZRW5rP03gEfw5yw9tiq4EQ==}
+
+  '@supabase/node-fetch@2.6.15':
+    resolution: {integrity: sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==}
+    engines: {node: 4.x || >=6.0.0}
+
+  '@supabase/postgrest-js@1.21.3':
+    resolution: {integrity: sha512-rg3DmmZQKEVCreXq6Am29hMVe1CzemXyIWVYyyua69y6XubfP+DzGfLxME/1uvdgwqdoaPbtjBDpEBhqxq1ZwA==}
+
+  '@supabase/realtime-js@2.15.1':
+    resolution: {integrity: sha512-edRFa2IrQw50kNntvUyS38hsL7t2d/psah6om6aNTLLcWem0R6bOUq7sk7DsGeSlNfuwEwWn57FdYSva6VddYw==}
+
+  '@supabase/ssr@0.6.1':
+    resolution: {integrity: sha512-QtQgEMvaDzr77Mk3vZ3jWg2/y+D8tExYF7vcJT+wQ8ysuvOeGGjYbZlvj5bHYsj/SpC0bihcisnwPrM4Gp5G4g==}
+    peerDependencies:
+      '@supabase/supabase-js': ^2.43.4
+
+  '@supabase/storage-js@2.11.0':
+    resolution: {integrity: sha512-Y+kx/wDgd4oasAgoAq0bsbQojwQ+ejIif8uczZ9qufRHWFLMU5cODT+ApHsSrDufqUcVKt+eyxtOXSkeh2v9ww==}
+
+  '@supabase/supabase-js@2.56.0':
+    resolution: {integrity: sha512-XqwhHSyVnkjdliPN61CmXsmFGnFHTX2WDdwjG3Ukvdzuu3Trix+dXupYOQ3BueIyYp7B6t0yYpdQtJP2hIInyg==}
+
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tabler/icons-react@3.34.1':
+    resolution: {integrity: sha512-Ld6g0NqOO05kyyHsfU8h787PdHBm7cFmOycQSIrGp45XcXYDuOK2Bs0VC4T2FWSKZ6bx5g04imfzazf/nqtk1A==}
+    peerDependencies:
+      react: '>= 16'
+
+  '@tabler/icons@3.34.1':
+    resolution: {integrity: sha512-9gTnUvd7Fd/DmQgr3MKY+oJLa1RfNsQo8c/ir3TJAWghOuZXodbtbVp0QBY2DxWuuvrSZFys0HEbv1CoiI5y6A==}
 
   '@tanstack/query-core@5.85.3':
     resolution: {integrity: sha512-9Ne4USX83nHmRuEYs78LW+3lFEEO2hBDHu7mrdIgAFx5Zcrs7ker3n/i8p4kf6OgKExmaDN5oR0efRD7i2J0DQ==}
@@ -1258,24 +1302,23 @@ packages:
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
 
-  '@types/prop-types@15.7.15':
-    resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
+  '@types/phoenix@1.6.6':
+    resolution: {integrity: sha512-PIzZZlEppgrpoT2QgbnDU+MMzuR6BbCjllj0bM70lWoejMeNJAxCchxnv7J3XFkI8MpygtRpzXrIlmWUBclP5A==}
 
   '@types/react-dom@19.1.7':
     resolution: {integrity: sha512-i5ZzwYpqjmrKenzkoLM2Ibzt6mAsM7pxB6BCIouEVVmgiqaMj1TjaK7hnA36hbW5aZv20kx7Lw6hWzPWg0Rurw==}
     peerDependencies:
       '@types/react': ^19.0.0
 
-  '@types/react-reconciler@0.26.7':
-    resolution: {integrity: sha512-mBDYl8x+oyPX/VBb3E638N0B7xG+SPk/EAMcVPeexqus/5aTpTphQi0curhhshOqRrc9t6OPoJfEUkbymse/lQ==}
-
   '@types/react-reconciler@0.28.9':
     resolution: {integrity: sha512-HHM3nxyUZ3zAylX8ZEyrDNd2XZOnQ0D5XfunJF5FLQnZbHHYq4UWvW1QfelQNXv1ICNkwYhfxjwfnqivYB6bFg==}
     peerDependencies:
       '@types/react': '*'
 
-  '@types/react@18.3.23':
-    resolution: {integrity: sha512-/LDXMQh55EzZQ0uVAZmKKhfENivEvWz6E+EYzh+/MCjMhNsotd+ZHhBGIjFDTi6+fz0OhQQQLbTgdQIxxCsC0w==}
+  '@types/react-reconciler@0.32.0':
+    resolution: {integrity: sha512-+WHarFkJevhH1s655qeeSEf/yxFST0dVRsmSqUgxG8mMOKqycgYBv2wVpyubBY7MX8KiX5FQ03rNIwrxfm7Bmw==}
+    peerDependencies:
+      '@types/react': '*'
 
   '@types/react@19.1.10':
     resolution: {integrity: sha512-EhBeSYX0Y6ye8pNebpKrwFJq7BoQ8J5SO6NlvNwwHjSj6adXJViPQrKlsyPw7hLBLvckEMO1yxeGdR82YBBlDg==}
@@ -1288,6 +1331,9 @@ packages:
 
   '@types/webxr@0.5.22':
     resolution: {integrity: sha512-Vr6Stjv5jPRqH690f5I5GLjVk8GSsoQSYJ2FVd/3jJF7KaqfwPi3ehfBS96mlQ2kPCwZaX6U0rG2+NGHBKkA/A==}
+
+  '@types/ws@8.18.1':
+    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
   '@use-gesture/core@10.3.1':
     resolution: {integrity: sha512-WcINiDt8WjqBdUXye25anHiNxPc0VOrlT8F6LLkU6cycrOGUDyY/yyFmsg3k8i5OLvv25llc0QC45GhR/C8llw==}
@@ -1418,6 +1464,10 @@ packages:
   commander@4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
     engines: {node: '>= 6'}
+
+  cookie@1.0.2:
+    resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
+    engines: {node: '>=18'}
 
   copy-to-clipboard@3.3.3:
     resolution: {integrity: sha512-2KV8NhB5JqC3ky0r9PMCAZKbUHSwtEo4CwCs0KXgruG43gX5PMqDEBbVU4OUzw2MuAWUfsuFmWvEKG5QRfSnJA==}
@@ -1717,10 +1767,10 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
-  its-fine@1.2.5:
-    resolution: {integrity: sha512-fXtDA0X0t0eBYAGLVM5YsgJGsJ5jEmqZEPrGbzdf5awjv0xE7nqv3TVnvtUF060Tkes15DbDAKW/I48vsb6SyA==}
+  its-fine@2.0.0:
+    resolution: {integrity: sha512-KLViCmWx94zOvpLwSlsx6yOCeMhZYaxrJV87Po5k/FoZzcPSahvK5qJ7fYhS61sZi5ikmh2S3Hz55A2l3U69ng==}
     peerDependencies:
-      react: '>=18.0'
+      react: ^19.0.0
 
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
@@ -2029,11 +2079,11 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-reconciler@0.27.0:
-    resolution: {integrity: sha512-HmMDKciQjYmBRGuuhIaKA1ba/7a+UsM5FzOZsMO2JYHt9Jh8reCb7j1eDC95NOyUlKM9KRyvdx0flBuDvYSBoA==}
+  react-reconciler@0.31.0:
+    resolution: {integrity: sha512-7Ob7Z+URmesIsIVRjnLoDGwBEG/tVitidU0nMsqX/eeJaLY89RISO/10ERe0MqmzuKUUB1rmY+h1itMbUHg9BQ==}
     engines: {node: '>=0.10.0'}
     peerDependencies:
-      react: ^18.0.0
+      react: ^19.0.0
 
   react-remove-scroll-bar@2.3.8:
     resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
@@ -2153,8 +2203,8 @@ packages:
   safe-buffer@5.1.2:
     resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}
 
-  scheduler@0.21.0:
-    resolution: {integrity: sha512-1r87x5fz9MXqswA2ERLo0EbOAU74DpIUO090gIasYTqlVoJeMcl+Z1Rg7WHz+qtPujhS/hGIt9kxZOYBV3faRQ==}
+  scheduler@0.25.0:
+    resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
 
   scheduler@0.26.0:
     resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
@@ -2336,6 +2386,9 @@ packages:
   toggle-selection@1.0.6:
     resolution: {integrity: sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==}
 
+  tr46@0.0.3:
+    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+
   troika-three-text@0.52.4:
     resolution: {integrity: sha512-V50EwcYGruV5rUZ9F4aNsrytGdKcXKALjEtQXIOBfhVoZU9VAqZNIoGQ3TMiooVqFAbR1w15T+f+8gkzoFzawg==}
     peerDependencies:
@@ -2425,6 +2478,12 @@ packages:
   webgl-sdf-generator@1.1.1:
     resolution: {integrity: sha512-9Z0JcMTFxeE+b2x1LJTdnaT8rT8aEp7MVxkNwoycNmJWwPdzoXzMh0BjJSh/AEFP+KPYZUli814h8bJZFIZ2jA==}
 
+  webidl-conversions@3.0.1:
+    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+
+  whatwg-url@5.0.0:
+    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
@@ -2438,6 +2497,18 @@ packages:
     resolution: {integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==}
     engines: {node: '>=12'}
 
+  ws@8.18.3:
+    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   yaml@2.8.1:
     resolution: {integrity: sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw==}
     engines: {node: '>= 14.6'}
@@ -2445,15 +2516,6 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zustand@3.7.2:
-    resolution: {integrity: sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==}
-    engines: {node: '>=12.7.0'}
-    peerDependencies:
-      react: '>=16.8'
-    peerDependenciesMeta:
-      react:
-        optional: true
 
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
@@ -3396,25 +3458,25 @@ snapshots:
       '@react-spring/types': 9.7.5
       react: 19.1.1
 
-  '@react-spring/three@9.7.5(@react-three/fiber@8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(react@19.1.1)(three@0.167.1)':
+  '@react-spring/three@9.7.5(@react-three/fiber@9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(react@19.1.1)(three@0.167.1)':
     dependencies:
       '@react-spring/animated': 9.7.5(react@19.1.1)
       '@react-spring/core': 9.7.5(react@19.1.1)
       '@react-spring/shared': 9.7.5(react@19.1.1)
       '@react-spring/types': 9.7.5
-      '@react-three/fiber': 8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)
+      '@react-three/fiber': 9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)
       react: 19.1.1
       three: 0.167.1
 
   '@react-spring/types@9.7.5': {}
 
-  '@react-three/drei@9.122.0(@react-three/fiber@8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(@types/react@19.1.10)(@types/three@0.167.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)(use-sync-external-store@1.5.0(react@19.1.1))':
+  '@react-three/drei@9.122.0(@react-three/fiber@9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(@types/react@19.1.10)(@types/three@0.167.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)(use-sync-external-store@1.5.0(react@19.1.1))':
     dependencies:
       '@babel/runtime': 7.28.3
       '@mediapipe/tasks-vision': 0.10.17
       '@monogrid/gainmap-js': 3.1.0(three@0.167.1)
-      '@react-spring/three': 9.7.5(@react-three/fiber@8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(react@19.1.1)(three@0.167.1)
-      '@react-three/fiber': 8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)
+      '@react-spring/three': 9.7.5(@react-three/fiber@9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1))(react@19.1.1)(three@0.167.1)
+      '@react-three/fiber': 9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)
       '@use-gesture/react': 10.3.1(react@19.1.1)
       camera-controls: 2.10.1(three@0.167.1)
       cross-env: 7.0.3
@@ -3443,29 +3505,85 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  '@react-three/fiber@8.18.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)':
+  '@react-three/fiber@9.3.0(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(three@0.167.1)':
     dependencies:
       '@babel/runtime': 7.28.3
-      '@types/react-reconciler': 0.26.7
+      '@types/react-reconciler': 0.32.0(@types/react@19.1.10)
       '@types/webxr': 0.5.22
       base64-js: 1.5.1
       buffer: 6.0.3
-      its-fine: 1.2.5(@types/react@19.1.10)(react@19.1.1)
+      its-fine: 2.0.0(@types/react@19.1.10)(react@19.1.1)
       react: 19.1.1
-      react-reconciler: 0.27.0(react@19.1.1)
+      react-reconciler: 0.31.0(react@19.1.1)
       react-use-measure: 2.1.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
-      scheduler: 0.21.0
+      scheduler: 0.25.0
       suspend-react: 0.1.3(react@19.1.1)
       three: 0.167.1
-      zustand: 3.7.2(react@19.1.1)
+      use-sync-external-store: 1.5.0(react@19.1.1)
+      zustand: 5.0.7(@types/react@19.1.10)(react@19.1.1)(use-sync-external-store@1.5.0(react@19.1.1))
     optionalDependencies:
       react-dom: 19.1.1(react@19.1.1)
     transitivePeerDependencies:
       - '@types/react'
+      - immer
+
+  '@supabase/auth-js@2.71.1':
+    dependencies:
+      '@supabase/node-fetch': 2.6.15
+
+  '@supabase/functions-js@2.4.5':
+    dependencies:
+      '@supabase/node-fetch': 2.6.15
+
+  '@supabase/node-fetch@2.6.15':
+    dependencies:
+      whatwg-url: 5.0.0
+
+  '@supabase/postgrest-js@1.21.3':
+    dependencies:
+      '@supabase/node-fetch': 2.6.15
+
+  '@supabase/realtime-js@2.15.1':
+    dependencies:
+      '@supabase/node-fetch': 2.6.15
+      '@types/phoenix': 1.6.6
+      '@types/ws': 8.18.1
+      ws: 8.18.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@supabase/ssr@0.6.1(@supabase/supabase-js@2.56.0)':
+    dependencies:
+      '@supabase/supabase-js': 2.56.0
+      cookie: 1.0.2
+
+  '@supabase/storage-js@2.11.0':
+    dependencies:
+      '@supabase/node-fetch': 2.6.15
+
+  '@supabase/supabase-js@2.56.0':
+    dependencies:
+      '@supabase/auth-js': 2.71.1
+      '@supabase/functions-js': 2.4.5
+      '@supabase/node-fetch': 2.6.15
+      '@supabase/postgrest-js': 1.21.3
+      '@supabase/realtime-js': 2.15.1
+      '@supabase/storage-js': 2.11.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@tabler/icons-react@3.34.1(react@19.1.1)':
+    dependencies:
+      '@tabler/icons': 3.34.1
+      react: 19.1.1
+
+  '@tabler/icons@3.34.1': {}
 
   '@tanstack/query-core@5.85.3': {}
 
@@ -3514,24 +3632,19 @@ snapshots:
 
   '@types/offscreencanvas@2019.7.3': {}
 
-  '@types/prop-types@15.7.15': {}
+  '@types/phoenix@1.6.6': {}
 
   '@types/react-dom@19.1.7(@types/react@19.1.10)':
     dependencies:
       '@types/react': 19.1.10
 
-  '@types/react-reconciler@0.26.7':
-    dependencies:
-      '@types/react': 18.3.23
-
   '@types/react-reconciler@0.28.9(@types/react@19.1.10)':
     dependencies:
       '@types/react': 19.1.10
 
-  '@types/react@18.3.23':
+  '@types/react-reconciler@0.32.0(@types/react@19.1.10)':
     dependencies:
-      '@types/prop-types': 15.7.15
-      csstype: 3.1.3
+      '@types/react': 19.1.10
 
   '@types/react@19.1.10':
     dependencies:
@@ -3548,6 +3661,10 @@ snapshots:
       meshoptimizer: 0.18.1
 
   '@types/webxr@0.5.22': {}
+
+  '@types/ws@8.18.1':
+    dependencies:
+      '@types/node': 22.17.2
 
   '@use-gesture/core@10.3.1': {}
 
@@ -3682,6 +3799,8 @@ snapshots:
     optional: true
 
   commander@4.1.1: {}
+
+  cookie@1.0.2: {}
 
   copy-to-clipboard@3.3.3:
     dependencies:
@@ -3939,7 +4058,7 @@ snapshots:
 
   isexe@2.0.0: {}
 
-  its-fine@1.2.5(@types/react@19.1.10)(react@19.1.1):
+  its-fine@2.0.0(@types/react@19.1.10)(react@19.1.1):
     dependencies:
       '@types/react-reconciler': 0.28.9(@types/react@19.1.10)
       react: 19.1.1
@@ -4219,11 +4338,10 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-reconciler@0.27.0(react@19.1.1):
+  react-reconciler@0.31.0(react@19.1.1):
     dependencies:
-      loose-envify: 1.4.0
       react: 19.1.1
-      scheduler: 0.21.0
+      scheduler: 0.25.0
 
   react-remove-scroll-bar@2.3.8(@types/react@19.1.10)(react@19.1.1):
     dependencies:
@@ -4363,9 +4481,7 @@ snapshots:
 
   safe-buffer@5.1.2: {}
 
-  scheduler@0.21.0:
-    dependencies:
-      loose-envify: 1.4.0
+  scheduler@0.25.0: {}
 
   scheduler@0.26.0: {}
 
@@ -4574,6 +4690,8 @@ snapshots:
 
   toggle-selection@1.0.6: {}
 
+  tr46@0.0.3: {}
+
   troika-three-text@0.52.4(three@0.167.1):
     dependencies:
       bidi-js: 1.0.3
@@ -4667,6 +4785,13 @@ snapshots:
 
   webgl-sdf-generator@1.1.1: {}
 
+  webidl-conversions@3.0.1: {}
+
+  whatwg-url@5.0.0:
+    dependencies:
+      tr46: 0.0.3
+      webidl-conversions: 3.0.1
+
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
@@ -4683,13 +4808,11 @@ snapshots:
       string-width: 5.1.2
       strip-ansi: 7.1.0
 
+  ws@8.18.3: {}
+
   yaml@2.8.1: {}
 
   zod@3.25.76: {}
-
-  zustand@3.7.2(react@19.1.1):
-    optionalDependencies:
-      react: 19.1.1
 
   zustand@4.5.7(@types/react@19.1.10)(react@19.1.1):
     dependencies:

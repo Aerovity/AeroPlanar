@@ -66,16 +66,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const getSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        setLoading(true)
+        
+        // Try to get session with timeout
+        let session = null
+        
+        try {
+          const sessionPromise = supabase.auth.getSession()
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Session fetch timeout')), 5000)
+          )
+          
+          const result = await Promise.race([sessionPromise, timeoutPromise]) as any
+          session = result.data?.session
+        } catch (timeoutError) {
+          console.warn('getSession timeout, trying fallback recovery...')
+          // Don't throw, just continue to fallback
+          throw timeoutError
+        }
+        
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
           const profileData = await fetchProfile(session.user.id)
           setProfile(profileData)
+        } else {
+          setProfile(null)
         }
       } catch (error) {
         console.error('Error getting session:', error)
+        
+        // Fallback: try to recover from localStorage 
+        try {
+          // Check multiple possible localStorage keys Supabase might use
+          const keys = [
+            'supabase.auth.token',
+            `sb-${supabase.supabaseUrl.split('//')[1].split('.')[0]}-auth-token`,
+            'sb-auth-token'
+          ]
+          
+          for (const key of keys) {
+            const storedAuth = localStorage.getItem(key)
+            if (storedAuth) {
+              const parsedAuth = JSON.parse(storedAuth)
+              
+              // Try different possible structures
+              const sessionData = parsedAuth?.currentSession || parsedAuth?.session || parsedAuth
+              
+              if (sessionData?.user && sessionData?.access_token) {
+                setUser(sessionData.user)
+                setSession(sessionData)
+                
+                // Only fetch profile if we have a valid user
+                try {
+                  const profileData = await fetchProfile(sessionData.user.id)
+                  setProfile(profileData)
+                } catch (profileError) {
+                  console.warn('Could not fetch profile during fallback:', profileError)
+                  setProfile(null)
+                }
+                return
+              }
+            }
+          }
+        } catch (fallbackError) {
+          console.warn('Fallback auth recovery failed:', fallbackError)
+        }
+        
+        // Clear state if everything fails
+        setSession(null)
+        setUser(null)
+        setProfile(null)
       } finally {
         setLoading(false)
       }
@@ -89,10 +151,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       
-      if (session?.user) {
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Force fresh profile fetch on sign in
         const profileData = await fetchProfile(session.user.id)
         setProfile(profileData)
-      } else {
+      } else if (event === 'SIGNED_OUT' || !session?.user) {
         setProfile(null)
       }
       
@@ -104,10 +167,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut()
+      // Immediately clear local state for instant UI feedback
+      setLoading(true)
+      setUser(null)
+      setProfile(null)
+      setSession(null)
+      
+      // Navigate immediately
       router.push('/')
+      
+      // Sign out from Supabase with timeout
+      const signOutPromise = supabase.auth.signOut()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Sign out timeout')), 3000)
+      )
+      
+      try {
+        await Promise.race([signOutPromise, timeoutPromise])
+      } catch (error) {
+        console.error('Sign out timeout or error:', error)
+        // Still continue - local state is already cleared
+      }
     } catch (error) {
       console.error('Error signing out:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
