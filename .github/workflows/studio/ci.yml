@@ -1,6 +1,12 @@
 name: Studio CI
 
-on: [push, pull_request]
+on:
+    push:
+        paths:
+            - "studio/**"
+    pull_request:
+        paths:
+            - "studio/**"
 
 jobs:
     lint-and-build:

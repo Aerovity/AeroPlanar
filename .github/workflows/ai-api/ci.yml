@@ -1,6 +1,12 @@
 name: AI API CI
 
-on: [push, pull_request]
+on:
+    push:
+        paths:
+            - "ai-api/**"
+    pull_request:
+        paths:
+            - "ai-api/**"
 
 jobs:
     test:
