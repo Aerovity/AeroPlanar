@@ -46,7 +46,7 @@ export function Hero() {
 							rel="noopener noreferrer"
 						>
 							<Button variant="outline" className="h-11 px-6">
-								Talk to founders
+								Watch Demo
 							</Button>
 						</Link>
 
