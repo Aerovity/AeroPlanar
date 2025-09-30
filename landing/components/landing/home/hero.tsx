@@ -51,7 +51,7 @@ export function Hero() {
 						</Link>
 
 						<Link href="/studio">
-							<Button className="h-11 px-5">Launch Studio</Button>
+							<Button className="h-11 px-5">Register for Beta</Button>
 						</Link>
 					</div>
 				</div>

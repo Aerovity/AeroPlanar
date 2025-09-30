@@ -50,9 +50,9 @@ export function Hero() {
 							</Button>
 						</Link>
 
-						<Link href="/studio">
-							<Button className="h-11 px-5">Launch Studio</Button>
-						</Link>
+						<a href="#register-beta">
+							<Button className="h-11 px-5">Register for Beta</Button>
+						</a>
 					</div>
 				</div>
 

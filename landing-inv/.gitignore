@@ -127,3 +127,4 @@ Thumbs.db
 .cache/
 .parcel-cache/
 .next/
+.vercel
